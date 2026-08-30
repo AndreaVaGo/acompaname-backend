@@ -41,7 +41,5 @@ public class UsuarioController {
         return ResponseEntity.status(201).body(dtoResponse);
 
     }
-    
-    
-    
+
 }

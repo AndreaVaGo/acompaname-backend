@@ -1,4 +1,5 @@
 package dev.andrea.acompaname_backend.usuario.mappers;
+
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
@@ -16,7 +17,8 @@ public class UsuarioMapper {
     }
 
     public static UsuarioDTOResponse toDTO(UsuarioEntity entity) {
-        UsuarioDTOResponse dtoResponse = new UsuarioDTOResponse(entity.getId(), entity.getNombre(), entity.getEmail(), entity.getTelefono(), entity.getRol());
+        UsuarioDTOResponse dtoResponse = new UsuarioDTOResponse(entity.getId(), entity.getNombre(), entity.getEmail(),
+                entity.getTelefono(), entity.getRol());
         return dtoResponse;
     }
 }

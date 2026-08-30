@@ -16,7 +16,8 @@ import jakarta.persistence.Table;
 @Table(name = "perfilcuidadores")
 public class PerfilCuidadorEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY )
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String especialidad;
     private Integer anosExperiencia;
@@ -24,7 +25,7 @@ public class PerfilCuidadorEntity {
     private String bio;
     private boolean tieneVehiculo;
     private boolean disponibleAhora;
-    
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", referencedColumnName = "id")
     private UsuarioEntity usuario;
@@ -107,7 +108,5 @@ public class PerfilCuidadorEntity {
     public void setUsuario(UsuarioEntity usuario) {
         this.usuario = usuario;
     }
-
-    
 
 }
