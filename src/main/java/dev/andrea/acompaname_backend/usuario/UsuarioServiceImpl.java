@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
+import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
 import dev.andrea.acompaname_backend.usuario.mappers.UsuarioMapper;
 
 @Service
@@ -23,7 +24,8 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public UsuarioEntity getById(Long id) {
-        return repository.findById(id).orElseThrow();
+        return repository.findById(id)
+                .orElseThrow(() -> new UsuarioExceptionNotFound("Usuario no encontrado. Id " + id + " no existe."));
     }
 
     @Override
@@ -40,14 +42,14 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public UsuarioDTOResponse update(Long id, UsuarioDTORequest dto) {
-        UsuarioEntity usuarioExistente = repository.findById(id).orElseThrow();
+        UsuarioEntity usuarioExistente = repository.findById(id).orElseThrow(() -> new UsuarioExceptionNotFound("Usuario no encontrado. Id " + id + " no existe."));
         usuarioExistente.setNombre(dto.nombre());
         usuarioExistente.setEmail(dto.email());
         usuarioExistente.setTelefono(dto.telefono());
         usuarioExistente.setPassword(dto.password());
         usuarioExistente.setRol(dto.rol());
         UsuarioEntity usuarioActualizado = repository.save(usuarioExistente);
-        return UsuarioMapper.toDTO(usuarioActualizado);        
+        return UsuarioMapper.toDTO(usuarioActualizado);
     }
 
 }
