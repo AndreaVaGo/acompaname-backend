@@ -1,6 +1,5 @@
 package dev.andrea.acompaname_backend.usuario;
 
-import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -78,11 +77,4 @@ public class UsuarioEntity {
         this.rol = rol;
     }
 
-    public static UsuarioEntity toEntity(UsuarioDTORequest dto) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'toEntity'");
-    }
-
-    
-    
 }
