@@ -17,8 +17,12 @@ public class UsuarioMapper {
     }
 
     public static UsuarioDTOResponse toDTO(UsuarioEntity entity) {
-        UsuarioDTOResponse dtoResponse = new UsuarioDTOResponse(entity.getId(), entity.getNombre(), entity.getEmail(),
-                entity.getTelefono(), entity.getRol());
+        UsuarioDTOResponse dtoResponse = new UsuarioDTOResponse
+        (entity.getId(), 
+        entity.getNombre(), 
+        entity.getEmail(),
+        entity.getTelefono(), 
+        entity.getRol());
         return dtoResponse;
     }
 }
