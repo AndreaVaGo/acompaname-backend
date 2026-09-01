@@ -33,4 +33,21 @@ public class UsuarioServiceImpl implements UsuarioService {
         return UsuarioMapper.toDTO(usuarioSaved);
     }
 
+    @Override
+    public void deleteById(Long id) {
+        repository.deleteById(id);
+    }
+
+    @Override
+    public UsuarioDTOResponse update(Long id, UsuarioDTORequest dto) {
+        UsuarioEntity usuarioExistente = repository.findById(id).orElseThrow();
+        usuarioExistente.setNombre(dto.nombre());
+        usuarioExistente.setEmail(dto.email());
+        usuarioExistente.setTelefono(dto.telefono());
+        usuarioExistente.setPassword(dto.password());
+        usuarioExistente.setRol(dto.rol());
+        UsuarioEntity usuarioActualizado = repository.save(usuarioExistente);
+        return UsuarioMapper.toDTO(usuarioActualizado);        
+    }
+
 }

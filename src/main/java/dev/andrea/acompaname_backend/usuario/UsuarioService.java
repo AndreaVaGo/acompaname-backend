@@ -11,4 +11,8 @@ public interface UsuarioService {
     public UsuarioEntity getById(Long id);
 
     public UsuarioDTOResponse storeEntity(UsuarioDTORequest dto);
+
+    public void deleteById(Long id);
+
+    public UsuarioDTOResponse update(Long id, UsuarioDTORequest dto);
 }

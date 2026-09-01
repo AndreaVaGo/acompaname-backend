@@ -3,9 +3,11 @@ package dev.andrea.acompaname_backend.usuario;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,4 +44,16 @@ public class UsuarioController {
 
     }
 
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        service.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<UsuarioDTOResponse> update(@PathVariable Long id, @Valid @RequestBody UsuarioDTORequest dto) {
+        UsuarioDTOResponse dtoResponse = service.update(id, dto);
+        return ResponseEntity.status(200).body(dtoResponse);
+
+    }
 }
