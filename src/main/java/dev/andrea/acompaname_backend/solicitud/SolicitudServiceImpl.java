@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
-import dev.andrea.acompaname_backend.perfilcuidador.mappers.PerfilCuidadorMapper;
+
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTOResponse;
 import dev.andrea.acompaname_backend.solicitud.mappers.SolicitudMapper;
