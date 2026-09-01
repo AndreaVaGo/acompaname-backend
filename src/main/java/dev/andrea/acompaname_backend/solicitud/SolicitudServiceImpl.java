@@ -47,4 +47,22 @@ public class SolicitudServiceImpl implements SolicitudService {
         SolicitudEntity solicitudSave = repository.save(solicitudToSave);
         return SolicitudMapper.toDTO(solicitudSave);
     }
+
+    @Override
+    public void deleteById(Long id) {
+        repository.deleteById(id);
+    }
+
+    @Override
+    public SolicitudDTOResponse update(Long id, SolicitudDTORequest dto) {
+        SolicitudEntity solicitudExistente = repository.findById(id).orElseThrow();
+        solicitudExistente.setTipoCuidado(dto.tipoCuidado());
+        solicitudExistente.setNombrePaciente(dto.nombrePaciente());
+        solicitudExistente.setNotas(dto.notas());
+        solicitudExistente.setEdadPaciente(dto.edadPaciente());
+        solicitudExistente.setFechaCuidado(dto.fechaCuidado());
+        SolicitudEntity solicitudActualizada = repository.save(solicitudExistente);
+        return SolicitudMapper.toDTO(solicitudActualizada);
+
+    }
 }
