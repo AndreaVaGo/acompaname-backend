@@ -12,4 +12,8 @@ public interface ValoracionService {
     public ValoracionEntity getById(Long id);
 
     public ValoracionDTOResponse storeEntity(ValoracionDTORequest dto);
+
+    public void deleteById(Long id);
+
+    public ValoracionDTOResponse update(Long id, ValoracionDTORequest dto);
 }

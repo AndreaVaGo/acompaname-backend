@@ -39,4 +39,19 @@ public class ValoracionServiceImpl implements ValoracionService {
         return ValoracionMapper.toDTO(valoracionSave);
     }
 
+    @Override
+    public void deleteById(Long id) {
+        repository.deleteById(id);
+    }
+
+    @Override
+    public ValoracionDTOResponse update(Long id, ValoracionDTORequest dto) {
+        ValoracionEntity valoracionExistente = repository.findById(id).orElseThrow();
+        valoracionExistente.setComentario(dto.comentario());
+        valoracionExistente.setPuntuacion(dto.puntuacion());
+        valoracionExistente.setFecha(dto.fecha());
+        ValoracionEntity valoracionActualizada = repository.save(valoracionExistente);
+        return ValoracionMapper.toDTO(valoracionActualizada);
+    }
+
 }
