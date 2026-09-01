@@ -7,7 +7,12 @@ import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTORespon
 
 public interface PerfilCuidadorService {
     public List<PerfilCuidadorEntity> getEntities();
+
     public PerfilCuidadorEntity getById(Long id);
 
     public PerfilCuidadorDTOResponse storeEntity(PerfilCuidadorDTORequest dto);
+
+    public void deleteById(Long id);
+
+    public PerfilCuidadorDTOResponse update(Long id, PerfilCuidadorDTORequest dto);
 }

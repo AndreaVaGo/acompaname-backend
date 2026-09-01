@@ -39,4 +39,21 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
         return PerfilCuidadorMapper.toDTO(perfilSaved);
     }
 
+    @Override
+    public void deleteById(Long id) {
+        repository.deleteById(id);
+    }
+
+    @Override
+    public PerfilCuidadorDTOResponse update(Long id, PerfilCuidadorDTORequest dto) {
+        PerfilCuidadorEntity perfilCuidadorExistente = repository.findById(id).orElseThrow();
+        perfilCuidadorExistente.setEspecialidad(dto.especialidad());
+        perfilCuidadorExistente.setAnosExperiencia(dto.anosExperiencia());
+        perfilCuidadorExistente.setTarifaHora(dto.tarifaHora());
+        perfilCuidadorExistente.setBio(dto.bio());
+        perfilCuidadorExistente.setTieneVehiculo(dto.tieneVehiculo());
+        perfilCuidadorExistente.setDisponibleAhora(dto.disponibleAhora());
+        PerfilCuidadorEntity perfilCuidadorActualizado = repository.save(perfilCuidadorExistente);
+        return PerfilCuidadorMapper.toDTO(perfilCuidadorActualizado);
+    }
 }
