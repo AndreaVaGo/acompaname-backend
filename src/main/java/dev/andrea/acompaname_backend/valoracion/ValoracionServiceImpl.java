@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 
 import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
 import dev.andrea.acompaname_backend.solicitud.SolicitudRepository;
+import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTORequest;
 import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTOResponse;
+import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionNotFound;
 import dev.andrea.acompaname_backend.valoracion.mappers.ValoracionMapper;
 
 @Service
@@ -28,12 +30,15 @@ public class ValoracionServiceImpl implements ValoracionService {
 
     @Override
     public ValoracionEntity getById(Long id) {
-        return repository.findById(id).orElseThrow();
+        return repository.findById(id).orElseThrow(
+                () -> new ValoracionExceptionNotFound("Valoracion no encontrada. Id " + id + " no existe."));
     }
 
     @Override
     public ValoracionDTOResponse storeEntity(ValoracionDTORequest dto) {
-        SolicitudEntity solicitud = solicitudRepository.findById(dto.solicitudId()).orElseThrow();
+        SolicitudEntity solicitud = solicitudRepository.findById(dto.solicitudId())
+                .orElseThrow(() -> new SolicitudExceptionNotFound(
+                        "Solicitud no encontrada. Id " + dto.solicitudId() + " no existe."));
         ValoracionEntity valoracionToSave = ValoracionMapper.toEntity(dto, solicitud);
         ValoracionEntity valoracionSave = repository.save(valoracionToSave);
         return ValoracionMapper.toDTO(valoracionSave);
@@ -46,7 +51,8 @@ public class ValoracionServiceImpl implements ValoracionService {
 
     @Override
     public ValoracionDTOResponse update(Long id, ValoracionDTORequest dto) {
-        ValoracionEntity valoracionExistente = repository.findById(id).orElseThrow();
+        ValoracionEntity valoracionExistente = repository.findById(id).orElseThrow(
+                () -> new ValoracionExceptionNotFound("Valoracion no encontrada. Id " + id + " no existe."));
         valoracionExistente.setComentario(dto.comentario());
         valoracionExistente.setPuntuacion(dto.puntuacion());
         valoracionExistente.setFecha(dto.fecha());
