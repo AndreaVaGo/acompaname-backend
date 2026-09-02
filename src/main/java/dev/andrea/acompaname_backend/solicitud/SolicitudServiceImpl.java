@@ -6,12 +6,15 @@ import org.springframework.stereotype.Service;
 
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
+import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;
 
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTOResponse;
+import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.solicitud.mappers.SolicitudMapper;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
+import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
 
 @Service
 public class SolicitudServiceImpl implements SolicitudService {
@@ -34,14 +37,18 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     @Override
     public SolicitudEntity getById(Long id) {
-        return repository.findById(id).orElseThrow();
-
+        return repository.findById(id)
+                .orElseThrow(() -> new SolicitudExceptionNotFound("Solicitud no encontrada. Id " + id + " no existe."));
     }
 
     @Override
     public SolicitudDTOResponse storeEntity(SolicitudDTORequest dto) {
-        UsuarioEntity familia = usuarioRepository.findById(dto.familiaId()).orElseThrow();
-        PerfilCuidadorEntity cuidador = perfilCuidadorRepository.findById(dto.cuidadorId()).orElseThrow();
+        UsuarioEntity familia = usuarioRepository.findById(dto.familiaId())
+                .orElseThrow(() -> new UsuarioExceptionNotFound(
+                        "Usuario no encontrado. Id " + dto.familiaId() + " no existe."));
+        PerfilCuidadorEntity cuidador = perfilCuidadorRepository.findById(dto.cuidadorId())
+                .orElseThrow(() -> new PerfilCuidadorExceptionNotFound(
+                        "Perfil de cuidador no encontrado. Id " + dto.cuidadorId() + " no existe."));
 
         SolicitudEntity solicitudToSave = SolicitudMapper.toEntity(dto, familia, cuidador);
         SolicitudEntity solicitudSave = repository.save(solicitudToSave);
@@ -55,7 +62,8 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     @Override
     public SolicitudDTOResponse update(Long id, SolicitudDTORequest dto) {
-        SolicitudEntity solicitudExistente = repository.findById(id).orElseThrow();
+        SolicitudEntity solicitudExistente = repository.findById(id)
+                .orElseThrow(() -> new SolicitudExceptionNotFound("Solicitud no encontrada. Id " + id + " no existe."));
         solicitudExistente.setTipoCuidado(dto.tipoCuidado());
         solicitudExistente.setNombrePaciente(dto.nombrePaciente());
         solicitudExistente.setNotas(dto.notas());
@@ -65,4 +73,5 @@ public class SolicitudServiceImpl implements SolicitudService {
         return SolicitudMapper.toDTO(solicitudActualizada);
 
     }
+
 }
