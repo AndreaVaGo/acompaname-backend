@@ -1,11 +1,13 @@
 package dev.andrea.acompaname_backend.perfilcuidador;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.hibernate.validator.internal.constraintvalidators.bv.time.past.PastValidatorForThaiBuddhistDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,10 +40,10 @@ public class PerfilCuidadorServiceImplTest {
                 new PerfilCuidadorEntity(1L, "Fisioterapia", 5, new BigDecimal("15.00"), "Bio de prueba", true, true,
                         usuario));
         when(repository.findAll()).thenReturn(perfilesMock);
-        
+
         List<PerfilCuidadorEntity> perfiles = service.getEntities();
-        
-    
+        assertThat(perfiles.size(), is(equalTo(1)));
+        assertThat(perfiles.get(0).getEspecialidad(), is(equalTo("Fisioterapia")));
     }
 
 }

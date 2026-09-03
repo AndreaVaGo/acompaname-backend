@@ -67,6 +67,8 @@ public class UsuarioServiceImplTest {
 
     @Test
     void testDeleteById() {
+        UsuarioEntity usuarioMock = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Rol.FAMILIA);
+        when(repository.findById(1L)).thenReturn(Optional.of(usuarioMock));
         service.deleteById(1L);
         Mockito.verify(repository).deleteById(1L);
     }
