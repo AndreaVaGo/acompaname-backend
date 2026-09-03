@@ -75,4 +75,13 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     }
 
+    @Override
+    public SolicitudDTOResponse cambiarEstado(Long id, EstadoSolicitud nuevoEstado) {
+        SolicitudEntity solicitud = getById(id);
+        solicitud.setEstado(nuevoEstado);
+        SolicitudEntity solicitudActualizada = repository.save(solicitud);
+        return SolicitudMapper.toDTO(solicitudActualizada);
+
+    }
+
 }

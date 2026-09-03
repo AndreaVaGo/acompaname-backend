@@ -15,4 +15,6 @@ public interface SolicitudService {
     public void deleteById(Long id);
 
     public SolicitudDTOResponse update(Long id, SolicitudDTORequest dto);
+
+    public SolicitudDTOResponse cambiarEstado(Long id, EstadoSolicitud nuevoEstado);
 }
