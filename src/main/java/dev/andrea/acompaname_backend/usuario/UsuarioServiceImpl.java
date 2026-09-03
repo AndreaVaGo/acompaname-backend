@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
+import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionEmailDuplicado;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
 import dev.andrea.acompaname_backend.usuario.mappers.UsuarioMapper;
 
@@ -30,6 +31,9 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public UsuarioDTOResponse storeEntity(UsuarioDTORequest dto) {
+        if (repository.findByEmail(dto.email()).isPresent()) {
+            throw new UsuarioExceptionEmailDuplicado("El email " + dto.email() + " ya está registrado.");
+        }
         UsuarioEntity usuarioToSave = UsuarioMapper.toEntity(dto);
         UsuarioEntity usuarioSaved = repository.save(usuarioToSave);
         return UsuarioMapper.toDTO(usuarioSaved);

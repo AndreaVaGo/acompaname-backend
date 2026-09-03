@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotFound;
+import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionEmailDuplicado;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionNotFound;
 
@@ -48,5 +49,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ValoracionExceptionNotFound.class)
     public ResponseEntity<String> handleValoracionNotFoundException(ValoracionExceptionNotFound exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(UsuarioExceptionEmailDuplicado.class)
+    public ResponseEntity<String> handleUsuarioEmailDuplicadoException(UsuarioExceptionEmailDuplicado exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
     }
 }
