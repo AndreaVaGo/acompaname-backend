@@ -37,12 +37,14 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public void deleteById(Long id) {
+        getById(id);
         repository.deleteById(id);
     }
 
     @Override
     public UsuarioDTOResponse update(Long id, UsuarioDTORequest dto) {
-        UsuarioEntity usuarioExistente = repository.findById(id).orElseThrow(() -> new UsuarioExceptionNotFound("Usuario no encontrado. Id " + id + " no existe."));
+        UsuarioEntity usuarioExistente = repository.findById(id)
+                .orElseThrow(() -> new UsuarioExceptionNotFound("Usuario no encontrado. Id " + id + " no existe."));
         usuarioExistente.setNombre(dto.nombre());
         usuarioExistente.setEmail(dto.email());
         usuarioExistente.setTelefono(dto.telefono());

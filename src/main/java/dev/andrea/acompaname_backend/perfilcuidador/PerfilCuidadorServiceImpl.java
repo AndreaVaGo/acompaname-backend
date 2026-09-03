@@ -46,6 +46,7 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
 
     @Override
     public void deleteById(Long id) {
+        getById(id);
         repository.deleteById(id);
     }
 

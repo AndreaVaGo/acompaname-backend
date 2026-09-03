@@ -46,6 +46,7 @@ public class ValoracionServiceImpl implements ValoracionService {
 
     @Override
     public void deleteById(Long id) {
+        getById(id);
         repository.deleteById(id);
     }
 

@@ -57,6 +57,7 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     @Override
     public void deleteById(Long id) {
+        getById(id);
         repository.deleteById(id);
     }
 
