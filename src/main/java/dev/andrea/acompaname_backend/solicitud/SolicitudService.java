@@ -1,20 +1,11 @@
 package dev.andrea.acompaname_backend.solicitud;
 
-import java.util.List;
-
+import dev.andrea.acompaname_backend.generics.InterfaceGenericService;
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTOResponse;
 
-public interface SolicitudService {
-    public List<SolicitudEntity> getEntities();
+public interface SolicitudService
+                extends InterfaceGenericService<SolicitudEntity, SolicitudDTORequest, SolicitudDTOResponse> {
 
-    public SolicitudEntity getById(Long id);
-
-    public SolicitudDTOResponse storeEntity(SolicitudDTORequest dto);
-
-    public void deleteById(Long id);
-
-    public SolicitudDTOResponse update(Long id, SolicitudDTORequest dto);
-
-    public SolicitudDTOResponse cambiarEstado(Long id, EstadoSolicitud nuevoEstado);
+        SolicitudDTOResponse cambiarEstado(Long id, EstadoSolicitud nuevoEstado);
 }
