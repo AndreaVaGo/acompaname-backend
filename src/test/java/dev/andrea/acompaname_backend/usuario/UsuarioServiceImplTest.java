@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
@@ -30,10 +31,12 @@ public class UsuarioServiceImplTest {
     private UsuarioRepository repository;
     @Mock
     private RoleRepository roleRepository;
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
-        service = new UsuarioServiceImpl(repository, roleRepository);
+        service = new UsuarioServiceImpl(repository, roleRepository, passwordEncoder);
     }
 
     private RoleEntity crearRolMock() {
@@ -74,10 +77,11 @@ public class UsuarioServiceImplTest {
     void testStoreUsuario() {
         RoleEntity rol = crearRolMock();
         when(roleRepository.findById(1L)).thenReturn(Optional.of(rol));
+        when(passwordEncoder.encode("1234")).thenReturn("encriptada123");
 
         UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "1234", Set.of(1L));
         when(repository.save(Mockito.any(UsuarioEntity.class))).thenReturn(
-                new UsuarioEntity(1L, dto.nombre(), dto.email(), dto.telefono(), dto.password(), Set.of(rol)));
+                new UsuarioEntity(1L, dto.nombre(), dto.email(), dto.telefono(), "encriptada123", Set.of(rol)));
 
         UsuarioDTOResponse entity = service.storeEntity(dto);
         assertThat(entity.nombre(), is(equalTo("Ana")));
@@ -100,12 +104,13 @@ public class UsuarioServiceImplTest {
                 Set.of(rol));
         when(repository.findById(1L)).thenReturn(Optional.of(usuarioExistente));
         when(roleRepository.findById(1L)).thenReturn(Optional.of(rol));
+        when(passwordEncoder.encode("1234")).thenReturn("encriptada123");
         when(repository.save(Mockito.any(UsuarioEntity.class))).thenReturn(usuarioExistente);
 
         UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "1234", Set.of(1L));
         UsuarioDTOResponse resultado = service.update(1L, dto);
         assertThat(resultado.nombre(), is(equalTo("Ana")));
-
+        
     }
 
 }

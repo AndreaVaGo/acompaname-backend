@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import dev.andrea.acompaname_backend.role.RoleEntity;
@@ -19,10 +20,13 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository repository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UsuarioServiceImpl(UsuarioRepository repository, RoleRepository roleRepository) {
+    public UsuarioServiceImpl(UsuarioRepository repository, RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -45,6 +49,7 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .map(id -> roleRepository.findById(id).orElseThrow())
                 .collect(Collectors.toSet());
         UsuarioEntity usuarioToSave = UsuarioMapper.toEntity(dto, roles);
+        usuarioToSave.setPassword(passwordEncoder.encode(dto.password()));
         UsuarioEntity usuarioSaved = repository.save(usuarioToSave);
         return UsuarioMapper.toDTO(usuarioSaved);
     }
@@ -62,7 +67,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioExistente.setNombre(dto.nombre());
         usuarioExistente.setEmail(dto.email());
         usuarioExistente.setTelefono(dto.telefono());
-        usuarioExistente.setPassword(dto.password());
+        usuarioExistente.setPassword(passwordEncoder.encode(dto.password()));
         Set<RoleEntity> roles = dto.rolesIds().stream()
                 .map(rId -> roleRepository.findById(rId).orElseThrow())
                 .collect(Collectors.toSet());
