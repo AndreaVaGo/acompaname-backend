@@ -5,20 +5,28 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import dev.andrea.acompaname_backend.role.RoleEntity;
+import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
+import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = UsuarioController.class)
@@ -31,9 +39,17 @@ public class UsuarioControllerTest {
     @Autowired
     ObjectMapper mapper;
 
+    private RoleEntity crearRolMock() {
+        RoleEntity rol = new RoleEntity();
+        rol.setId(1L);
+        rol.setName("FAMILIA");
+        return rol;
+    }
+
     @Test
     void testIndex() throws Exception {
-        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Rol.FAMILIA);
+        RoleEntity rol = crearRolMock();
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Set.of(rol));
         List<UsuarioEntity> usuarios = new ArrayList<>();
         usuarios.add(usuario);
         String json = mapper.writeValueAsString(usuarios);
@@ -47,5 +63,48 @@ public class UsuarioControllerTest {
         assertThat(response.getStatus(), is(equalTo(200)));
         assertThat(response.getContentAsString(), is(equalTo(json)));
         assertThat(response.getContentAsString(), containsString("Juan"));
+    }
+
+    @Test
+    void testGetById() throws Exception {
+        RoleEntity rol = crearRolMock();
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Set.of(rol));
+        String json = mapper.writeValueAsString(usuario);
+        when(service.getById(1L)).thenReturn(usuario);
+
+        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/usuarios/1"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(200)));
+        assertThat(response.getContentAsString(), is(equalTo(json)));
+        assertThat(response.getContentAsString(), containsString("Juan"));
+    }
+
+    @Test
+    void testStore() throws Exception {
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "1234", Set.of(1L));
+        UsuarioDTOResponse dtoResponse = new UsuarioDTOResponse(1L, "Ana", "ana@test.com", "600555666",
+                Set.of("FAMILIA"));
+        String json = mapper.writeValueAsString(dtoResponse);
+        when(service.storeEntity(Mockito.any(UsuarioDTORequest.class))).thenReturn(dtoResponse);
+
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/usuarios")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+        assertThat(response.getStatus(), is(equalTo(201)));
+        assertThat(response.getContentAsString(), is(equalTo(json)));
+        assertThat(response.getContentAsString(), containsString("Ana"));
+    }
+
+    @Test
+    void testDelete() throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(delete("/api/v1/usuarios/1"))
+                .andReturn()
+                .getResponse();
+        assertThat(response.getStatus(), is(equalTo(204)));
+        Mockito.verify(service).deleteById(1L);
     }
 }

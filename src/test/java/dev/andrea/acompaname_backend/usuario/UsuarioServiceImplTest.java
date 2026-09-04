@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import dev.andrea.acompaname_backend.role.RoleEntity;
+import dev.andrea.acompaname_backend.role.RoleRepository;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
 
@@ -25,17 +28,27 @@ public class UsuarioServiceImplTest {
     private UsuarioServiceImpl service;
     @Mock
     private UsuarioRepository repository;
+    @Mock
+    private RoleRepository roleRepository;
 
     @BeforeEach
     void setUp() {
-        service = new UsuarioServiceImpl(repository);
+        service = new UsuarioServiceImpl(repository, roleRepository);
+    }
+
+    private RoleEntity crearRolMock() {
+        RoleEntity rol = new RoleEntity();
+        rol.setId(1L);
+        rol.setName("FAMILIA");
+        return rol;
     }
 
     @Test
     void testGetEntities() {
+        RoleEntity rol = crearRolMock();
         List<UsuarioEntity> usuariosMock = List.of(
-                new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Rol.FAMILIA),
-                new UsuarioEntity(2L, "Maria", "maria@test.com", "600333444", "5678", Rol.CUIDADOR));
+                new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Set.of(rol)),
+                new UsuarioEntity(2L, "Maria", "maria@test.com", "600333444", "5678", Set.of(rol)));
         when(repository.findAll()).thenReturn(usuariosMock);
 
         List<UsuarioEntity> usuarios = service.getEntities();
@@ -47,7 +60,8 @@ public class UsuarioServiceImplTest {
 
     @Test
     void testGetById() {
-        UsuarioEntity usuarioMock = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Rol.FAMILIA);
+        RoleEntity rol = crearRolMock();
+        UsuarioEntity usuarioMock = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Set.of(rol));
         when(repository.findById(1L)).thenReturn(Optional.of(usuarioMock));
 
         UsuarioEntity usuario = service.getById(1L);
@@ -58,30 +72,40 @@ public class UsuarioServiceImplTest {
 
     @Test
     void testStoreUsuario() {
-        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "1234", Rol.FAMILIA);
+        RoleEntity rol = crearRolMock();
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(rol));
+
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "1234", Set.of(1L));
         when(repository.save(Mockito.any(UsuarioEntity.class))).thenReturn(
-                new UsuarioEntity(1L, dto.nombre(), dto.email(), dto.telefono(), dto.password(), dto.rol()));
+                new UsuarioEntity(1L, dto.nombre(), dto.email(), dto.telefono(), dto.password(), Set.of(rol)));
+
         UsuarioDTOResponse entity = service.storeEntity(dto);
         assertThat(entity.nombre(), is(equalTo("Ana")));
     }
 
     @Test
     void testDeleteById() {
-        UsuarioEntity usuarioMock = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Rol.FAMILIA);
+        RoleEntity rol = crearRolMock();
+        UsuarioEntity usuarioMock = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Set.of(rol));
         when(repository.findById(1L)).thenReturn(Optional.of(usuarioMock));
+
         service.deleteById(1L);
         Mockito.verify(repository).deleteById(1L);
     }
 
     @Test
     void testUpdate() {
+        RoleEntity rol = crearRolMock();
         UsuarioEntity usuarioExistente = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
-                Rol.FAMILIA);
+                Set.of(rol));
         when(repository.findById(1L)).thenReturn(Optional.of(usuarioExistente));
+        when(roleRepository.findById(1L)).thenReturn(Optional.of(rol));
         when(repository.save(Mockito.any(UsuarioEntity.class))).thenReturn(usuarioExistente);
-        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "1234", Rol.FAMILIA);
+
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "1234", Set.of(1L));
         UsuarioDTOResponse resultado = service.update(1L, dto);
         assertThat(resultado.nombre(), is(equalTo("Ana")));
 
     }
+
 }

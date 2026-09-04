@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,9 +20,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
+import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTOResponse;
-import dev.andrea.acompaname_backend.usuario.Rol;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
 
@@ -41,11 +42,27 @@ public class SolicitudServiceImplTest {
         service = new SolicitudServiceImpl(repository, usuarioRepository, perfilCuidadorRepository);
     }
 
+    private RoleEntity rolFamilia() {
+        RoleEntity rol = new RoleEntity();
+        rol.setId(1L);
+        rol.setName("FAMILIA");
+        return rol;
+    }
+
+    private RoleEntity rolCuidador() {
+        RoleEntity rol = new RoleEntity();
+        rol.setId(2L);
+        rol.setName("CUIDADOR");
+        return rol;
+    }
+
     @Test
     void testGetEntities() {
-        UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234", Rol.FAMILIA);
+        UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234",
+                Set.of(rolFamilia()));
         PerfilCuidadorEntity cuidador = new PerfilCuidadorEntity(1L, "Geriatría", 4, new java.math.BigDecimal("18.00"),
-                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678", Rol.CUIDADOR));
+                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678",
+                        Set.of(rolCuidador())));
         List<SolicitudEntity> solicitudesMock = List.of(
                 new SolicitudEntity(1L, "Acompañamiento", "Manuel", "Sin notas", 80, LocalDate.of(2026, 9, 10),
                         EstadoSolicitud.PENDIENTE, familia, cuidador));
@@ -59,9 +76,11 @@ public class SolicitudServiceImplTest {
 
     @Test
     void testGetById() {
-        UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234", Rol.FAMILIA);
+        UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234",
+                Set.of(rolFamilia()));
         PerfilCuidadorEntity cuidador = new PerfilCuidadorEntity(1L, "Geriatría", 4, new java.math.BigDecimal("18.00"),
-                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678", Rol.CUIDADOR));
+                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678",
+                        Set.of(rolCuidador())));
         SolicitudEntity solicitudMock = new SolicitudEntity(1L, "Acompañamiento", "Manuel", "Sin notas", 80,
                 LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, familia, cuidador);
         when(repository.findById(1L)).thenReturn(Optional.of(solicitudMock));
@@ -74,11 +93,13 @@ public class SolicitudServiceImplTest {
 
     @Test
     void testStoreEntity() {
-        UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234", Rol.FAMILIA);
+        UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234",
+                Set.of(rolFamilia()));
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(familia));
 
         PerfilCuidadorEntity cuidador = new PerfilCuidadorEntity(1L, "Geriatría", 4, new java.math.BigDecimal("18.00"),
-                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678", Rol.CUIDADOR));
+                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678",
+                        Set.of(rolCuidador())));
         when(perfilCuidadorRepository.findById(1L)).thenReturn(Optional.of(cuidador));
 
         SolicitudDTORequest dto = new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", 80,
@@ -95,9 +116,11 @@ public class SolicitudServiceImplTest {
 
     @Test
     void testDeleteById() {
-        UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234", Rol.FAMILIA);
+        UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234",
+                Set.of(rolFamilia()));
         PerfilCuidadorEntity cuidador = new PerfilCuidadorEntity(1L, "Geriatría", 4, new java.math.BigDecimal("18.00"),
-                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678", Rol.CUIDADOR));
+                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678",
+                        Set.of(rolCuidador())));
         SolicitudEntity solicitudMock = new SolicitudEntity(1L, "Acompañamiento", "Manuel", "Sin notas", 80,
                 LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, familia, cuidador);
         when(repository.findById(1L)).thenReturn(Optional.of(solicitudMock));
@@ -109,9 +132,11 @@ public class SolicitudServiceImplTest {
 
     @Test
     void testUpdate() {
-        UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234", Rol.FAMILIA);
+        UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234",
+                Set.of(rolFamilia()));
         PerfilCuidadorEntity cuidador = new PerfilCuidadorEntity(1L, "Geriatría", 4, new java.math.BigDecimal("18.00"),
-                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678", Rol.CUIDADOR));
+                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678",
+                        Set.of(rolCuidador())));
         SolicitudEntity solicitudExistente = new SolicitudEntity(1L, "Acompañamiento", "Manuel", "Sin notas", 80,
                 LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, familia, cuidador);
         when(repository.findById(1L)).thenReturn(Optional.of(solicitudExistente));
@@ -126,9 +151,11 @@ public class SolicitudServiceImplTest {
 
     @Test
     void testCambiarEstado() {
-        UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234", Rol.FAMILIA);
+        UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234",
+                Set.of(rolFamilia()));
         PerfilCuidadorEntity cuidador = new PerfilCuidadorEntity(1L, "Geriatría", 4, new java.math.BigDecimal("18.00"),
-                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678", Rol.CUIDADOR));
+                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678",
+                        Set.of(rolCuidador())));
         SolicitudEntity solicitudExistente = new SolicitudEntity(1L, "Acompañamiento", "Manuel", "Sin notas", 80,
                 LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, familia, cuidador);
         when(repository.findById(1L)).thenReturn(Optional.of(solicitudExistente));

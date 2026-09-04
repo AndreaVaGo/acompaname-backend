@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,10 +19,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
+import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.solicitud.EstadoSolicitud;
 import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
 import dev.andrea.acompaname_backend.solicitud.SolicitudRepository;
-import dev.andrea.acompaname_backend.usuario.Rol;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTORequest;
 import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTOResponse;
@@ -40,10 +41,26 @@ public class ValoracionServiceImplTest {
         service = new ValoracionServiceImpl(repository, solicitudRepository);
     }
 
+    private RoleEntity rolFamilia() {
+        RoleEntity rol = new RoleEntity();
+        rol.setId(1L);
+        rol.setName("FAMILIA");
+        return rol;
+    }
+
+    private RoleEntity rolCuidador() {
+        RoleEntity rol = new RoleEntity();
+        rol.setId(2L);
+        rol.setName("CUIDADOR");
+        return rol;
+    }
+
     private SolicitudEntity crearSolicitudMock() {
-        UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234", Rol.FAMILIA);
+        UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234",
+                Set.of(rolFamilia()));
         PerfilCuidadorEntity cuidador = new PerfilCuidadorEntity(1L, "Geriatría", 4, new java.math.BigDecimal("18.00"),
-                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678", Rol.CUIDADOR));
+                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678",
+                        Set.of(rolCuidador())));
         return new SolicitudEntity(1L, "Acompañamiento", "Manuel", "Sin notas", 80, LocalDate.of(2026, 9, 10),
                 EstadoSolicitud.COMPLETADA, familia, cuidador);
     }

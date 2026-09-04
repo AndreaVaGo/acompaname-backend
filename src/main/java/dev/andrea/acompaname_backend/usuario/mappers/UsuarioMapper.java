@@ -1,28 +1,31 @@
 package dev.andrea.acompaname_backend.usuario.mappers;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
 
 public class UsuarioMapper {
 
-    public static UsuarioEntity toEntity(UsuarioDTORequest dtoRequest) {
+    public static UsuarioEntity toEntity(UsuarioDTORequest dto, Set<RoleEntity> roles) {
         UsuarioEntity usuario = new UsuarioEntity();
-        usuario.setNombre(dtoRequest.nombre());
-        usuario.setEmail(dtoRequest.email());
-        usuario.setTelefono(dtoRequest.telefono());
-        usuario.setPassword(dtoRequest.password());
-        usuario.setRol(dtoRequest.rol());
+        usuario.setNombre(dto.nombre());
+        usuario.setEmail(dto.email());
+        usuario.setTelefono(dto.telefono());
+        usuario.setPassword(dto.password());
+        usuario.setRoles(roles);
         return usuario;
     }
 
     public static UsuarioDTOResponse toDTO(UsuarioEntity entity) {
-        UsuarioDTOResponse dtoResponse = new UsuarioDTOResponse
-        (entity.getId(), 
-        entity.getNombre(), 
-        entity.getEmail(),
-        entity.getTelefono(), 
-        entity.getRol());
-        return dtoResponse;
+        Set<String> rolesNombres = entity.getRoles().stream()
+                .map(RoleEntity::getName)
+                .collect(Collectors.toSet());
+        return new UsuarioDTOResponse(entity.getId(), entity.getNombre(), entity.getEmail(), entity.getTelefono(),
+                rolesNombres);
     }
+    
 }
