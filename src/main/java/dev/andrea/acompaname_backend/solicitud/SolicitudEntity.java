@@ -13,12 +13,23 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "solicitudes")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class SolicitudEntity {
-    
-    @Id @GeneratedValue (strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String tipoCuidado;
     private String nombrePaciente;
@@ -35,96 +46,4 @@ public class SolicitudEntity {
     @ManyToOne
     @JoinColumn(name = "cuidador_id")
     private PerfilCuidadorEntity cuidador;
-
-    public SolicitudEntity() {
-    }
-
-    public SolicitudEntity(Long id, String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
-            LocalDate fechaCuidado, EstadoSolicitud estado, UsuarioEntity familia, PerfilCuidadorEntity cuidador) {
-        this.id = id;
-        this.tipoCuidado = tipoCuidado;
-        this.nombrePaciente = nombrePaciente;
-        this.notas = notas;
-        this.edadPaciente = edadPaciente;
-        this.fechaCuidado = fechaCuidado;
-        this.estado = estado;
-        this.familia = familia;
-        this.cuidador = cuidador;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTipoCuidado() {
-        return tipoCuidado;
-    }
-
-    public void setTipoCuidado(String tipoCuidado) {
-        this.tipoCuidado = tipoCuidado;
-    }
-
-    public String getNombrePaciente() {
-        return nombrePaciente;
-    }
-
-    public void setNombrePaciente(String nombrePaciente) {
-        this.nombrePaciente = nombrePaciente;
-    }
-
-    public String getNotas() {
-        return notas;
-    }
-
-    public void setNotas(String notas) {
-        this.notas = notas;
-    }
-
-    public Integer getEdadPaciente() {
-        return edadPaciente;
-    }
-
-    public void setEdadPaciente(Integer edadPaciente) {
-        this.edadPaciente = edadPaciente;
-    }
-
-    public LocalDate getFechaCuidado() {
-        return fechaCuidado;
-    }
-
-    public void setFechaCuidado(LocalDate fechaCuidado) {
-        this.fechaCuidado = fechaCuidado;
-    }
-
-    public EstadoSolicitud getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoSolicitud estado) {
-        this.estado = estado;
-    }
-
-    public UsuarioEntity getFamilia() {
-        return familia;
-    }
-
-    public void setFamilia(UsuarioEntity familia) {
-        this.familia = familia;
-    }
-
-    public PerfilCuidadorEntity getCuidador() {
-        return cuidador;
-    }
-
-    public void setCuidador(PerfilCuidadorEntity cuidador) {
-        this.cuidador = cuidador;
-    }
-
-    
-
-
 }
