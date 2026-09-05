@@ -68,10 +68,10 @@ public class SolicitudServiceImplTest {
                         EstadoSolicitud.PENDIENTE, familia, cuidador));
         when(repository.findAll()).thenReturn(solicitudesMock);
 
-        List<SolicitudEntity> solicitudes = service.getEntities();
+        List<SolicitudDTOResponse> solicitudes = service.getEntities();
 
         assertThat(solicitudes.size(), is(equalTo(1)));
-        assertThat(solicitudes.get(0).getTipoCuidado(), is(equalTo("Acompañamiento")));
+        assertThat(solicitudes.get(0).tipoCuidado(), is(equalTo("Acompañamiento")));
     }
 
     @Test
@@ -85,10 +85,10 @@ public class SolicitudServiceImplTest {
                 LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, familia, cuidador);
         when(repository.findById(1L)).thenReturn(Optional.of(solicitudMock));
 
-        SolicitudEntity solicitud = service.getById(1L);
+        SolicitudDTOResponse solicitud = service.getById(1L);
 
-        assertThat(solicitud.getTipoCuidado(), is(equalTo("Acompañamiento")));
-        assertThat(solicitud.getEstado(), is(equalTo(EstadoSolicitud.PENDIENTE)));
+        assertThat(solicitud.tipoCuidado(), is(equalTo("Acompañamiento")));
+        assertThat(solicitud.estado(), is(equalTo(EstadoSolicitud.PENDIENTE)));
     }
 
     @Test

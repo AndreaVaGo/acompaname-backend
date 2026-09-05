@@ -1,13 +1,13 @@
 package dev.andrea.acompaname_backend.solicitud;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;
-
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTOResponse;
 import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotFound;
@@ -30,15 +30,22 @@ public class SolicitudServiceImpl implements SolicitudService {
         this.perfilCuidadorRepository = perfilCuidadorRepository;
     }
 
-    @Override
-    public List<SolicitudEntity> getEntities() {
-        return repository.findAll();
+    private SolicitudEntity findEntityById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new SolicitudExceptionNotFound("Solicitud no encontrada. Id " + id + " no existe."));
     }
 
     @Override
-    public SolicitudEntity getById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new SolicitudExceptionNotFound("Solicitud no encontrada. Id " + id + " no existe."));
+    public List<SolicitudDTOResponse> getEntities() {
+        return repository.findAll().stream()
+                .map(SolicitudMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public SolicitudDTOResponse getById(Long id) {
+        SolicitudEntity solicitud = findEntityById(id);
+        return SolicitudMapper.toDTO(solicitud);
     }
 
     @Override
@@ -57,14 +64,13 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     @Override
     public void deleteById(Long id) {
-        getById(id);
+        findEntityById(id);
         repository.deleteById(id);
     }
 
     @Override
     public SolicitudDTOResponse update(Long id, SolicitudDTORequest dto) {
-        SolicitudEntity solicitudExistente = repository.findById(id)
-                .orElseThrow(() -> new SolicitudExceptionNotFound("Solicitud no encontrada. Id " + id + " no existe."));
+        SolicitudEntity solicitudExistente = findEntityById(id);
         solicitudExistente.setTipoCuidado(dto.tipoCuidado());
         solicitudExistente.setNombrePaciente(dto.nombrePaciente());
         solicitudExistente.setNotas(dto.notas());
@@ -72,16 +78,14 @@ public class SolicitudServiceImpl implements SolicitudService {
         solicitudExistente.setFechaCuidado(dto.fechaCuidado());
         SolicitudEntity solicitudActualizada = repository.save(solicitudExistente);
         return SolicitudMapper.toDTO(solicitudActualizada);
-
     }
 
     @Override
     public SolicitudDTOResponse cambiarEstado(Long id, EstadoSolicitud nuevoEstado) {
-        SolicitudEntity solicitud = getById(id);
+        SolicitudEntity solicitud = findEntityById(id);
         solicitud.setEstado(nuevoEstado);
         SolicitudEntity solicitudActualizada = repository.save(solicitud);
         return SolicitudMapper.toDTO(solicitudActualizada);
-
     }
 
 }

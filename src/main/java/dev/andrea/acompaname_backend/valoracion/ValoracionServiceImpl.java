@@ -1,6 +1,7 @@
 package dev.andrea.acompaname_backend.valoracion;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -23,15 +24,22 @@ public class ValoracionServiceImpl implements ValoracionService {
         this.solicitudRepository = solicitudRepository;
     }
 
-    @Override
-    public List<ValoracionEntity> getEntities() {
-        return repository.findAll();
+    private ValoracionEntity findEntityById(Long id) {
+        return repository.findById(id).orElseThrow(
+                () -> new ValoracionExceptionNotFound("Valoracion no encontrada. Id " + id + " no existe."));
     }
 
     @Override
-    public ValoracionEntity getById(Long id) {
-        return repository.findById(id).orElseThrow(
-                () -> new ValoracionExceptionNotFound("Valoracion no encontrada. Id " + id + " no existe."));
+    public List<ValoracionDTOResponse> getEntities() {
+        return repository.findAll().stream()
+                .map(ValoracionMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public ValoracionDTOResponse getById(Long id) {
+        ValoracionEntity valoracion = findEntityById(id);
+        return ValoracionMapper.toDTO(valoracion);
     }
 
     @Override
@@ -46,14 +54,13 @@ public class ValoracionServiceImpl implements ValoracionService {
 
     @Override
     public void deleteById(Long id) {
-        getById(id);
+        findEntityById(id);
         repository.deleteById(id);
     }
 
     @Override
     public ValoracionDTOResponse update(Long id, ValoracionDTORequest dto) {
-        ValoracionEntity valoracionExistente = repository.findById(id).orElseThrow(
-                () -> new ValoracionExceptionNotFound("Valoracion no encontrada. Id " + id + " no existe."));
+        ValoracionEntity valoracionExistente = findEntityById(id);
         valoracionExistente.setComentario(dto.comentario());
         valoracionExistente.setPuntuacion(dto.puntuacion());
         valoracionExistente.setFecha(dto.fecha());

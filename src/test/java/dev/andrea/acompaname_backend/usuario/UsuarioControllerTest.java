@@ -24,7 +24,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
 import tools.jackson.databind.ObjectMapper;
@@ -39,18 +38,11 @@ public class UsuarioControllerTest {
     @Autowired
     ObjectMapper mapper;
 
-    private RoleEntity crearRolMock() {
-        RoleEntity rol = new RoleEntity();
-        rol.setId(1L);
-        rol.setName("FAMILIA");
-        return rol;
-    }
-
     @Test
     void testIndex() throws Exception {
-        RoleEntity rol = crearRolMock();
-        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Set.of(rol));
-        List<UsuarioEntity> usuarios = new ArrayList<>();
+        UsuarioDTOResponse usuario = new UsuarioDTOResponse(1L, "Juan", "juan@test.com", "600111222",
+                Set.of("FAMILIA"));
+        List<UsuarioDTOResponse> usuarios = new ArrayList<>();
         usuarios.add(usuario);
         String json = mapper.writeValueAsString(usuarios);
         when(service.getEntities()).thenReturn(usuarios);
@@ -67,8 +59,8 @@ public class UsuarioControllerTest {
 
     @Test
     void testGetById() throws Exception {
-        RoleEntity rol = crearRolMock();
-        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Set.of(rol));
+        UsuarioDTOResponse usuario = new UsuarioDTOResponse(1L, "Juan", "juan@test.com", "600111222",
+                Set.of("FAMILIA"));
         String json = mapper.writeValueAsString(usuario);
         when(service.getById(1L)).thenReturn(usuario);
 

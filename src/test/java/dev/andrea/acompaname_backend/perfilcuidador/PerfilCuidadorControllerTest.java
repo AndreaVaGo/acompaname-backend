@@ -13,7 +13,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -27,8 +26,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTORequest;
 import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTOResponse;
-import dev.andrea.acompaname_backend.role.RoleEntity;
-import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = PerfilCuidadorController.class)
@@ -41,18 +38,11 @@ public class PerfilCuidadorControllerTest {
     @Autowired
     ObjectMapper mapper;
 
-    private UsuarioEntity crearUsuarioMock() {
-        RoleEntity rol = new RoleEntity();
-        rol.setId(1L);
-        rol.setName("CUIDADOR");
-        return new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678", Set.of(rol));
-    }
-
     @Test
     void testIndex() throws Exception {
-        PerfilCuidadorEntity perfil = new PerfilCuidadorEntity(1L, "Fisioterapia", 5, new BigDecimal("15.00"),
-                "Bio", true, true, crearUsuarioMock());
-        List<PerfilCuidadorEntity> perfiles = new ArrayList<>();
+        PerfilCuidadorDTOResponse perfil = new PerfilCuidadorDTOResponse(1L, "Fisioterapia", 5,
+                new BigDecimal("15.00"), "Bio", true, true, 2L);
+        List<PerfilCuidadorDTOResponse> perfiles = new ArrayList<>();
         perfiles.add(perfil);
         String json = mapper.writeValueAsString(perfiles);
         when(service.getEntities()).thenReturn(perfiles);
@@ -69,8 +59,8 @@ public class PerfilCuidadorControllerTest {
 
     @Test
     void testGetById() throws Exception {
-        PerfilCuidadorEntity perfil = new PerfilCuidadorEntity(1L, "Fisioterapia", 5, new BigDecimal("15.00"),
-                "Bio", true, true, crearUsuarioMock());
+        PerfilCuidadorDTOResponse perfil = new PerfilCuidadorDTOResponse(1L, "Fisioterapia", 5,
+                new BigDecimal("15.00"), "Bio", true, true, 2L);
         String json = mapper.writeValueAsString(perfil);
         when(service.getById(1L)).thenReturn(perfil);
 

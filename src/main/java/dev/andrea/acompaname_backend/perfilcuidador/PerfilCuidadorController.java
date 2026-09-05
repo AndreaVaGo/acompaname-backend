@@ -27,12 +27,12 @@ public class PerfilCuidadorController {
     }
 
     @GetMapping("")
-    public List<PerfilCuidadorEntity> index() {
+    public List<PerfilCuidadorDTOResponse> index() {
         return service.getEntities();
     }
 
     @GetMapping("{id}")
-    public PerfilCuidadorEntity getById(@PathVariable Long id) {
+    public PerfilCuidadorDTOResponse getById(@PathVariable Long id) {
         return service.getById(id);
     }
 
@@ -40,7 +40,6 @@ public class PerfilCuidadorController {
     public ResponseEntity<PerfilCuidadorDTOResponse> store(@Valid @RequestBody PerfilCuidadorDTORequest dto) {
         PerfilCuidadorDTOResponse dtoResponse = service.storeEntity(dto);
         return ResponseEntity.status(201).body(dtoResponse);
-
     }
 
     @DeleteMapping("{id}")
@@ -50,9 +49,9 @@ public class PerfilCuidadorController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<PerfilCuidadorDTOResponse> update(@PathVariable Long id, @Valid @RequestBody PerfilCuidadorDTORequest dto) {
+    public ResponseEntity<PerfilCuidadorDTOResponse> update(@PathVariable Long id,
+            @Valid @RequestBody PerfilCuidadorDTORequest dto) {
         PerfilCuidadorDTOResponse dtoResponse = service.update(id, dto);
         return ResponseEntity.status(200).body(dtoResponse);
     }
-
 }

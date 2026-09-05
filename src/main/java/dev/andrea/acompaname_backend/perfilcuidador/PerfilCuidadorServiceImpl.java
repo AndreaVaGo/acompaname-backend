@@ -1,6 +1,7 @@
 package dev.andrea.acompaname_backend.perfilcuidador;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -23,15 +24,22 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
         this.usuarioRepository = usuarioRepository;
     }
 
-    @Override
-    public List<PerfilCuidadorEntity> getEntities() {
-        return repository.findAll();
+    private PerfilCuidadorEntity findEntityById(Long id) {
+        return repository.findById(id).orElseThrow(() -> new PerfilCuidadorExceptionNotFound(
+                "Perfil de cuidador no encontrado. Id " + id + " no existe."));
     }
 
     @Override
-    public PerfilCuidadorEntity getById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new PerfilCuidadorExceptionNotFound(
-                "Perfil de cuidador no encontrado. Id " + id + " no existe."));
+    public List<PerfilCuidadorDTOResponse> getEntities() {
+        return repository.findAll().stream()
+                .map(PerfilCuidadorMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public PerfilCuidadorDTOResponse getById(Long id) {
+        PerfilCuidadorEntity perfil = findEntityById(id);
+        return PerfilCuidadorMapper.toDTO(perfil);
     }
 
     @Override
@@ -46,15 +54,13 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
 
     @Override
     public void deleteById(Long id) {
-        getById(id);
+        findEntityById(id);
         repository.deleteById(id);
     }
 
     @Override
     public PerfilCuidadorDTOResponse update(Long id, PerfilCuidadorDTORequest dto) {
-        PerfilCuidadorEntity perfilCuidadorExistente = repository.findById(id)
-                .orElseThrow(() -> new PerfilCuidadorExceptionNotFound(
-                        "Perfil de cuidador no encontrado. Id " + id + " no existe."));
+        PerfilCuidadorEntity perfilCuidadorExistente = findEntityById(id);
         perfilCuidadorExistente.setEspecialidad(dto.especialidad());
         perfilCuidadorExistente.setAnosExperiencia(dto.anosExperiencia());
         perfilCuidadorExistente.setTarifaHora(dto.tarifaHora());

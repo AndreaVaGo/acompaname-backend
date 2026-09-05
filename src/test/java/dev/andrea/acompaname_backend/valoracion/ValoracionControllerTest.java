@@ -10,11 +10,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -26,11 +24,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
-import dev.andrea.acompaname_backend.role.RoleEntity;
-import dev.andrea.acompaname_backend.solicitud.EstadoSolicitud;
-import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
-import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTORequest;
 import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTOResponse;
 import tools.jackson.databind.ObjectMapper;
@@ -45,29 +38,11 @@ public class ValoracionControllerTest {
     @Autowired
     ObjectMapper mapper;
 
-    private SolicitudEntity crearSolicitudMock() {
-        RoleEntity rolFamilia = new RoleEntity();
-        rolFamilia.setId(1L);
-        rolFamilia.setName("FAMILIA");
-        UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234", Set.of(rolFamilia));
-
-        RoleEntity rolCuidador = new RoleEntity();
-        rolCuidador.setId(2L);
-        rolCuidador.setName("CUIDADOR");
-        UsuarioEntity usuarioCuidador = new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678",
-                Set.of(rolCuidador));
-        PerfilCuidadorEntity cuidador = new PerfilCuidadorEntity(1L, "Geriatría", 4, new BigDecimal("18.00"), "Bio",
-                true, true, usuarioCuidador);
-
-        return new SolicitudEntity(1L, "Acompañamiento", "Manuel", "Sin notas", 80, LocalDate.of(2026, 9, 10),
-                EstadoSolicitud.COMPLETADA, familia, cuidador);
-    }
-
     @Test
     void testIndex() throws Exception {
-        ValoracionEntity valoracion = new ValoracionEntity(1L, "Muy buena atención", 5, LocalDate.of(2026, 9, 11),
-                crearSolicitudMock());
-        List<ValoracionEntity> valoraciones = new ArrayList<>();
+        ValoracionDTOResponse valoracion = new ValoracionDTOResponse(1L, "Muy buena atención", 5,
+                LocalDate.of(2026, 9, 11), 1L);
+        List<ValoracionDTOResponse> valoraciones = new ArrayList<>();
         valoraciones.add(valoracion);
         String json = mapper.writeValueAsString(valoraciones);
         when(service.getEntities()).thenReturn(valoraciones);
@@ -84,8 +59,8 @@ public class ValoracionControllerTest {
 
     @Test
     void testGetById() throws Exception {
-        ValoracionEntity valoracion = new ValoracionEntity(1L, "Muy buena atención", 5, LocalDate.of(2026, 9, 11),
-                crearSolicitudMock());
+        ValoracionDTOResponse valoracion = new ValoracionDTOResponse(1L, "Muy buena atención", 5,
+                LocalDate.of(2026, 9, 11), 1L);
         String json = mapper.writeValueAsString(valoracion);
         when(service.getById(1L)).thenReturn(valoracion);
 

@@ -54,11 +54,11 @@ public class UsuarioServiceImplTest {
                 new UsuarioEntity(2L, "Maria", "maria@test.com", "600333444", "5678", Set.of(rol)));
         when(repository.findAll()).thenReturn(usuariosMock);
 
-        List<UsuarioEntity> usuarios = service.getEntities();
+        List<UsuarioDTOResponse> usuarios = service.getEntities();
 
         assertThat(usuarios.size(), is(equalTo(2)));
-        assertThat(usuarios.get(0).getNombre(), is(equalTo("Juan")));
-        assertThat(usuarios.get(1).getNombre(), is(equalTo("Maria")));
+        assertThat(usuarios.get(0).nombre(), is(equalTo("Juan")));
+        assertThat(usuarios.get(1).nombre(), is(equalTo("Maria")));
     }
 
     @Test
@@ -67,10 +67,10 @@ public class UsuarioServiceImplTest {
         UsuarioEntity usuarioMock = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Set.of(rol));
         when(repository.findById(1L)).thenReturn(Optional.of(usuarioMock));
 
-        UsuarioEntity usuario = service.getById(1L);
+        UsuarioDTOResponse usuario = service.getById(1L);
 
-        assertThat(usuario.getNombre(), is(equalTo("Juan")));
-        assertThat(usuario.getEmail(), is(equalTo("juan@test.com")));
+        assertThat(usuario.nombre(), is(equalTo("Juan")));
+        assertThat(usuario.email(), is(equalTo("juan@test.com")));
     }
 
     @Test
@@ -110,7 +110,5 @@ public class UsuarioServiceImplTest {
         UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "1234", Set.of(1L));
         UsuarioDTOResponse resultado = service.update(1L, dto);
         assertThat(resultado.nombre(), is(equalTo("Ana")));
-        
     }
-
 }

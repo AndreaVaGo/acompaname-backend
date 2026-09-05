@@ -72,10 +72,10 @@ public class ValoracionServiceImplTest {
                 new ValoracionEntity(1L, "Muy buena atención", 5, LocalDate.of(2026, 9, 11), solicitud));
         when(repository.findAll()).thenReturn(valoracionesMock);
 
-        List<ValoracionEntity> valoraciones = service.getEntities();
+        List<ValoracionDTOResponse> valoraciones = service.getEntities();
 
         assertThat(valoraciones.size(), is(equalTo(1)));
-        assertThat(valoraciones.get(0).getComentario(), is(equalTo("Muy buena atención")));
+        assertThat(valoraciones.get(0).comentario(), is(equalTo("Muy buena atención")));
     }
 
     @Test
@@ -85,10 +85,10 @@ public class ValoracionServiceImplTest {
                 LocalDate.of(2026, 9, 11), solicitud);
         when(repository.findById(1L)).thenReturn(Optional.of(valoracionMock));
 
-        ValoracionEntity valoracion = service.getById(1L);
+        ValoracionDTOResponse valoracion = service.getById(1L);
 
-        assertThat(valoracion.getComentario(), is(equalTo("Muy buena atención")));
-        assertThat(valoracion.getPuntuacion(), is(equalTo(5)));
+        assertThat(valoracion.comentario(), is(equalTo("Muy buena atención")));
+        assertThat(valoracion.puntuacion(), is(equalTo(5)));
     }
 
     @Test

@@ -27,12 +27,12 @@ public class ValoracionController {
     }
 
     @GetMapping("")
-    public List<ValoracionEntity> index() {
+    public List<ValoracionDTOResponse> index() {
         return service.getEntities();
     }
 
     @GetMapping("{id}")
-    public ValoracionEntity getById(@PathVariable Long id) {
+    public ValoracionDTOResponse getById(@PathVariable Long id) {
         return service.getById(id);
     }
 

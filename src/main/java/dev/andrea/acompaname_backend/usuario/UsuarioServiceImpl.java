@@ -29,15 +29,23 @@ public class UsuarioServiceImpl implements UsuarioService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Override
-    public List<UsuarioEntity> getEntities() {
-        return repository.findAll();
+    // Método privado auxiliar: sigue devolviendo la Entity real, para uso interno
+    private UsuarioEntity findEntityById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new UsuarioExceptionNotFound("Usuario no encontrado. Id " + id + " no existe."));
     }
 
     @Override
-    public UsuarioEntity getById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new UsuarioExceptionNotFound("Usuario no encontrado. Id " + id + " no existe."));
+    public List<UsuarioDTOResponse> getEntities() {
+        return repository.findAll().stream()
+                .map(UsuarioMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public UsuarioDTOResponse getById(Long id) {
+        UsuarioEntity usuario = findEntityById(id);
+        return UsuarioMapper.toDTO(usuario);
     }
 
     @Override
@@ -56,14 +64,13 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public void deleteById(Long id) {
-        getById(id);
+        findEntityById(id);
         repository.deleteById(id);
     }
 
     @Override
     public UsuarioDTOResponse update(Long id, UsuarioDTORequest dto) {
-        UsuarioEntity usuarioExistente = repository.findById(id)
-                .orElseThrow(() -> new UsuarioExceptionNotFound("Usuario no encontrado. Id " + id + " no existe."));
+        UsuarioEntity usuarioExistente = findEntityById(id);
         usuarioExistente.setNombre(dto.nombre());
         usuarioExistente.setEmail(dto.email());
         usuarioExistente.setTelefono(dto.telefono());

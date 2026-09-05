@@ -29,12 +29,12 @@ public class SolicitudController {
     }
 
     @GetMapping("")
-    public List<SolicitudEntity> index() {
+    public List<SolicitudDTOResponse> index() {
         return service.getEntities();
     }
 
     @GetMapping("{id}")
-    public SolicitudEntity getById(@PathVariable Long id) {
+    public SolicitudDTOResponse getById(@PathVariable Long id) {
         return service.getById(id);
     }
 
@@ -62,7 +62,5 @@ public class SolicitudController {
             @RequestBody CambiarEstadoDTO dto) {
         SolicitudDTOResponse dtoResponse = service.cambiarEstado(id, dto.estado());
         return ResponseEntity.status(200).body(dtoResponse);
-
     }
-
 }

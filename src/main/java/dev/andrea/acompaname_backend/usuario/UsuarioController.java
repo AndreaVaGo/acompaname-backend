@@ -16,7 +16,6 @@ import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
 import jakarta.validation.Valid;
 
-
 @RestController
 @RequestMapping(path = "${api-endpoint}/usuarios")
 public class UsuarioController {
@@ -28,12 +27,12 @@ public class UsuarioController {
     }
 
     @GetMapping("")
-    public List<UsuarioEntity> index() {
+    public List<UsuarioDTOResponse> index() {
         return service.getEntities();
     }
 
     @GetMapping("{id}")
-    public UsuarioEntity getById(@PathVariable Long id) {
+    public UsuarioDTOResponse getById(@PathVariable Long id) {
         return service.getById(id);
     }
 
@@ -41,7 +40,6 @@ public class UsuarioController {
     public ResponseEntity<UsuarioDTOResponse> store(@Valid @RequestBody UsuarioDTORequest dto) {
         UsuarioDTOResponse dtoResponse = service.storeEntity(dto);
         return ResponseEntity.status(201).body(dtoResponse);
-
     }
 
     @DeleteMapping("{id}")
@@ -51,9 +49,11 @@ public class UsuarioController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<UsuarioDTOResponse> update(@PathVariable Long id, @Valid @RequestBody UsuarioDTORequest dto) {
+    public ResponseEntity<UsuarioDTOResponse> update(@PathVariable Long id,
+            @Valid @RequestBody UsuarioDTORequest dto) {
         UsuarioDTOResponse dtoResponse = service.update(id, dto);
         return ResponseEntity.status(200).body(dtoResponse);
 
     }
+
 }
