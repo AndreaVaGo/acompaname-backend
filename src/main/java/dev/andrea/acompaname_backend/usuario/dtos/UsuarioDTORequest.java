@@ -15,7 +15,7 @@ public record UsuarioDTORequest(
 
         @NotBlank(message = "El telefono no puede estar vacío") String telefono,
 
-        @NotBlank(message = "La password no puede estar vacía") @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres") String password,
+        @NotBlank(message = "La password no puede estar vacía") @Size(min = 8, max = 72, message = "La contraseña debe tener entre 8 y 72 caracteres") String password,
 
         @NotNull(message = "Los roles no pueden ser nulos") Set<Long> rolesIds
 

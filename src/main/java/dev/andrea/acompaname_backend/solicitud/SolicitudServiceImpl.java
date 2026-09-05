@@ -3,6 +3,8 @@ package dev.andrea.acompaname_backend.solicitud;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
@@ -10,6 +12,7 @@ import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTOResponse;
+import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.solicitud.mappers.SolicitudMapper;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
@@ -35,6 +38,15 @@ public class SolicitudServiceImpl implements SolicitudService {
                 .orElseThrow(() -> new SolicitudExceptionNotFound("Solicitud no encontrada. Id " + id + " no existe."));
     }
 
+    private void verificarPropietario(SolicitudEntity solicitud) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String emailLogueado = auth.getName();
+        if (!solicitud.getFamilia().getEmail().equals(emailLogueado)
+                && !solicitud.getCuidador().getUsuario().getEmail().equals(emailLogueado)) {
+            throw new SolicitudExceptionAccesoDenegado("No tiene permiso para acceder a esta solicitud");
+        }
+    }
+
     @Override
     public List<SolicitudDTOResponse> getEntities() {
         return repository.findAll().stream()
@@ -45,6 +57,7 @@ public class SolicitudServiceImpl implements SolicitudService {
     @Override
     public SolicitudDTOResponse getById(Long id) {
         SolicitudEntity solicitud = findEntityById(id);
+        verificarPropietario(solicitud);
         return SolicitudMapper.toDTO(solicitud);
     }
 
@@ -64,13 +77,15 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     @Override
     public void deleteById(Long id) {
-        findEntityById(id);
+        SolicitudEntity solicitud = findEntityById(id);
+        verificarPropietario(solicitud);
         repository.deleteById(id);
     }
 
     @Override
     public SolicitudDTOResponse update(Long id, SolicitudDTORequest dto) {
         SolicitudEntity solicitudExistente = findEntityById(id);
+        verificarPropietario(solicitudExistente);
         solicitudExistente.setTipoCuidado(dto.tipoCuidado());
         solicitudExistente.setNombrePaciente(dto.nombrePaciente());
         solicitudExistente.setNotas(dto.notas());
@@ -83,6 +98,7 @@ public class SolicitudServiceImpl implements SolicitudService {
     @Override
     public SolicitudDTOResponse cambiarEstado(Long id, EstadoSolicitud nuevoEstado) {
         SolicitudEntity solicitud = findEntityById(id);
+        verificarPropietario(solicitud);
         solicitud.setEstado(nuevoEstado);
         SolicitudEntity solicitudActualizada = repository.save(solicitud);
         return SolicitudMapper.toDTO(solicitudActualizada);

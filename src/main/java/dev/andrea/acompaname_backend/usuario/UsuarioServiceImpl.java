@@ -51,7 +51,8 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public UsuarioDTOResponse storeEntity(UsuarioDTORequest dto) {
         if (repository.findByEmail(dto.email()).isPresent()) {
-            throw new UsuarioExceptionEmailDuplicado("El email " + dto.email() + " ya está registrado.");
+            throw new UsuarioExceptionEmailDuplicado(
+                    "No ha sido posible completar el registro con los datos proporcionados.");
         }
         Set<RoleEntity> roles = dto.rolesIds().stream()
                 .map(id -> roleRepository.findById(id).orElseThrow())
