@@ -23,6 +23,9 @@ import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTORespon
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @ExtendWith(MockitoExtension.class)
 public class PerfilCuidadorServiceImplTest {
@@ -86,6 +89,9 @@ public class PerfilCuidadorServiceImplTest {
 
     @Test
     void testDeleteById() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
         UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
                 Set.of(crearRolMock()));
         PerfilCuidadorEntity perfilMock = new PerfilCuidadorEntity(1L, "Enfermeria", 3, new BigDecimal("20.00"),
@@ -97,6 +103,9 @@ public class PerfilCuidadorServiceImplTest {
 
     @Test
     void testUpdate() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
         UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
                 Set.of(crearRolMock()));
         PerfilCuidadorEntity perfilExistente = new PerfilCuidadorEntity(1L, "Enfermeria", 3, new BigDecimal("20.00"),

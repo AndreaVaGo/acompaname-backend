@@ -3,10 +3,13 @@ package dev.andrea.acompaname_backend.perfilcuidador;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTORequest;
 import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTOResponse;
+import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.perfilcuidador.mappers.PerfilCuidadorMapper;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
@@ -27,6 +30,14 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
     private PerfilCuidadorEntity findEntityById(Long id) {
         return repository.findById(id).orElseThrow(() -> new PerfilCuidadorExceptionNotFound(
                 "Perfil de cuidador no encontrado. Id " + id + " no existe."));
+    }
+
+    private void verificarPropietario(PerfilCuidadorEntity perfil) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String emailLogueado = auth.getName();
+        if (!perfil.getUsuario().getEmail().equals(emailLogueado)) {
+            throw new PerfilCuidadorExceptionAccesoDenegado("No tiene permiso para modificar este perfil");
+        }
     }
 
     @Override
@@ -54,13 +65,15 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
 
     @Override
     public void deleteById(Long id) {
-        findEntityById(id);
+        PerfilCuidadorEntity perfil = findEntityById(id);
+        verificarPropietario(perfil);
         repository.deleteById(id);
     }
 
     @Override
     public PerfilCuidadorDTOResponse update(Long id, PerfilCuidadorDTORequest dto) {
         PerfilCuidadorEntity perfilCuidadorExistente = findEntityById(id);
+        verificarPropietario(perfilCuidadorExistente);
         perfilCuidadorExistente.setEspecialidad(dto.especialidad());
         perfilCuidadorExistente.setAnosExperiencia(dto.anosExperiencia());
         perfilCuidadorExistente.setTarifaHora(dto.tarifaHora());

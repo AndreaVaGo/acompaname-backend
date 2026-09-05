@@ -16,6 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import dev.andrea.acompaname_backend.role.RoleEntity;
@@ -63,6 +66,9 @@ public class UsuarioServiceImplTest {
 
     @Test
     void testGetById() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
         RoleEntity rol = crearRolMock();
         UsuarioEntity usuarioMock = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Set.of(rol));
         when(repository.findById(1L)).thenReturn(Optional.of(usuarioMock));
@@ -77,9 +83,9 @@ public class UsuarioServiceImplTest {
     void testStoreUsuario() {
         RoleEntity rol = crearRolMock();
         when(roleRepository.findById(1L)).thenReturn(Optional.of(rol));
-        when(passwordEncoder.encode("1234")).thenReturn("encriptada123");
+        when(passwordEncoder.encode("12345678")).thenReturn("encriptada123");
 
-        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "1234", Set.of(1L));
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "12345678", Set.of(1L));
         when(repository.save(Mockito.any(UsuarioEntity.class))).thenReturn(
                 new UsuarioEntity(1L, dto.nombre(), dto.email(), dto.telefono(), "encriptada123", Set.of(rol)));
 
@@ -89,6 +95,9 @@ public class UsuarioServiceImplTest {
 
     @Test
     void testDeleteById() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
         RoleEntity rol = crearRolMock();
         UsuarioEntity usuarioMock = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Set.of(rol));
         when(repository.findById(1L)).thenReturn(Optional.of(usuarioMock));
@@ -99,15 +108,18 @@ public class UsuarioServiceImplTest {
 
     @Test
     void testUpdate() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
         RoleEntity rol = crearRolMock();
         UsuarioEntity usuarioExistente = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
                 Set.of(rol));
         when(repository.findById(1L)).thenReturn(Optional.of(usuarioExistente));
         when(roleRepository.findById(1L)).thenReturn(Optional.of(rol));
-        when(passwordEncoder.encode("1234")).thenReturn("encriptada123");
+        when(passwordEncoder.encode("12345678")).thenReturn("encriptada123");
         when(repository.save(Mockito.any(UsuarioEntity.class))).thenReturn(usuarioExistente);
 
-        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "1234", Set.of(1L));
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "12345678", Set.of(1L));
         UsuarioDTOResponse resultado = service.update(1L, dto);
         assertThat(resultado.nombre(), is(equalTo("Ana")));
     }

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,7 @@ import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
+import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionEmailDuplicado;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
 import dev.andrea.acompaname_backend.usuario.mappers.UsuarioMapper;
@@ -29,10 +32,17 @@ public class UsuarioServiceImpl implements UsuarioService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // Método privado auxiliar: sigue devolviendo la Entity real, para uso interno
     private UsuarioEntity findEntityById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new UsuarioExceptionNotFound("Usuario no encontrado. Id " + id + " no existe."));
+    }
+
+    private void verificarPropietario(UsuarioEntity usuario) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String emailLogueado = auth.getName();
+        if (!usuario.getEmail().equals(emailLogueado)) {
+            throw new UsuarioExceptionAccesoDenegado("No tiene permiso para acceder a este usuario");
+        }
     }
 
     @Override
@@ -45,14 +55,14 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public UsuarioDTOResponse getById(Long id) {
         UsuarioEntity usuario = findEntityById(id);
+        verificarPropietario(usuario);
         return UsuarioMapper.toDTO(usuario);
     }
 
     @Override
     public UsuarioDTOResponse storeEntity(UsuarioDTORequest dto) {
         if (repository.findByEmail(dto.email()).isPresent()) {
-            throw new UsuarioExceptionEmailDuplicado(
-                    "No ha sido posible completar el registro con los datos proporcionados.");
+            throw new UsuarioExceptionEmailDuplicado("No ha sido posible completar el registro con los datos proporcionados.");
         }
         Set<RoleEntity> roles = dto.rolesIds().stream()
                 .map(id -> roleRepository.findById(id).orElseThrow())
@@ -65,13 +75,15 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public void deleteById(Long id) {
-        findEntityById(id);
+        UsuarioEntity usuario = findEntityById(id);
+        verificarPropietario(usuario);
         repository.deleteById(id);
     }
 
     @Override
     public UsuarioDTOResponse update(Long id, UsuarioDTORequest dto) {
         UsuarioEntity usuarioExistente = findEntityById(id);
+        verificarPropietario(usuarioExistente);
         usuarioExistente.setNombre(dto.nombre());
         usuarioExistente.setEmail(dto.email());
         usuarioExistente.setTelefono(dto.telefono());
@@ -83,5 +95,4 @@ public class UsuarioServiceImpl implements UsuarioService {
         UsuarioEntity usuarioActualizado = repository.save(usuarioExistente);
         return UsuarioMapper.toDTO(usuarioActualizado);
     }
-
 }
