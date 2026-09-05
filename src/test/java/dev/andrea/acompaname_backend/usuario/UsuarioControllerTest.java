@@ -76,7 +76,7 @@ public class UsuarioControllerTest {
 
     @Test
     void testStore() throws Exception {
-        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "1234", Set.of(1L));
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "12345678", Set.of(1L));
         UsuarioDTOResponse dtoResponse = new UsuarioDTOResponse(1L, "Ana", "ana@test.com", "600555666",
                 Set.of("FAMILIA"));
         String json = mapper.writeValueAsString(dtoResponse);
