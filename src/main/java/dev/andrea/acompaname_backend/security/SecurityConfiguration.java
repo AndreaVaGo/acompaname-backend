@@ -35,11 +35,15 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/usuarios").permitAll()
                         .requestMatchers("/" + endpoint + "/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/" + endpoint + "/cuidadores").hasAuthority("CUIDADOR")
+                        .requestMatchers(HttpMethod.POST, "/" + endpoint + "/solicitudes").hasAuthority("FAMILIA")
                         .anyRequest().authenticated())
                 .userDetailsService(jpaUserDetailsService)
                 .httpBasic(withDefaults())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
+
+        http.headers(header -> header.frameOptions(frame -> frame.sameOrigin()));
 
         return http.build();
     }
