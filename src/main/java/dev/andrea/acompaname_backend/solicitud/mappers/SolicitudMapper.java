@@ -24,16 +24,10 @@ public class SolicitudMapper {
     }
 
     public static SolicitudDTOResponse toDTO(SolicitudEntity entity) {
-        SolicitudDTOResponse dtoResponse = new SolicitudDTOResponse(
-                entity.getId(),
-                entity.getTipoCuidado(),
-                entity.getNombrePaciente(),
-                entity.getNotas(),
-                entity.getEdadPaciente(),
-                entity.getFechaCuidado(),
-                entity.getEstado(),
-                entity.getFamilia().getId(),
-                entity.getCuidador().getId());
-        return dtoResponse;
+        return new SolicitudDTOResponse(entity.getId(), entity.getTipoCuidado(), entity.getNombrePaciente(),
+                entity.getNotas(), entity.getEdadPaciente(), entity.getFechaCuidado(), entity.getEstado(),
+                entity.getFamilia().getId(), entity.getCuidador().getId(),
+                entity.getFamilia().getNombre(), entity.getCuidador().getUsuario().getNombre());
     }
+    
 }

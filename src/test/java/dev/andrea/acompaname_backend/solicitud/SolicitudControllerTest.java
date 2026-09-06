@@ -31,73 +31,76 @@ import tools.jackson.databind.ObjectMapper;
 @WebMvcTest(controllers = SolicitudController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class SolicitudControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
-    @MockitoBean
-    private SolicitudService service;
-    @Autowired
-    ObjectMapper mapper;
+        @Autowired
+        private MockMvc mockMvc;
+        @MockitoBean
+        private SolicitudService service;
+        @Autowired
+        ObjectMapper mapper;
 
-    @Test
-    void testIndex() throws Exception {
-        SolicitudDTOResponse solicitud = new SolicitudDTOResponse(1L, "Acompañamiento", "Manuel", "Sin notas", 80,
-                LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, 1L, 1L);
-        List<SolicitudDTOResponse> solicitudes = new ArrayList<>();
-        solicitudes.add(solicitud);
-        String json = mapper.writeValueAsString(solicitudes);
-        when(service.getEntities()).thenReturn(solicitudes);
+        @Test
+        void testIndex() throws Exception {
+                SolicitudDTOResponse solicitud = new SolicitudDTOResponse(1L, "Acompañamiento", "Manuel", "Sin notas",
+                                80,
+                                LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, 1L, 1L, "Ana", "Pepe");
+                List<SolicitudDTOResponse> solicitudes = new ArrayList<>();
+                solicitudes.add(solicitud);
+                String json = mapper.writeValueAsString(solicitudes);
+                when(service.getEntities()).thenReturn(solicitudes);
 
-        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/solicitudes"))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse();
+                MockHttpServletResponse response = mockMvc.perform(get("/api/v1/solicitudes"))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse();
 
-        assertThat(response.getStatus(), is(equalTo(200)));
-        assertThat(response.getContentAsString(), is(equalTo(json)));
-        assertThat(response.getContentAsString(), containsString("Acompañamiento"));
-    }
+                assertThat(response.getStatus(), is(equalTo(200)));
+                assertThat(response.getContentAsString(), is(equalTo(json)));
+                assertThat(response.getContentAsString(), containsString("Acompañamiento"));
+        }
 
-    @Test
-    void testGetById() throws Exception {
-        SolicitudDTOResponse solicitud = new SolicitudDTOResponse(1L, "Acompañamiento", "Manuel", "Sin notas", 80,
-                LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, 1L, 1L);
-        String json = mapper.writeValueAsString(solicitud);
-        when(service.getById(1L)).thenReturn(solicitud);
+        @Test
+        void testGetById() throws Exception {
 
-        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/solicitudes/1"))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse();
+                SolicitudDTOResponse solicitud = new SolicitudDTOResponse(1L, "Acompañamiento", "Manuel", "Sin notas",
+                                80,
+                                LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, 1L, 1L, "Ana", "Pepe");
+                when(service.getById(1L)).thenReturn(solicitud);
 
-        assertThat(response.getStatus(), is(equalTo(200)));
-        assertThat(response.getContentAsString(), is(equalTo(json)));
-        assertThat(response.getContentAsString(), containsString("Acompañamiento"));
-    }
+                MockHttpServletResponse response = mockMvc.perform(get("/api/v1/solicitudes/1"))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse();
+                String json = mapper.writeValueAsString(solicitud);
+                assertThat(response.getStatus(), is(equalTo(200)));
+                assertThat(response.getContentAsString(), is(equalTo(json)));
+                assertThat(response.getContentAsString(), containsString("Acompañamiento"));
+        }
 
-    @Test
-    void testStore() throws Exception {
-        SolicitudDTORequest dto = new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", 80,
-                LocalDate.of(2026, 9, 10), 1L, 1L);
-        SolicitudDTOResponse dtoResponse = new SolicitudDTOResponse(1L, "Acompañamiento", "Manuel", "Sin notas", 80,
-                LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, 1L, 1L);
-        String json = mapper.writeValueAsString(dtoResponse);
-        when(service.storeEntity(Mockito.any(SolicitudDTORequest.class))).thenReturn(dtoResponse);
+        @Test
+        void testStore() throws Exception {
+                SolicitudDTORequest dto = new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", 80,
+                                LocalDate.of(2026, 9, 10), 1L, 1L);
+                SolicitudDTOResponse dtoResponse = new SolicitudDTOResponse(1L, "Acompañamiento", "Manuel", "Sin notas",
+                                80,
+                                LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, 1L, 1L, "Ana", "Pepe");
+                String json = mapper.writeValueAsString(dtoResponse);
+                when(service.storeEntity(Mockito.any(SolicitudDTORequest.class))).thenReturn(dtoResponse);
 
-        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/solicitudes")
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
-                .andReturn()
-                .getResponse();
-        assertThat(response.getStatus(), is(equalTo(201)));
-        assertThat(response.getContentAsString(), is(equalTo(json)));
-        assertThat(response.getContentAsString(), containsString("Acompañamiento"));
-    }
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/solicitudes")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(201)));
+                assertThat(response.getContentAsString(), is(equalTo(json)));
+                assertThat(response.getContentAsString(), containsString("Acompañamiento"));
+        }
 
-    @Test
-    void testDelete() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(delete("/api/v1/solicitudes/1"))
-                .andReturn()
-                .getResponse();
-        assertThat(response.getStatus(), is(equalTo(204)));
-        Mockito.verify(service).deleteById(1L);
-    }
+        @Test
+        void testDelete() throws Exception {
+                MockHttpServletResponse response = mockMvc.perform(delete("/api/v1/solicitudes/1"))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(204)));
+                Mockito.verify(service).deleteById(1L);
+        }
 }
