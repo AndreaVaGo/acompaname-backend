@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.andrea.acompaname_backend.security.SecurityUser;
+
 @RestController
 @RequestMapping(path = "${api-endpoint}")
 public class AuthController {
@@ -17,7 +19,10 @@ public class AuthController {
         SecurityContext contextHolder = SecurityContextHolder.getContext();
         Authentication auth = contextHolder.getAuthentication();
 
-        AuthDTOResponse authResponse = new AuthDTOResponse("Logged", auth.getName(),
+        SecurityUser securityUser = (SecurityUser) auth.getPrincipal();
+        Long id = securityUser.getUsuario().getId();
+
+        AuthDTOResponse authResponse = new AuthDTOResponse(id, "Logged", auth.getName(),
                 auth.getAuthorities().iterator().next().getAuthority());
         return ResponseEntity.ok().body(authResponse);
     }

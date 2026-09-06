@@ -17,7 +17,10 @@ public class SecurityUser implements UserDetails {
 
     public SecurityUser(UsuarioEntity usuario) {
         this.usuario = usuario;
+    }
 
+    public UsuarioEntity getUsuario() {
+        return usuario;
     }
 
     @Override
