@@ -20,14 +20,16 @@ public class PerfilCuidadorMapper {
     }
 
     public static PerfilCuidadorDTOResponse toDTO(PerfilCuidadorEntity entity) {
-        PerfilCuidadorDTOResponse dtoResponse = new PerfilCuidadorDTOResponse(
-                entity.getId(), entity.getEspecialidad(),
-                entity.getAnosExperiencia(),
-                entity.getTarifaHora(),
-                entity.getBio(),
-                entity.isTieneVehiculo(),
-                entity.isDisponibleAhora(),
-                entity.getUsuario().getId());
+       PerfilCuidadorDTOResponse dtoResponse = new PerfilCuidadorDTOResponse(
+        entity.getId(),
+        entity.getEspecialidad(),
+        entity.getAnosExperiencia(),
+        entity.getTarifaHora(),
+        entity.getBio(),
+        entity.isTieneVehiculo(),
+        entity.isDisponibleAhora(),
+        entity.getUsuario().getId(),
+        entity.getUsuario().getNombre());
         return dtoResponse;
 
     }

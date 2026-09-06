@@ -31,73 +31,73 @@ import tools.jackson.databind.ObjectMapper;
 @WebMvcTest(controllers = PerfilCuidadorController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class PerfilCuidadorControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
-    @MockitoBean
-    private PerfilCuidadorService service;
-    @Autowired
-    ObjectMapper mapper;
+        @Autowired
+        private MockMvc mockMvc;
+        @MockitoBean
+        private PerfilCuidadorService service;
+        @Autowired
+        ObjectMapper mapper;
 
-    @Test
-    void testIndex() throws Exception {
-        PerfilCuidadorDTOResponse perfil = new PerfilCuidadorDTOResponse(1L, "Fisioterapia", 5,
-                new BigDecimal("15.00"), "Bio", true, true, 2L);
-        List<PerfilCuidadorDTOResponse> perfiles = new ArrayList<>();
-        perfiles.add(perfil);
-        String json = mapper.writeValueAsString(perfiles);
-        when(service.getEntities()).thenReturn(perfiles);
+        @Test
+        void testIndex() throws Exception {
+                PerfilCuidadorDTOResponse perfil = new PerfilCuidadorDTOResponse(1L, "Fisioterapia", 5,
+                                new BigDecimal("15.00"), "Bio", true, true, 2L, "Pepe");
+                List<PerfilCuidadorDTOResponse> perfiles = new ArrayList<>();
+                perfiles.add(perfil);
+                String json = mapper.writeValueAsString(perfiles);
+                when(service.getEntities()).thenReturn(perfiles);
 
-        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/cuidadores"))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse();
+                MockHttpServletResponse response = mockMvc.perform(get("/api/v1/cuidadores"))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse();
 
-        assertThat(response.getStatus(), is(equalTo(200)));
-        assertThat(response.getContentAsString(), is(equalTo(json)));
-        assertThat(response.getContentAsString(), containsString("Fisioterapia"));
-    }
+                assertThat(response.getStatus(), is(equalTo(200)));
+                assertThat(response.getContentAsString(), is(equalTo(json)));
+                assertThat(response.getContentAsString(), containsString("Fisioterapia"));
+        }
 
-    @Test
-    void testGetById() throws Exception {
-        PerfilCuidadorDTOResponse perfil = new PerfilCuidadorDTOResponse(1L, "Fisioterapia", 5,
-                new BigDecimal("15.00"), "Bio", true, true, 2L);
-        String json = mapper.writeValueAsString(perfil);
-        when(service.getById(1L)).thenReturn(perfil);
+        @Test
+        void testGetById() throws Exception {
+                PerfilCuidadorDTOResponse perfil = new PerfilCuidadorDTOResponse(1L, "Fisioterapia", 5,
+                                new BigDecimal("15.00"), "Bio", true, true, 2L, "Pepe");
+                String json = mapper.writeValueAsString(perfil);
+                when(service.getById(1L)).thenReturn(perfil);
 
-        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/cuidadores/1"))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse();
+                MockHttpServletResponse response = mockMvc.perform(get("/api/v1/cuidadores/1"))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse();
 
-        assertThat(response.getStatus(), is(equalTo(200)));
-        assertThat(response.getContentAsString(), is(equalTo(json)));
-        assertThat(response.getContentAsString(), containsString("Fisioterapia"));
-    }
+                assertThat(response.getStatus(), is(equalTo(200)));
+                assertThat(response.getContentAsString(), is(equalTo(json)));
+                assertThat(response.getContentAsString(), containsString("Fisioterapia"));
+        }
 
-    @Test
-    void testStore() throws Exception {
-        PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", 4, new BigDecimal("18.00"),
-                "Bio", true, true, 2L);
-        PerfilCuidadorDTOResponse dtoResponse = new PerfilCuidadorDTOResponse(1L, "Geriatría", 4,
-                new BigDecimal("18.00"), "Bio", true, true, 2L);
-        String json = mapper.writeValueAsString(dtoResponse);
-        when(service.storeEntity(Mockito.any(PerfilCuidadorDTORequest.class))).thenReturn(dtoResponse);
+        @Test
+        void testStore() throws Exception {
+                PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", 4, new BigDecimal("18.00"),
+                                "Bio", true, true, 2L);
+                PerfilCuidadorDTOResponse dtoResponse = new PerfilCuidadorDTOResponse(1L, "Geriatría", 5,
+                                new BigDecimal("15.00"), "Bio", true, true, 2L, "Pepe");
+                String json = mapper.writeValueAsString(dtoResponse);
+                when(service.storeEntity(Mockito.any(PerfilCuidadorDTORequest.class))).thenReturn(dtoResponse);
 
-        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/cuidadores")
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
-                .andReturn()
-                .getResponse();
-        assertThat(response.getStatus(), is(equalTo(201)));
-        assertThat(response.getContentAsString(), is(equalTo(json)));
-        assertThat(response.getContentAsString(), containsString("Geriatría"));
-    }
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/cuidadores")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(201)));
+                assertThat(response.getContentAsString(), is(equalTo(json)));
+                assertThat(response.getContentAsString(), containsString("Geriatría"));
+        }
 
-    @Test
-    void testDelete() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(delete("/api/v1/cuidadores/1"))
-                .andReturn()
-                .getResponse();
-        assertThat(response.getStatus(), is(equalTo(204)));
-        Mockito.verify(service).deleteById(1L);
-    }
+        @Test
+        void testDelete() throws Exception {
+                MockHttpServletResponse response = mockMvc.perform(delete("/api/v1/cuidadores/1"))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(204)));
+                Mockito.verify(service).deleteById(1L);
+        }
 }
