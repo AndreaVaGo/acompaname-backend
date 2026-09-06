@@ -104,4 +104,16 @@ public class SolicitudServiceImpl implements SolicitudService {
         return SolicitudMapper.toDTO(solicitudActualizada);
     }
 
+    @Override
+    public List<SolicitudDTOResponse> getMisSolicitudes() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String emailLogueado = auth.getName();
+
+        return repository.findAll().stream()
+                .filter(solicitud -> solicitud.getFamilia().getEmail().equals(emailLogueado)
+                        || solicitud.getCuidador().getUsuario().getEmail().equals(emailLogueado))
+                .map(SolicitudMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
 }

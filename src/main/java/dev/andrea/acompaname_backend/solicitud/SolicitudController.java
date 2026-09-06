@@ -38,6 +38,11 @@ public class SolicitudController {
         return service.getById(id);
     }
 
+    @GetMapping("/mis-solicitudes")
+    public List<SolicitudDTOResponse> getMisSolicitudes() {
+        return service.getMisSolicitudes();
+    }
+
     @PostMapping("")
     public ResponseEntity<SolicitudDTOResponse> store(@Valid @RequestBody SolicitudDTORequest dto) {
         SolicitudDTOResponse dtoResponse = service.storeEntity(dto);
@@ -63,4 +68,5 @@ public class SolicitudController {
         SolicitudDTOResponse dtoResponse = service.cambiarEstado(id, dto.estado());
         return ResponseEntity.status(200).body(dtoResponse);
     }
+
 }
