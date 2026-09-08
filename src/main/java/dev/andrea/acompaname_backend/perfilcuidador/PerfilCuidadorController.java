@@ -54,4 +54,9 @@ public class PerfilCuidadorController {
         PerfilCuidadorDTOResponse dtoResponse = service.update(id, dto);
         return ResponseEntity.status(200).body(dtoResponse);
     }
+
+    @GetMapping("/mi-perfil")
+    public PerfilCuidadorDTOResponse getMiPerfil() {
+        return service.getMiPerfil();
+    }
 }

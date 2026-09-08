@@ -7,4 +7,6 @@ import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTORespon
 public interface PerfilCuidadorService
         extends InterfaceGenericService<PerfilCuidadorEntity, PerfilCuidadorDTORequest, PerfilCuidadorDTOResponse> {
 
+        PerfilCuidadorDTOResponse getMiPerfil();
+
 }

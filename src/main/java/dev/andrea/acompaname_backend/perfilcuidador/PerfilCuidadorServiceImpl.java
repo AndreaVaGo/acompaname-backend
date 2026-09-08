@@ -83,4 +83,17 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
         PerfilCuidadorEntity perfilCuidadorActualizado = repository.save(perfilCuidadorExistente);
         return PerfilCuidadorMapper.toDTO(perfilCuidadorActualizado);
     }
+
+    @Override 
+    public PerfilCuidadorDTOResponse getMiPerfil(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String emailLogueado = auth.getName();
+
+        PerfilCuidadorEntity perfil = repository.findAll().stream()
+            .filter(p -> p.getUsuario().getEmail().equals(emailLogueado))
+            .findFirst()
+            .orElseThrow(() -> new PerfilCuidadorExceptionNotFound("No tienes un perfil de cuidador creado."));
+
+        return PerfilCuidadorMapper.toDTO(perfil);
+    }
 }
