@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
@@ -18,7 +19,6 @@ import dev.andrea.acompaname_backend.solicitud.mappers.SolicitudMapper;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SolicitudServiceImpl implements SolicitudService {
@@ -119,5 +119,4 @@ public class SolicitudServiceImpl implements SolicitudService {
                 .map(SolicitudMapper::toDTO)
                 .collect(Collectors.toList());
     }
-
 }
