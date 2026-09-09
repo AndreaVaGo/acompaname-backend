@@ -12,6 +12,7 @@ import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTORequest;
 import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTOResponse;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionNotFound;
 import dev.andrea.acompaname_backend.valoracion.mappers.ValoracionMapper;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ValoracionServiceImpl implements ValoracionService {
@@ -42,6 +43,7 @@ public class ValoracionServiceImpl implements ValoracionService {
         return ValoracionMapper.toDTO(valoracion);
     }
 
+    @Transactional
     @Override
     public ValoracionDTOResponse storeEntity(ValoracionDTORequest dto) {
         SolicitudEntity solicitud = solicitudRepository.findById(dto.solicitudId())
@@ -52,12 +54,14 @@ public class ValoracionServiceImpl implements ValoracionService {
         return ValoracionMapper.toDTO(valoracionSave);
     }
 
+    @Transactional
     @Override
     public void deleteById(Long id) {
         findEntityById(id);
         repository.deleteById(id);
     }
 
+    @Transactional
     @Override
     public ValoracionDTOResponse update(Long id, ValoracionDTORequest dto) {
         ValoracionEntity valoracionExistente = findEntityById(id);

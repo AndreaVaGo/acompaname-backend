@@ -18,6 +18,7 @@ import dev.andrea.acompaname_backend.solicitud.mappers.SolicitudMapper;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SolicitudServiceImpl implements SolicitudService {
@@ -61,6 +62,7 @@ public class SolicitudServiceImpl implements SolicitudService {
         return SolicitudMapper.toDTO(solicitud);
     }
 
+    @Transactional
     @Override
     public SolicitudDTOResponse storeEntity(SolicitudDTORequest dto) {
         UsuarioEntity familia = usuarioRepository.findById(dto.familiaId())
@@ -75,6 +77,7 @@ public class SolicitudServiceImpl implements SolicitudService {
         return SolicitudMapper.toDTO(solicitudSave);
     }
 
+    @Transactional
     @Override
     public void deleteById(Long id) {
         SolicitudEntity solicitud = findEntityById(id);
@@ -82,6 +85,7 @@ public class SolicitudServiceImpl implements SolicitudService {
         repository.deleteById(id);
     }
 
+    @Transactional
     @Override
     public SolicitudDTOResponse update(Long id, SolicitudDTORequest dto) {
         SolicitudEntity solicitudExistente = findEntityById(id);

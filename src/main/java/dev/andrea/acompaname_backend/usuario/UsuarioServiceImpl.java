@@ -17,6 +17,7 @@ import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionAccesoDe
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionEmailDuplicado;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
 import dev.andrea.acompaname_backend.usuario.mappers.UsuarioMapper;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
@@ -59,10 +60,12 @@ public class UsuarioServiceImpl implements UsuarioService {
         return UsuarioMapper.toDTO(usuario);
     }
 
+    @Transactional
     @Override
     public UsuarioDTOResponse storeEntity(UsuarioDTORequest dto) {
         if (repository.findByEmail(dto.email()).isPresent()) {
-            throw new UsuarioExceptionEmailDuplicado("No ha sido posible completar el registro con los datos proporcionados.");
+            throw new UsuarioExceptionEmailDuplicado(
+                    "No ha sido posible completar el registro con los datos proporcionados.");
         }
         Set<RoleEntity> roles = dto.rolesIds().stream()
                 .map(id -> roleRepository.findById(id).orElseThrow())
@@ -73,6 +76,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         return UsuarioMapper.toDTO(usuarioSaved);
     }
 
+    @Transactional
     @Override
     public void deleteById(Long id) {
         UsuarioEntity usuario = findEntityById(id);
@@ -80,6 +84,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         repository.deleteById(id);
     }
 
+    @Transactional
     @Override
     public UsuarioDTOResponse update(Long id, UsuarioDTORequest dto) {
         UsuarioEntity usuarioExistente = findEntityById(id);
