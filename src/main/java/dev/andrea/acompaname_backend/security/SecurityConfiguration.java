@@ -34,6 +34,7 @@ public class SecurityConfiguration {
                 .formLogin(form -> form.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/usuarios").permitAll()
+                        .requestMatchers("/" + endpoint + "/roles").permitAll()
                         .requestMatchers("/" + endpoint + "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/cuidadores").hasAuthority("CUIDADOR")
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/solicitudes").hasAuthority("FAMILIA")
