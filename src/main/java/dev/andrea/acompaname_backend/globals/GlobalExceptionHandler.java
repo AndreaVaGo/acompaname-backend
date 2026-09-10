@@ -9,10 +9,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;
+import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotFound;
+import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionEmailDuplicado;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
+import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionNotFound;
 
 @RestControllerAdvice
@@ -54,5 +58,26 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UsuarioExceptionEmailDuplicado.class)
     public ResponseEntity<String> handleUsuarioEmailDuplicadoException(UsuarioExceptionEmailDuplicado exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(SolicitudExceptionAccesoDenegado.class)
+    public ResponseEntity<String> handleSolicitudAccesoDenegadoException(SolicitudExceptionAccesoDenegado exception) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(PerfilCuidadorExceptionAccesoDenegado.class)
+    public ResponseEntity<String> handlePerfilCuidadorAccesoDenegadoException(
+            PerfilCuidadorExceptionAccesoDenegado exception) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(UsuarioExceptionAccesoDenegado.class)
+    public ResponseEntity<String> handleUsuarioAccesoDenegadoException(UsuarioExceptionAccesoDenegado exception) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(ValoracionExceptionAccesoDenegado.class)
+    public ResponseEntity<String> handleValoracionAccesoDenegadoException(ValoracionExceptionAccesoDenegado exception) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
     }
 }

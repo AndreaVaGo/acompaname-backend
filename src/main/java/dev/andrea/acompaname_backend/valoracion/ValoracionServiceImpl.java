@@ -16,7 +16,6 @@ import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionAc
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionNotFound;
 import dev.andrea.acompaname_backend.valoracion.mappers.ValoracionMapper;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 @Service
 public class ValoracionServiceImpl implements ValoracionService {
@@ -58,8 +57,7 @@ public class ValoracionServiceImpl implements ValoracionService {
     @Transactional
     @Override
     public ValoracionDTOResponse storeEntity(ValoracionDTORequest dto) {
-        Authentication auth = new UsernamePasswordAuthenticationToken("ana@test.com", null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
+        
         SolicitudEntity solicitud = solicitudRepository.findById(dto.solicitudId())
                 .orElseThrow(() -> new SolicitudExceptionNotFound(
                         "Solicitud no encontrada. Id " + dto.solicitudId() + " no existe."));

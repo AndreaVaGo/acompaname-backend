@@ -17,6 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.role.RoleEntity;
@@ -93,6 +96,9 @@ public class ValoracionServiceImplTest {
 
     @Test
     void testStoreEntity() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("ana@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
         SolicitudEntity solicitud = crearSolicitudMock();
         when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitud));
 
