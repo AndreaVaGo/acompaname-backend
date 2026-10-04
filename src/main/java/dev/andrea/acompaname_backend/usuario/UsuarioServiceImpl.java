@@ -1,5 +1,6 @@
 package dev.andrea.acompaname_backend.usuario;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -9,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
+import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
@@ -24,12 +27,14 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository repository;
     private final RoleRepository roleRepository;
+    private final PerfilCuidadorRepository perfilCuidadorRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UsuarioServiceImpl(UsuarioRepository repository, RoleRepository roleRepository,
-            PasswordEncoder passwordEncoder) {
+            PerfilCuidadorRepository perfilCuidadorRepository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.roleRepository = roleRepository;
+        this.perfilCuidadorRepository = perfilCuidadorRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -73,6 +78,22 @@ public class UsuarioServiceImpl implements UsuarioService {
         UsuarioEntity usuarioToSave = UsuarioMapper.toEntity(dto, roles);
         usuarioToSave.setPassword(passwordEncoder.encode(dto.password()));
         UsuarioEntity usuarioSaved = repository.save(usuarioToSave);
+
+        boolean esCuidador = roles.stream()
+                .anyMatch(role -> role.getName().equals("CUIDADOR"));
+        if (esCuidador) {
+            PerfilCuidadorEntity perfilNuevo = PerfilCuidadorEntity.builder()
+                    .especialidad("")
+                    .anosExperiencia(0)
+                    .tarifaHora(BigDecimal.ZERO)
+                    .bio("")
+                    .tieneVehiculo(false)
+                    .disponibleAhora(false)
+                    .usuario(usuarioSaved)
+                    .build();
+            perfilCuidadorRepository.save(perfilNuevo);
+        }
+
         return UsuarioMapper.toDTO(usuarioSaved);
     }
 
