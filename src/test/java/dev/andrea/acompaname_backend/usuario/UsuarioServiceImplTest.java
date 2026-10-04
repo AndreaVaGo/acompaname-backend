@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
@@ -35,11 +36,13 @@ public class UsuarioServiceImplTest {
     @Mock
     private RoleRepository roleRepository;
     @Mock
+    private PerfilCuidadorRepository perfilCuidadorRepository;
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
-        service = new UsuarioServiceImpl(repository, roleRepository, passwordEncoder);
+        service = new UsuarioServiceImpl(repository, roleRepository, perfilCuidadorRepository, passwordEncoder);
     }
 
     private RoleEntity crearRolMock() {
