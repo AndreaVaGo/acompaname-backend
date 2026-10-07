@@ -359,7 +359,7 @@ Bocetos, wireframes y mockups para móvil, tablet y escritorio. El conjunto comp
 | ![Landing](docs/design/01-landing_escritorio.png) | ![Buscar](docs/design/04-buscar_escritorio.png) | ![Perfil](docs/design/05-perfil-cuidador_escritorio.png) |
 
 - **Figma:** <ENLACE_FIGMA>
-- **Prototipo en Lovable:** <ENLACE_LOVABLE>
+- **Prototipo en Lovable:** https://care-connection-hub-18.lovable.app
 
 ---
 
@@ -435,7 +435,7 @@ Funcionalidades identificadas como **Fase 2**, fuera del alcance del MVP entrega
 | Presentación | [docs/presentacion.pdf](docs/presentacion.pdf) |
 | Tablero JIRA | https://saludosalamanecer-1780468848301.atlassian.net/jira/software/projects/ACOM/boards/34/timeline?rangeMode=MONTHS |
 | Diseño en Figma | <ENLACE_FIGMA> |
-| Prototipo Lovable | <ENLACE_LOVABLE> |
+| Prototipo Lovable | https://care-connection-hub-18.lovable.app |
 
 ---
 
