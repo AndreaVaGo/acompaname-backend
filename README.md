@@ -372,7 +372,10 @@ La planificación y el seguimiento del proyecto se han gestionado en **JIRA** (p
 - 16 tareas técnicas
 - 5 sprints entre agosto y octubre de 2026
 
-🔗 Enlace al tablero de JIRA: <ENLACE_JIRA>
+🔗 Enlace al tablero de JIRA: https://saludosalamanecer-1780468848301.atlassian.net/jira/software/projects/ACOM/boards/34/timeline?rangeMode=MONTHS
+
+![Cronograma de JIRA](docs/jira/jira-cronograma.png)
+
 
 ---
 
@@ -428,7 +431,7 @@ Funcionalidades identificadas como **Fase 2**, fuera del alcance del MVP entrega
 | Repositorio Backend | [github.com/AndreaVaGo/acompaname-backend](https://github.com/AndreaVaGo/acompaname-backend) |
 | Repositorio Frontend | [github.com/AndreaVaGo/acompaname-frontend](https://github.com/AndreaVaGo/acompaname-frontend) |
 | Presentación | <ENLACE_PRESENTACION> |
-| Tablero JIRA | <ENLACE_JIRA> |
+| Tablero JIRA | https://saludosalamanecer-1780468848301.atlassian.net/jira/software/projects/ACOM/boards/34/timeline?rangeMode=MONTHS |
 | Diseño en Figma | <ENLACE_FIGMA> |
 | Prototipo Lovable | <ENLACE_LOVABLE> |
 
