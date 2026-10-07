@@ -381,6 +381,8 @@ La planificación y el seguimiento del proyecto se han gestionado en **JIRA** (p
 
 ## 🧭 Decisiones técnicas
 
+📄 Documento completo con el proceso y los problemas encontrados: [docs/decisiones-tecnicas.pdf](docs/decisiones-tecnicas.pdf)
+
 Documentar el porqué de las decisiones, no solo el qué, para dejar constancia del proceso de desarrollo:
 
 | Decisión | Motivo |
