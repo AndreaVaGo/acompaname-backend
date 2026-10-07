@@ -314,7 +314,7 @@ El backend implementa autenticación y autorización mediante **Spring Security*
 
 ## 🧪 Testing
 
-El proyecto cuenta con unos **44 tests** que cubren la lógica de negocio, la capa de exposición HTTP y la integración con base de datos real:
+El proyecto cuenta con **43 tests** que cubren la lógica de negocio, la capa de exposición HTTP y la integración con base de datos real:
 
 - **Tests unitarios de Service** (`Mockito`): cada `ServiceImpl` está testeado de forma aislada, mockeando sus repositorios.
 - **Tests de Controller** (`MockMvc` + `@WebMvcTest`): verifican que cada endpoint responde con el código de estado y el cuerpo JSON esperados.
