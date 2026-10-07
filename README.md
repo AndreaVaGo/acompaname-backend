@@ -432,7 +432,7 @@ Funcionalidades identificadas como **Fase 2**, fuera del alcance del MVP entrega
 |---|---|
 | Repositorio Backend | [github.com/AndreaVaGo/acompaname-backend](https://github.com/AndreaVaGo/acompaname-backend) |
 | Repositorio Frontend | [github.com/AndreaVaGo/acompaname-frontend](https://github.com/AndreaVaGo/acompaname-frontend) |
-| Presentación | <ENLACE_PRESENTACION> |
+| Presentación | [docs/presentacion.pdf](docs/presentacion.pdf) |
 | Tablero JIRA | https://saludosalamanecer-1780468848301.atlassian.net/jira/software/projects/ACOM/boards/34/timeline?rangeMode=MONTHS |
 | Diseño en Figma | <ENLACE_FIGMA> |
 | Prototipo Lovable | <ENLACE_LOVABLE> |
