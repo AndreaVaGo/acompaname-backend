@@ -66,6 +66,10 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
         UsuarioEntity usuario = usuarioRepository.findById(dto.usuarioId())
                 .orElseThrow(() -> new UsuarioExceptionNotFound(
                         "Usuario no encontrado. Id " + dto.usuarioId() + " no existe."));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!usuario.getEmail().equals(auth.getName())) {
+            throw new PerfilCuidadorExceptionAccesoDenegado("No puede crear un perfil para otro usuario");
+        }
         PerfilCuidadorEntity perfilToSave = PerfilCuidadorMapper.toEntity(dto, usuario);
         PerfilCuidadorEntity perfilSaved = repository.save(perfilToSave);
         return PerfilCuidadorMapper.toDTO(perfilSaved);
