@@ -6,7 +6,7 @@ Este repositorio contiene la **API REST** del proyecto, desarrollada con **Sprin
 
 Proyecto final del bootcamp de Desarrollo Web Full Stack (850h) en **Factoría F5 — Digital Academy**.
 
-![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-64-success)
+![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-94-success)
 
 ---
 
@@ -314,7 +314,7 @@ El backend implementa autenticación y autorización mediante **Spring Security*
 
 ## 🧪 Testing
 
-El proyecto cuenta con **64 tests** que cubren la lógica de negocio, la capa de exposición HTTP y la integración con base de datos real:
+El proyecto cuenta con **94 tests** que cubren la lógica de negocio, la capa de exposición HTTP y la integración con base de datos real:
 
 - **Tests unitarios de Service** (`Mockito`): cada `ServiceImpl` está testeado de forma aislada, mockeando sus repositorios.
 - **Tests de Controller** (`MockMvc` + `@WebMvcTest`): verifican que cada endpoint responde con el código de estado y el cuerpo JSON esperados.
@@ -326,7 +326,14 @@ El proyecto cuenta con **64 tests** que cubren la lógica de negocio, la capa de
 
 ![Resultado de los tests del backend](docs/screenshots/tests-backend.png)
 
-Los tests del módulo `Pago` cubren también los casos de error: un pago o una solicitud que no existen (404) y un pago sin importe o sin solicitud (400).
+Además de los casos normales, hay tests pensados para los **casos límite y de seguridad**:
+
+- **404:** pedir, editar o borrar algo que no existe (pagos, solicitudes, usuarios, perfiles y valoraciones).
+- **403:** que un usuario no pueda ver, editar ni borrar las solicitudes, el perfil, los datos o las valoraciones de otra persona. Se comprueba también que en esos casos no se guarda ni se borra nada.
+- **409:** registrar dos veces el mismo email.
+- **400:** enviar un pago sin importe o sin solicitud.
+
+Al escribir estos tests encontré dos fallos reales y los arreglé: un pago que no existía devolvía error 500 en vez de 404, y cualquier usuario podía editar o borrar la valoración de otra persona.
 
 ---
 
