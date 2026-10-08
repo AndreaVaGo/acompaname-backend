@@ -53,7 +53,9 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public List<UsuarioDTOResponse> getEntities() {
-        return repository.findAll().stream()
+        // Cada usuario solo ve sus propios datos, no los de los demás
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return repository.findByEmail(auth.getName()).stream()
                 .map(UsuarioMapper::toDTO)
                 .collect(Collectors.toList());
     }
