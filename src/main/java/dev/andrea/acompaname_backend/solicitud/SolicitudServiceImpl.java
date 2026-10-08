@@ -48,6 +48,15 @@ public class SolicitudServiceImpl implements SolicitudService {
         }
     }
 
+    // Solo el cuidador de la solicitud puede aceptarla, rechazarla o completarla
+    private void verificarCuidador(SolicitudEntity solicitud) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String emailLogueado = auth.getName();
+        if (!solicitud.getCuidador().getUsuario().getEmail().equals(emailLogueado)) {
+            throw new SolicitudExceptionAccesoDenegado("Solo el cuidador de la solicitud puede cambiar su estado");
+        }
+    }
+
     @Override
     public List<SolicitudDTOResponse> getEntities() {
         // Cada usuario solo ve sus solicitudes, no las de los demás
@@ -106,7 +115,7 @@ public class SolicitudServiceImpl implements SolicitudService {
     @Override
     public SolicitudDTOResponse cambiarEstado(Long id, EstadoSolicitud nuevoEstado) {
         SolicitudEntity solicitud = findEntityById(id);
-        verificarPropietario(solicitud);
+        verificarCuidador(solicitud);
         solicitud.setEstado(nuevoEstado);
         SolicitudEntity solicitudActualizada = repository.save(solicitud);
         return SolicitudMapper.toDTO(solicitudActualizada);
