@@ -75,7 +75,8 @@ public class UsuarioServiceImpl implements UsuarioService {
                     "No ha sido posible completar el registro con los datos proporcionados.");
         }
         Set<RoleEntity> roles = dto.rolesIds().stream()
-                .map(id -> roleRepository.findById(id).orElseThrow())
+                .map(id -> roleRepository.findById(id).orElseThrow(
+                        () -> new UsuarioExceptionNotFound("Rol no encontrado. Id " + id + " no existe.")))
                 .collect(Collectors.toSet());
         UsuarioEntity usuarioToSave = UsuarioMapper.toEntity(dto, roles);
         usuarioToSave.setPassword(passwordEncoder.encode(dto.password()));
@@ -117,7 +118,8 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioExistente.setTelefono(dto.telefono());
         usuarioExistente.setPassword(passwordEncoder.encode(dto.password()));
         Set<RoleEntity> roles = dto.rolesIds().stream()
-                .map(rId -> roleRepository.findById(rId).orElseThrow())
+                .map(rId -> roleRepository.findById(rId).orElseThrow(
+                        () -> new UsuarioExceptionNotFound("Rol no encontrado. Id " + rId + " no existe.")))
                 .collect(Collectors.toSet());
         usuarioExistente.setRoles(roles);
         UsuarioEntity usuarioActualizado = repository.save(usuarioExistente);
