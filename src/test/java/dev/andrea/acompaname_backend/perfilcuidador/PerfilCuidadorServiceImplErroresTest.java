@@ -122,6 +122,16 @@ public class PerfilCuidadorServiceImplErroresTest {
     }
 
     @Test
+    void testNoSePuedeCrearUnPerfilParaOtroUsuario() {
+        loguearComo("intruso@test.com");
+        when(repository.findAll()).thenReturn(List.of());
+        when(usuarioRepository.findById(2L)).thenReturn(Optional.of(pepe()));
+
+        assertThrows(PerfilCuidadorExceptionAccesoDenegado.class, () -> service.storeEntity(dtoCualquiera(2L)));
+        verify(repository, never()).save(Mockito.any(PerfilCuidadorEntity.class));
+    }
+
+    @Test
     void testMiPerfilDevuelveElMio() {
         loguearComo("pepe@test.com");
         when(repository.findAll()).thenReturn(List.of(perfilDePepe()));
