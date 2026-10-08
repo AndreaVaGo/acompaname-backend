@@ -75,6 +75,8 @@ public class PerfilCuidadorServiceImplTest {
 
     @Test
     void testStorePerfilCuidador() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
         UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
                 Set.of(crearRolMock()));
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
