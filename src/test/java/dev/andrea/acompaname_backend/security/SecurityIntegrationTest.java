@@ -53,4 +53,48 @@ public class SecurityIntegrationTest {
                 .with(csrf()))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    @WithAnonymousUser
+    void testListadoDeCuidadoresEsPublico() throws Exception {
+        mockMvc.perform(get("/api/v1/cuidadores"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void testPerfilDeCuidadorEsPublico() throws Exception {
+        mockMvc.perform(get("/api/v1/cuidadores/999999"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void testMiPerfilDeCuidadorNoEsPublico() throws Exception {
+        mockMvc.perform(get("/api/v1/cuidadores/mi-perfil"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void testSolicitudesSinLoginDa401() throws Exception {
+        mockMvc.perform(get("/api/v1/solicitudes/mis-solicitudes"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void testPagosSinLoginDa401() throws Exception {
+        mockMvc.perform(get("/api/v1/pagos"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void testCrearSolicitudSinLoginDa401() throws Exception {
+        mockMvc.perform(post("/api/v1/solicitudes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+                .andExpect(status().isUnauthorized());
+    }
 }
