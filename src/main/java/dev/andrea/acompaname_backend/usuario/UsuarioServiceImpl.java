@@ -113,6 +113,11 @@ public class UsuarioServiceImpl implements UsuarioService {
     public UsuarioDTOResponse update(Long id, UsuarioDTORequest dto) {
         UsuarioEntity usuarioExistente = findEntityById(id);
         verificarPropietario(usuarioExistente);
+        boolean cambiaDeEmail = !usuarioExistente.getEmail().equals(dto.email());
+        if (cambiaDeEmail && repository.findByEmail(dto.email()).isPresent()) {
+            throw new UsuarioExceptionEmailDuplicado(
+                    "No ha sido posible completar la actualización con los datos proporcionados.");
+        }
         usuarioExistente.setNombre(dto.nombre());
         usuarioExistente.setEmail(dto.email());
         usuarioExistente.setTelefono(dto.telefono());
