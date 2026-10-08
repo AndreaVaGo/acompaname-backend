@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -133,6 +134,16 @@ public class SolicitudControllerTest {
                 assertThat(response.getStatus(), is(equalTo(400)));
                 assertThat(response.getContentAsString(),
                                 containsString("La fecha del cuidado no puede estar en el pasado"));
+        }
+
+        @Test
+        void testCambiarEstadoSinEstado() throws Exception {
+                MockHttpServletResponse response = mockMvc.perform(patch("/api/v1/solicitudes/1/estado")
+                                .contentType(MediaType.APPLICATION_JSON).content("{}"))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(400)));
+                assertThat(response.getContentAsString(), containsString("El estado no puede ser nulo"));
         }
 
         @Test
