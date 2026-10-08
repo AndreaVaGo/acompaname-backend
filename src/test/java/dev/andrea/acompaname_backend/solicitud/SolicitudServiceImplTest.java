@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import dev.andrea.acompaname_backend.pago.PagoRepository;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
@@ -39,10 +40,13 @@ public class SolicitudServiceImplTest {
         private UsuarioRepository usuarioRepository;
         @Mock
         private PerfilCuidadorRepository perfilCuidadorRepository;
+        @Mock
+        private PagoRepository pagoRepository;
 
         @BeforeEach
         void setup() {
-                service = new SolicitudServiceImpl(repository, usuarioRepository, perfilCuidadorRepository);
+                service = new SolicitudServiceImpl(repository, usuarioRepository, perfilCuidadorRepository,
+                                pagoRepository);
         }
 
         private RoleEntity rolFamilia() {
