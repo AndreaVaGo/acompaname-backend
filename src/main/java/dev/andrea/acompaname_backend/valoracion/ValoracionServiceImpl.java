@@ -7,12 +7,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import dev.andrea.acompaname_backend.solicitud.EstadoSolicitud;
 import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
 import dev.andrea.acompaname_backend.solicitud.SolicitudRepository;
 import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTORequest;
 import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTOResponse;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionConflicto;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionNotFound;
 import dev.andrea.acompaname_backend.valoracion.mappers.ValoracionMapper;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +64,12 @@ public class ValoracionServiceImpl implements ValoracionService {
                 .orElseThrow(() -> new SolicitudExceptionNotFound(
                         "Solicitud no encontrada. Id " + dto.solicitudId() + " no existe."));
         verificarPropietario(solicitud);
+        if (solicitud.getEstado() != EstadoSolicitud.COMPLETADA) {
+            throw new ValoracionExceptionConflicto("Solo se puede valorar un servicio completado");
+        }
+        if (repository.existsBySolicitudId(dto.solicitudId())) {
+            throw new ValoracionExceptionConflicto("Esta solicitud ya tiene una valoración");
+        }
         ValoracionEntity valoracionToSave = ValoracionMapper.toEntity(dto, solicitud);
         ValoracionEntity valoracionSave = repository.save(valoracionToSave);
         return ValoracionMapper.toDTO(valoracionSave);
