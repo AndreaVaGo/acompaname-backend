@@ -30,6 +30,7 @@ import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotF
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTORequest;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionConflicto;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionNotFound;
 
 // Tests de los casos de error y de seguridad de ValoracionServiceImpl:
@@ -112,6 +113,27 @@ public class ValoracionServiceImplErroresTest {
 
         assertThrows(ValoracionExceptionAccesoDenegado.class,
                 () -> service.storeEntity(new ValoracionDTORequest("Bien", 5, LocalDate.of(2026, 9, 12), 1L)));
+        verify(repository, never()).save(Mockito.any(ValoracionEntity.class));
+    }
+
+    @Test
+    void testNoSePuedeValorarUnServicioQueNoEstaCompletado() {
+        loguearComo("ana@test.com");
+        SolicitudEntity solicitud = solicitudAnaPepe();
+        solicitud.setEstado(EstadoSolicitud.PENDIENTE);
+        when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitud));
+
+        assertThrows(ValoracionExceptionConflicto.class, () -> service.storeEntity(dtoCualquiera()));
+        verify(repository, never()).save(Mockito.any(ValoracionEntity.class));
+    }
+
+    @Test
+    void testNoSePuedeValorarDosVecesLaMismaSolicitud() {
+        loguearComo("ana@test.com");
+        when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitudAnaPepe()));
+        when(repository.existsBySolicitudId(1L)).thenReturn(true);
+
+        assertThrows(ValoracionExceptionConflicto.class, () -> service.storeEntity(dtoCualquiera()));
         verify(repository, never()).save(Mockito.any(ValoracionEntity.class));
     }
 
