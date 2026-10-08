@@ -79,7 +79,7 @@ public class SolicitudControllerTest {
         @Test
         void testStore() throws Exception {
                 SolicitudDTORequest dto = new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", 80,
-                                LocalDate.of(2026, 9, 10), 1L, 1L);
+                                LocalDate.now().plusDays(7), 1L, 1L);
                 SolicitudDTOResponse dtoResponse = new SolicitudDTOResponse(1L, "Acompañamiento", "Manuel", "Sin notas",
                                 80,
                                 LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, 1L, 1L, "Ana", "Pepe");
@@ -93,6 +93,46 @@ public class SolicitudControllerTest {
                 assertThat(response.getStatus(), is(equalTo(201)));
                 assertThat(response.getContentAsString(), is(equalTo(json)));
                 assertThat(response.getContentAsString(), containsString("Acompañamiento"));
+        }
+
+        @Test
+        void testStoreEdadNegativa() throws Exception {
+                SolicitudDTORequest dto = new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", -5,
+                                LocalDate.now().plusDays(7), 1L, 1L);
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/solicitudes")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(400)));
+                assertThat(response.getContentAsString(), containsString("La edad no puede ser negativa"));
+        }
+
+        @Test
+        void testStoreEdadImposible() throws Exception {
+                SolicitudDTORequest dto = new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", 150,
+                                LocalDate.now().plusDays(7), 1L, 1L);
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/solicitudes")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(400)));
+                assertThat(response.getContentAsString(), containsString("La edad no puede superar 120 años"));
+        }
+
+        @Test
+        void testStoreFechaEnElPasado() throws Exception {
+                SolicitudDTORequest dto = new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", 80,
+                                LocalDate.now().minusDays(1), 1L, 1L);
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/solicitudes")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(400)));
+                assertThat(response.getContentAsString(),
+                                containsString("La fecha del cuidado no puede estar en el pasado"));
         }
 
         @Test
