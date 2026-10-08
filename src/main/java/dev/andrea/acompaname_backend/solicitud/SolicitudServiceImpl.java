@@ -72,6 +72,11 @@ public class SolicitudServiceImpl implements SolicitudService {
                 .orElseThrow(() -> new PerfilCuidadorExceptionNotFound(
                         "Perfil de cuidador no encontrado. Id " + dto.cuidadorId() + " no existe."));
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!familia.getEmail().equals(auth.getName())) {
+            throw new SolicitudExceptionAccesoDenegado("No puede crear solicitudes en nombre de otra familia");
+        }
+
         SolicitudEntity solicitudToSave = SolicitudMapper.toEntity(dto, familia, cuidador);
         SolicitudEntity solicitudSave = repository.save(solicitudToSave);
         return SolicitudMapper.toDTO(solicitudSave);
