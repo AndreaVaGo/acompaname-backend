@@ -9,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import dev.andrea.acompaname_backend.pago.exceptions.PagoExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.pago.exceptions.PagoExceptionNotFound;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;
@@ -84,6 +85,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ValoracionExceptionAccesoDenegado.class)
     public ResponseEntity<String> handleValoracionAccesoDenegadoException(ValoracionExceptionAccesoDenegado exception) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(PagoExceptionAccesoDenegado.class)
+    public ResponseEntity<String> handlePagoAccesoDenegadoException(PagoExceptionAccesoDenegado exception) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
     }
 }
