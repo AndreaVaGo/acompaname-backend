@@ -127,4 +127,46 @@ public class PerfilCuidadorControllerTest {
                 assertThat(response.getStatus(), is(equalTo(204)));
                 Mockito.verify(service).deleteById(1L);
         }
+
+        @Test
+        void testStoreBioDemasiadoLarga() throws Exception {
+                PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", 4, new BigDecimal("18.00"),
+                                "a".repeat(1001), true, true, 2L);
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/cuidadores")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(400)));
+                assertThat(response.getContentAsString(), containsString("La biografía no puede superar 1000 caracteres"));
+                Mockito.verifyNoInteractions(service);
+        }
+
+        @Test
+        void testStoreEspecialidadVacia() throws Exception {
+                PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("", 4, new BigDecimal("18.00"),
+                                "Bio", true, true, 2L);
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/cuidadores")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(400)));
+                assertThat(response.getContentAsString(), containsString("La especialidad no puede estar vacío"));
+                Mockito.verifyNoInteractions(service);
+        }
+
+        @Test
+        void testStoreEspecialidadDemasiadoLarga() throws Exception {
+                PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("a".repeat(101), 4, new BigDecimal("18.00"),
+                                "Bio", true, true, 2L);
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/cuidadores")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(400)));
+                assertThat(response.getContentAsString(), containsString("La especialidad no puede superar 100 caracteres"));
+                Mockito.verifyNoInteractions(service);
+        }
 }
