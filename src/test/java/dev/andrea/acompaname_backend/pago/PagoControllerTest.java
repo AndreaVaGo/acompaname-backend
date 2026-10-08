@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import dev.andrea.acompaname_backend.pago.dtos.PagoDTORequest;
 import dev.andrea.acompaname_backend.pago.dtos.PagoDTOResponse;
+import dev.andrea.acompaname_backend.pago.exceptions.PagoExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.pago.exceptions.PagoExceptionNotFound;
 import tools.jackson.databind.ObjectMapper;
 
@@ -209,5 +210,17 @@ public class PagoControllerTest {
                 .getResponse();
 
         assertThat(response.getStatus(), is(equalTo(404)));
+    }
+
+    @Test
+    void testMarcarComoPagadoSinPermiso() throws Exception {
+        when(service.marcarComoPagado(1L))
+                .thenThrow(new PagoExceptionAccesoDenegado("Solo la familia de la solicitud puede pagar"));
+
+        MockHttpServletResponse response = mockMvc.perform(patch("/api/v1/pagos/1/pagar"))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(403)));
     }
 }
