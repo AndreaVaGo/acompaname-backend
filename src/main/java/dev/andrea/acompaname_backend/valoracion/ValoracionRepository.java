@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ValoracionRepository extends JpaRepository<ValoracionEntity, Long> {
 
+    boolean existsBySolicitudId(Long solicitudId);
 
-    
 }
