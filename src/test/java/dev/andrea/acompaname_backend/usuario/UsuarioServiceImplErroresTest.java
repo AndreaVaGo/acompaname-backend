@@ -118,6 +118,24 @@ public class UsuarioServiceImplErroresTest {
     }
 
     @Test
+    void testRegistroConRolQueNoExisteDaNotFoundYNoGuarda() {
+        when(roleRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(UsuarioExceptionNotFound.class, () -> service.storeEntity(dtoAna(99L)));
+        verify(repository, never()).save(Mockito.any(UsuarioEntity.class));
+    }
+
+    @Test
+    void testUpdateConRolQueNoExisteDaNotFoundYNoGuarda() {
+        loguearComo("juan@test.com");
+        when(repository.findById(1L)).thenReturn(Optional.of(juan()));
+        when(roleRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(UsuarioExceptionNotFound.class, () -> service.update(1L, dtoAna(99L)));
+        verify(repository, never()).save(Mockito.any(UsuarioEntity.class));
+    }
+
+    @Test
     void testGetByIdNoExiste() {
         when(repository.findById(99L)).thenReturn(Optional.empty());
 
