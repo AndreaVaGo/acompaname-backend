@@ -132,6 +132,32 @@ public class PagoControllerTest {
     }
 
     @Test
+    void testStoreImporteCero() throws Exception {
+        PagoDTORequest dto = new PagoDTORequest(BigDecimal.ZERO, 1L);
+
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/pagos")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        assertThat(response.getContentAsString(), containsString("El importe debe ser mayor que 0"));
+    }
+
+    @Test
+    void testStoreImporteNegativo() throws Exception {
+        PagoDTORequest dto = new PagoDTORequest(new BigDecimal("-50.00"), 1L);
+
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/pagos")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        assertThat(response.getContentAsString(), containsString("El importe debe ser mayor que 0"));
+    }
+
+    @Test
     void testUpdate() throws Exception {
         PagoDTORequest dto = new PagoDTORequest(new BigDecimal("120.00"), 1L);
         PagoDTOResponse dtoResponse = new PagoDTOResponse(1L, new BigDecimal("120.00"), EstadoPago.PENDIENTE,
