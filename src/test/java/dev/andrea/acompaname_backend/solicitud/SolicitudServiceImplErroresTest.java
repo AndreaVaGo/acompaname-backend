@@ -189,6 +189,17 @@ public class SolicitudServiceImplErroresTest {
     }
 
     @Test
+    void testGetEntitiesSoloDevuelveLasMias() {
+        loguearComo("luis@test.com");
+        when(repository.findAll()).thenReturn(List.of(solicitudAnaPepe(), solicitudLuisMarta()));
+
+        List<SolicitudDTOResponse> mias = service.getEntities();
+
+        assertThat(mias.size(), is(equalTo(1)));
+        assertThat(mias.get(0).tipoCuidado(), is(equalTo("Hospital")));
+    }
+
+    @Test
     void testMisSolicitudesSoloDevuelveLasMias() {
         loguearComo("ana@test.com");
         when(repository.findAll()).thenReturn(List.of(solicitudAnaPepe(), solicitudLuisMarta()));
