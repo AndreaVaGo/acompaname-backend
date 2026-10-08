@@ -327,11 +327,18 @@ El backend implementa autenticación y autorización mediante **Spring Security*
 
 ## 🧪 Testing
 
-El proyecto cuenta con **94 tests** que cubren la lógica de negocio, la capa de exposición HTTP y la integración con base de datos real:
+El proyecto cuenta con **147 tests** que cubren la lógica de negocio, la capa de exposición HTTP, la seguridad y la integración con base de datos real:
 
-- **Tests unitarios de Service** (`Mockito`): cada `ServiceImpl` está testeado de forma aislada, mockeando sus repositorios.
+| Tipo | Tests |
+|---|---|
+| Servicios (unitarios, con Mockito) | 84 |
+| Controladores (MockMvc) | 51 |
+| Integración (Testcontainers + seguridad) | 11 |
+| Arranque de la aplicación | 1 |
+
+- **Tests unitarios de Service** (`Mockito`): cada `ServiceImpl` está testeado de forma aislada, mockeando sus repositorios. Hay una clase para los casos normales y otra para los errores (`...ErroresTest`).
 - **Tests de Controller** (`MockMvc` + `@WebMvcTest`): verifican que cada endpoint responde con el código de estado y el cuerpo JSON esperados.
-- **Tests de integración** (`Testcontainers`): `UsuarioRepositoryIntegrationTest` y `SecurityIntegrationTest` se ejecutan contra un MySQL real en contenedor.
+- **Tests de integración** (`Testcontainers`): `UsuarioRepositoryIntegrationTest` y `SecurityIntegrationTest` se ejecutan contra un MySQL real en contenedor. Este último comprueba las reglas de seguridad con peticiones reales.
 
 ```bash
 ./mvnw test
@@ -345,8 +352,10 @@ Además de los casos normales, hay tests pensados para los **casos límite y de 
 - **403:** que un usuario no pueda ver, editar ni borrar las solicitudes, el perfil, los datos o las valoraciones de otra persona. Se comprueba también que en esos casos no se guarda ni se borra nada.
 - **409:** registrar dos veces el mismo email.
 - **400:** enviar un pago sin importe o sin solicitud.
+- **401:** llamar sin iniciar sesión a rutas privadas (pagos, solicitudes, `mi-perfil`). El listado y el perfil público de los cuidadores sí se pueden ver sin cuenta.
+- **Pago automático:** al aceptar una solicitud se crea el pago pendiente con la tarifa del cuidador, y al rechazarla no se crea ninguno.
 
-Al escribir estos tests encontré dos fallos reales y los arreglé: un pago que no existía devolvía error 500 en vez de 404, y cualquier usuario podía editar o borrar la valoración de otra persona.
+Al escribir estos tests encontré varios fallos reales y los arreglé: un pago que no existía devolvía error 500 en vez de 404, cualquier usuario podía editar o borrar la valoración de otra persona, y aceptar una solicitud no generaba el pago. Además, los errores no controlados ahora se escriben en el log para poder saber qué ha pasado.
 
 ---
 
