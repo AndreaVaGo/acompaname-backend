@@ -9,6 +9,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import dev.andrea.acompaname_backend.pago.exceptions.PagoExceptionNotFound;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionAccesoDenegado;
@@ -52,6 +53,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ValoracionExceptionNotFound.class)
     public ResponseEntity<String> handleValoracionNotFoundException(ValoracionExceptionNotFound exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(PagoExceptionNotFound.class)
+    public ResponseEntity<String> handlePagoNotFoundException(PagoExceptionNotFound exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
     }
 
