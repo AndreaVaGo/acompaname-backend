@@ -64,7 +64,7 @@ public class SolicitudController {
 
     @PatchMapping("{id}/estado")
     public ResponseEntity<SolicitudDTOResponse> cambiarEstado(@PathVariable Long id,
-            @RequestBody CambiarEstadoDTO dto) {
+            @Valid @RequestBody CambiarEstadoDTO dto) {
         SolicitudDTOResponse dtoResponse = service.cambiarEstado(id, dto.estado());
         return ResponseEntity.status(200).body(dtoResponse);
     }
