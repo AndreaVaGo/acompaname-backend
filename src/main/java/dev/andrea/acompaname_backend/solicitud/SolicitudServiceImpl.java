@@ -8,6 +8,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.andrea.acompaname_backend.pago.PagoRepository;
+import dev.andrea.acompaname_backend.pago.dtos.PagoDTORequest;
+import dev.andrea.acompaname_backend.pago.mappers.PagoMapper;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;
@@ -26,12 +29,14 @@ public class SolicitudServiceImpl implements SolicitudService {
     private final SolicitudRepository repository;
     private final UsuarioRepository usuarioRepository;
     private final PerfilCuidadorRepository perfilCuidadorRepository;
+    private final PagoRepository pagoRepository;
 
     public SolicitudServiceImpl(SolicitudRepository repository, UsuarioRepository usuarioRepository,
-            PerfilCuidadorRepository perfilCuidadorRepository) {
+            PerfilCuidadorRepository perfilCuidadorRepository, PagoRepository pagoRepository) {
         this.repository = repository;
         this.usuarioRepository = usuarioRepository;
         this.perfilCuidadorRepository = perfilCuidadorRepository;
+        this.pagoRepository = pagoRepository;
     }
 
     private SolicitudEntity findEntityById(Long id) {
@@ -112,12 +117,20 @@ public class SolicitudServiceImpl implements SolicitudService {
         return SolicitudMapper.toDTO(solicitudActualizada);
     }
 
+    @Transactional
     @Override
     public SolicitudDTOResponse cambiarEstado(Long id, EstadoSolicitud nuevoEstado) {
         SolicitudEntity solicitud = findEntityById(id);
         verificarCuidador(solicitud);
+        boolean seAcepta = nuevoEstado == EstadoSolicitud.ACEPTADA
+                && solicitud.getEstado() != EstadoSolicitud.ACEPTADA;
         solicitud.setEstado(nuevoEstado);
         SolicitudEntity solicitudActualizada = repository.save(solicitud);
+        if (seAcepta && !pagoRepository.existsBySolicitudId(solicitud.getId())) {
+            // Al aceptar la solicitud se genera su pago pendiente, con la tarifa del cuidador
+            PagoDTORequest pago = new PagoDTORequest(solicitud.getCuidador().getTarifaHora(), solicitud.getId());
+            pagoRepository.save(PagoMapper.toEntity(pago, solicitud));
+        }
         return SolicitudMapper.toDTO(solicitudActualizada);
     }
 
