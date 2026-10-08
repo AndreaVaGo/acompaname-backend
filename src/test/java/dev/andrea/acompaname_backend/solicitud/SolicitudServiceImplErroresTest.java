@@ -18,6 +18,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,6 +26,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import dev.andrea.acompaname_backend.pago.EstadoPago;
+import dev.andrea.acompaname_backend.pago.PagoEntity;
+import dev.andrea.acompaname_backend.pago.PagoRepository;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;
@@ -47,6 +51,8 @@ public class SolicitudServiceImplErroresTest {
     private UsuarioRepository usuarioRepository;
     @Mock
     private PerfilCuidadorRepository perfilCuidadorRepository;
+    @Mock
+    private PagoRepository pagoRepository;
 
     private SolicitudServiceImpl service;
     private SecurityContext contextoOriginal;
@@ -57,7 +63,8 @@ public class SolicitudServiceImplErroresTest {
         // para no afectar a los otros tests. Al terminar lo devuelvo.
         contextoOriginal = SecurityContextHolder.getContext();
         SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
-        service = new SolicitudServiceImpl(repository, usuarioRepository, perfilCuidadorRepository);
+        service = new SolicitudServiceImpl(repository, usuarioRepository, perfilCuidadorRepository,
+                pagoRepository);
     }
 
     @AfterEach
@@ -179,6 +186,48 @@ public class SolicitudServiceImplErroresTest {
         SolicitudDTOResponse resultado = service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA);
 
         assertThat(resultado.estado(), is(equalTo(EstadoSolicitud.ACEPTADA)));
+    }
+
+    @Test
+    void testAceptarLaSolicitudGeneraSuPagoPendienteConLaTarifaDelCuidador() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = solicitudAnaPepe();
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
+        when(pagoRepository.existsBySolicitudId(1L)).thenReturn(false);
+
+        service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA);
+
+        ArgumentCaptor<PagoEntity> captor = ArgumentCaptor.forClass(PagoEntity.class);
+        verify(pagoRepository).save(captor.capture());
+        assertThat(captor.getValue().getEstado(), is(equalTo(EstadoPago.PENDIENTE)));
+        assertThat(captor.getValue().getImporte(), is(equalTo(new BigDecimal("18.00"))));
+        assertThat(captor.getValue().getSolicitud().getId(), is(equalTo(1L)));
+    }
+
+    @Test
+    void testAceptarUnaSolicitudQueYaTienePagoNoCreaOtro() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = solicitudAnaPepe();
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
+        when(pagoRepository.existsBySolicitudId(1L)).thenReturn(true);
+
+        service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA);
+
+        verify(pagoRepository, never()).save(Mockito.any(PagoEntity.class));
+    }
+
+    @Test
+    void testRechazarLaSolicitudNoGeneraPago() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = solicitudAnaPepe();
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
+
+        service.cambiarEstado(1L, EstadoSolicitud.RECHAZADA);
+
+        verify(pagoRepository, never()).save(Mockito.any(PagoEntity.class));
     }
 
     @Test
