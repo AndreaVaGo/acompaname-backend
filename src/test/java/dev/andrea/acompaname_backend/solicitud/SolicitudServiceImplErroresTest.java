@@ -160,6 +160,28 @@ public class SolicitudServiceImplErroresTest {
     }
 
     @Test
+    void testLaFamiliaNoPuedeCambiarElEstadoDeSuSolicitud() {
+        loguearComo("ana@test.com");
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitudAnaPepe()));
+
+        assertThrows(SolicitudExceptionAccesoDenegado.class,
+                () -> service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA));
+        verify(repository, never()).save(Mockito.any(SolicitudEntity.class));
+    }
+
+    @Test
+    void testElCuidadorPuedeAceptarLaSolicitud() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = solicitudAnaPepe();
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
+
+        SolicitudDTOResponse resultado = service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA);
+
+        assertThat(resultado.estado(), is(equalTo(EstadoSolicitud.ACEPTADA)));
+    }
+
+    @Test
     void testStoreConFamiliaQueNoExiste() {
         when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
 
