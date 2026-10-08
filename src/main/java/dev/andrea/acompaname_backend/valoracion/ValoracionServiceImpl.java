@@ -37,7 +37,7 @@ public class ValoracionServiceImpl implements ValoracionService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String emailLogueado = auth.getName();
         if (!solicitud.getFamilia().getEmail().equals(emailLogueado)) {
-            throw new ValoracionExceptionAccesoDenegado("No tiene permiso para valorar esta solicitud");
+            throw new ValoracionExceptionAccesoDenegado("No tiene permiso sobre esta valoración");
         }
     }
 
@@ -70,7 +70,8 @@ public class ValoracionServiceImpl implements ValoracionService {
     @Transactional
     @Override
     public void deleteById(Long id) {
-        findEntityById(id);
+        ValoracionEntity valoracion = findEntityById(id);
+        verificarPropietario(valoracion.getSolicitud());
         repository.deleteById(id);
     }
 
@@ -78,6 +79,7 @@ public class ValoracionServiceImpl implements ValoracionService {
     @Override
     public ValoracionDTOResponse update(Long id, ValoracionDTORequest dto) {
         ValoracionEntity valoracionExistente = findEntityById(id);
+        verificarPropietario(valoracionExistente.getSolicitud());
         valoracionExistente.setComentario(dto.comentario());
         valoracionExistente.setPuntuacion(dto.puntuacion());
         valoracionExistente.setFecha(dto.fecha());
