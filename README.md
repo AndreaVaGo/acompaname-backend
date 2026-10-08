@@ -6,7 +6,7 @@ Este repositorio contiene la **API REST** del proyecto, desarrollada con **Sprin
 
 Proyecto final del bootcamp de Desarrollo Web Full Stack (850h) en **Factoría F5 — Digital Academy**.
 
-![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-43-success)
+![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-64-success)
 
 ---
 
@@ -314,7 +314,7 @@ El backend implementa autenticación y autorización mediante **Spring Security*
 
 ## 🧪 Testing
 
-El proyecto cuenta con **43 tests** que cubren la lógica de negocio, la capa de exposición HTTP y la integración con base de datos real:
+El proyecto cuenta con **64 tests** que cubren la lógica de negocio, la capa de exposición HTTP y la integración con base de datos real:
 
 - **Tests unitarios de Service** (`Mockito`): cada `ServiceImpl` está testeado de forma aislada, mockeando sus repositorios.
 - **Tests de Controller** (`MockMvc` + `@WebMvcTest`): verifican que cada endpoint responde con el código de estado y el cuerpo JSON esperados.
@@ -326,7 +326,7 @@ El proyecto cuenta con **43 tests** que cubren la lógica de negocio, la capa de
 
 ![Resultado de los tests del backend](docs/screenshots/tests-backend.png)
 
-> 🔜 **Pendiente:** tests del módulo `Pago`.
+Los tests del módulo `Pago` cubren también los casos de error: un pago o una solicitud que no existen (404) y un pago sin importe o sin solicitud (400).
 
 ---
 
@@ -408,7 +408,7 @@ De forma transparente, estas son las áreas identificadas como pendientes de mej
 
 - **Autenticación mediante Basic Auth**, no JWT. La migración a JWT está prevista como siguiente paso.
 - **Credenciales de desarrollo en el código** (`application.properties` y `docker-compose.yml`). Habría que pasarlas a variables de entorno antes de desplegar.
-- **Pagos simulados:** no hay pasarela de pago real y el módulo `Pago` aún no tiene tests.
+- **Pagos simulados:** no hay pasarela de pago real y el flujo de pago del frontend todavía no está conectado a `PATCH /pagos/{id}/pagar`.
 - **Sin límite de intentos de login** (protección básica frente a fuerza bruta pendiente).
 
 ---
