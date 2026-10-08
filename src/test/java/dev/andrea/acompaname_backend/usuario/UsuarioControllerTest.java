@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
@@ -98,5 +99,72 @@ public class UsuarioControllerTest {
                 .getResponse();
         assertThat(response.getStatus(), is(equalTo(204)));
         Mockito.verify(service).deleteById(1L);
+    }
+
+    @Test
+    void testStoreConEmailInvalidoDevuelve400() throws Exception {
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "esto-no-es-un-email", "600555666", "12345678",
+                Set.of(1L));
+
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/usuarios")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        Mockito.verifyNoInteractions(service);
+    }
+
+    @Test
+    void testStoreConPasswordCortaDevuelve400() throws Exception {
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "1234567", Set.of(1L));
+
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/usuarios")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        Mockito.verifyNoInteractions(service);
+    }
+
+    @Test
+    void testStoreConNombreVacioDevuelve400() throws Exception {
+        UsuarioDTORequest dto = new UsuarioDTORequest("", "ana@test.com", "600555666", "12345678", Set.of(1L));
+
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/usuarios")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        Mockito.verifyNoInteractions(service);
+    }
+
+    @Test
+    void testStoreSinTelefonoDevuelve400() throws Exception {
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "", "12345678", Set.of(1L));
+
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/usuarios")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        Mockito.verifyNoInteractions(service);
+    }
+
+    @Test
+    void testUpdateConDatosInvalidosDevuelve400() throws Exception {
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "esto-no-es-un-email", "600555666", "12345678",
+                Set.of(1L));
+
+        MockHttpServletResponse response = mockMvc.perform(put("/api/v1/usuarios/1")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        Mockito.verifyNoInteractions(service);
     }
 }
