@@ -6,7 +6,7 @@ Este repositorio contiene la **API REST** del proyecto, desarrollada con **Sprin
 
 Proyecto final del bootcamp de Desarrollo Web Full Stack (850h) en **Factoría F5 — Digital Academy**.
 
-![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-94-success)
+![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-147-success)
 
 ---
 
@@ -177,20 +177,33 @@ El sistema gira en torno a **seis entidades principales**:
 
 ## 🔐 Configuración
 
-Los valores de desarrollo local están en `docker-compose.yml` y en `src/main/resources/application.properties`:
+La conexión a la base de datos se lee de variables de entorno. Si no existen, se usan los valores de desarrollo local, así que el proyecto arranca sin configurar nada.
+
+| Variable | Valor por defecto | Para qué sirve |
+|---|---|---|
+| `DB_HOST` | `localhost` | Servidor de la base de datos |
+| `DB_PORT` | `3306` | Puerto |
+| `DB_NAME` | `acompaname_db` | Nombre de la base de datos |
+| `DB_USER` | `acompaname_user` | Usuario |
+| `DB_PASSWORD` | `acompaname_pass` | Contraseña del usuario |
+| `DB_ROOT_PASSWORD` | `root` | Contraseña root (solo la usa Docker Compose) |
+
+Otros ajustes:
 
 | Ajuste | Valor |
 |---|---|
 | Contenedor | `acompaname-mysql` (mysql:8.0) |
-| Base de datos | `acompaname_db` |
-| Usuario / contraseña | `acompaname_user` / `acompaname_pass` |
-| Contraseña root | `root` |
-| Puerto | `3306` |
 | Volumen | `acompaname_data` |
 | Prefijo de la API (`api-endpoint`) | `api/v1` |
 | Origen CORS permitido | `http://localhost:5173` (frontend) |
 
-> ⚠️ Estas credenciales son **solo para desarrollo local**. Antes de desplegar habría que sacarlas a variables de entorno.
+Para usar otros valores, copia `.env.example` como `.env` en la raíz y cámbialos. Docker Compose lo lee solo. El archivo `.env` está en el `.gitignore`, así que no se sube a GitHub.
+
+```bash
+cp .env.example .env
+```
+
+> ⚠️ Los valores por defecto son **solo para desarrollo local**. En un despliegue real hay que definir otras contraseñas en el entorno.
 
 ---
 
@@ -414,8 +427,8 @@ Documentar el porqué de las decisiones, no solo el qué, para dejar constancia 
 De forma transparente, estas son las áreas identificadas como pendientes de mejora en la versión actual:
 
 - **Autenticación mediante Basic Auth**, no JWT. La migración a JWT está prevista como siguiente paso.
-- **Credenciales de desarrollo en el código** (`application.properties` y `docker-compose.yml`). Habría que pasarlas a variables de entorno antes de desplegar.
-- **Pagos simulados:** no hay pasarela de pago real y el flujo de pago del frontend todavía no está conectado a `PATCH /pagos/{id}/pagar`.
+- **Credenciales por defecto de desarrollo:** se pueden cambiar con variables de entorno, pero los valores por defecto siguen en `application.properties` y `docker-compose.yml`.
+- **Pagos simulados:** no hay pasarela de pago real. El pago se crea al aceptar la solicitud y se marca como pagado con `PATCH /pagos/{id}/pagar`.
 - **Sin límite de intentos de login** (protección básica frente a fuerza bruta pendiente).
 
 ---
