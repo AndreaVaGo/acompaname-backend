@@ -19,6 +19,7 @@ import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionAccesoDe
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionEmailDuplicado;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionConflicto;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionNotFound;
 
 @RestControllerAdvice
@@ -91,5 +92,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PagoExceptionAccesoDenegado.class)
     public ResponseEntity<String> handlePagoAccesoDenegadoException(PagoExceptionAccesoDenegado exception) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(ValoracionExceptionConflicto.class)
+    public ResponseEntity<String> handleValoracionConflictoException(ValoracionExceptionConflicto exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
     }
 }
