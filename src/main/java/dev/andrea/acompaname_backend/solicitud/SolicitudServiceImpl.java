@@ -50,9 +50,8 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     @Override
     public List<SolicitudDTOResponse> getEntities() {
-        return repository.findAll().stream()
-                .map(SolicitudMapper::toDTO)
-                .collect(Collectors.toList());
+        // Cada usuario solo ve sus solicitudes, no las de los demás
+        return getMisSolicitudes();
     }
 
     @Override
