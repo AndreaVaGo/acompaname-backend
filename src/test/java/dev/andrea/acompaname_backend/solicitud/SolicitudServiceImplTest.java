@@ -170,7 +170,7 @@ public class SolicitudServiceImplTest {
 
         @Test
         void testCambiarEstado() {
-                Authentication auth = new UsernamePasswordAuthenticationToken("ana@test.com", null);
+                Authentication auth = new UsernamePasswordAuthenticationToken("pepe@test.com", null);
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234",
                                 Set.of(rolFamilia()));
