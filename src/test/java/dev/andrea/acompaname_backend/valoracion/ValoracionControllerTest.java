@@ -92,6 +92,32 @@ public class ValoracionControllerTest {
     }
 
     @Test
+    void testStorePuntuacionMenorQueUno() throws Exception {
+        ValoracionDTORequest dto = new ValoracionDTORequest("Mal", 0, LocalDate.of(2026, 9, 12), 1L);
+
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/valoraciones")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        assertThat(response.getContentAsString(), containsString("La puntuacion minima es 1"));
+    }
+
+    @Test
+    void testStorePuntuacionMayorQueCinco() throws Exception {
+        ValoracionDTORequest dto = new ValoracionDTORequest("Genial", 6, LocalDate.of(2026, 9, 12), 1L);
+
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/valoraciones")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        assertThat(response.getContentAsString(), containsString("La puntuacion maxima es 5"));
+    }
+
+    @Test
     void testDelete() throws Exception {
         MockHttpServletResponse response = mockMvc.perform(delete("/api/v1/valoraciones/1"))
                 .andReturn()
