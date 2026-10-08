@@ -178,6 +178,17 @@ public class SolicitudServiceImplErroresTest {
     }
 
     @Test
+    void testStoreEnNombreDeOtraFamiliaDaAccesoDenegadoYNoGuarda() {
+        loguearComo("intruso@test.com");
+        SolicitudEntity solicitudAna = solicitudAnaPepe();
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(solicitudAna.getFamilia()));
+        when(perfilCuidadorRepository.findById(1L)).thenReturn(Optional.of(solicitudAna.getCuidador()));
+
+        assertThrows(SolicitudExceptionAccesoDenegado.class, () -> service.storeEntity(dtoCualquiera(1L, 1L)));
+        verify(repository, never()).save(Mockito.any(SolicitudEntity.class));
+    }
+
+    @Test
     void testMisSolicitudesSoloDevuelveLasMias() {
         loguearComo("ana@test.com");
         when(repository.findAll()).thenReturn(List.of(solicitudAnaPepe(), solicitudLuisMarta()));
