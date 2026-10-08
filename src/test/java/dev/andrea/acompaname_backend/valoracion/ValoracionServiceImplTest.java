@@ -114,6 +114,9 @@ public class ValoracionServiceImplTest {
 
     @Test
     void testDeleteById() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("ana@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
         SolicitudEntity solicitud = crearSolicitudMock();
         ValoracionEntity valoracionMock = new ValoracionEntity(1L, "Muy buena atención", 5,
                 LocalDate.of(2026, 9, 11), solicitud);
@@ -126,6 +129,9 @@ public class ValoracionServiceImplTest {
 
     @Test
     void testUpdate() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("ana@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
         SolicitudEntity solicitud = crearSolicitudMock();
         ValoracionEntity valoracionExistente = new ValoracionEntity(1L, "Muy buena atención", 5,
                 LocalDate.of(2026, 9, 11), solicitud);
