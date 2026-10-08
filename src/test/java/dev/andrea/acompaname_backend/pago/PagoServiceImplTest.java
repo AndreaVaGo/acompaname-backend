@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import dev.andrea.acompaname_backend.pago.dtos.PagoDTORequest;
 import dev.andrea.acompaname_backend.pago.dtos.PagoDTOResponse;
@@ -42,9 +46,22 @@ public class PagoServiceImplTest {
     @Mock
     private SolicitudRepository solicitudRepository;
 
+    private SecurityContext contextoOriginal;
+
     @BeforeEach
     void setup() {
+        // Guardo el contexto de seguridad que hubiera, entro como Ana (la familia
+        // de los pagos de prueba) y al terminar lo devuelvo.
+        contextoOriginal = SecurityContextHolder.getContext();
+        SecurityContext contexto = SecurityContextHolder.createEmptyContext();
+        contexto.setAuthentication(new UsernamePasswordAuthenticationToken("ana@test.com", null));
+        SecurityContextHolder.setContext(contexto);
         service = new PagoServiceImpl(repository, solicitudRepository);
+    }
+
+    @AfterEach
+    void limpiar() {
+        SecurityContextHolder.setContext(contextoOriginal);
     }
 
     private RoleEntity rolFamilia() {
