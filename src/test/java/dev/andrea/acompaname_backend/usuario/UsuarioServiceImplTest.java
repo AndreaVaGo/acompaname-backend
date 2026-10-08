@@ -3,6 +3,8 @@ package dev.andrea.acompaname_backend.usuario;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -53,18 +55,18 @@ public class UsuarioServiceImplTest {
     }
 
     @Test
-    void testGetEntities() {
+    void testGetEntitiesSoloDevuelveAlUsuarioLogueado() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
         RoleEntity rol = crearRolMock();
-        List<UsuarioEntity> usuariosMock = List.of(
-                new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Set.of(rol)),
-                new UsuarioEntity(2L, "Maria", "maria@test.com", "600333444", "5678", Set.of(rol)));
-        when(repository.findAll()).thenReturn(usuariosMock);
+        UsuarioEntity juan = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234", Set.of(rol));
+        when(repository.findByEmail("juan@test.com")).thenReturn(Optional.of(juan));
 
         List<UsuarioDTOResponse> usuarios = service.getEntities();
 
-        assertThat(usuarios.size(), is(equalTo(2)));
+        assertThat(usuarios.size(), is(equalTo(1)));
         assertThat(usuarios.get(0).nombre(), is(equalTo("Juan")));
-        assertThat(usuarios.get(1).nombre(), is(equalTo("Maria")));
+        verify(repository, never()).findAll();
     }
 
     @Test
