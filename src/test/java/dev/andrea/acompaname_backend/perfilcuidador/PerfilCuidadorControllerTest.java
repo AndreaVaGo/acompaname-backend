@@ -93,6 +93,33 @@ public class PerfilCuidadorControllerTest {
         }
 
         @Test
+        void testStoreAnosExperienciaNegativos() throws Exception {
+                PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", -1, new BigDecimal("18.00"),
+                                "Bio", true, true, 2L);
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/cuidadores")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(400)));
+                assertThat(response.getContentAsString(),
+                                containsString("Los años de experiencia no pueden ser negativos"));
+        }
+
+        @Test
+        void testStoreTarifaNegativa() throws Exception {
+                PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", 4, new BigDecimal("-5.00"),
+                                "Bio", true, true, 2L);
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/cuidadores")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(400)));
+                assertThat(response.getContentAsString(), containsString("La tarifa/hora no puede ser negativa"));
+        }
+
+        @Test
         void testDelete() throws Exception {
                 MockHttpServletResponse response = mockMvc.perform(delete("/api/v1/cuidadores/1"))
                                 .andReturn()
