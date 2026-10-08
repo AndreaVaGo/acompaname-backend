@@ -4,12 +4,12 @@ services:
     container_name: acompaname-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: acompaname_db
-      MYSQL_USER: acompaname_user
-      MYSQL_PASSWORD: acompaname_pass
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-acompaname_db}
+      MYSQL_USER: ${DB_USER:-acompaname_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-acompaname_pass}
     ports:
-      - "3306:3306"
+      - "${DB_PORT:-3306}:3306"
     volumes:
       - acompaname_data:/var/lib/mysql
 
