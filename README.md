@@ -60,7 +60,7 @@ Y a los **cuidadores**:
 | Persistencia | Spring Data JPA / Hibernate |
 | Base de datos | MySQL 8.0 (dockerizada) |
 | Build tool | Maven |
-| Reducción de boilerplate | Lombok |
+| Menos código repetido (getters, setters, constructores) | Lombok |
 | Testing | JUnit 5, Mockito, MockMvc, Testcontainers |
 | Contenerización | Docker / Docker Compose |
 | Control de versiones | Git / GitHub |
@@ -110,7 +110,7 @@ dev.andrea.acompaname_backend
 - **DTO (Data Transfer Object):** las entidades JPA nunca se exponen directamente en la API. Cada recurso tiene su `DTORequest` (datos de entrada, con validación) y `DTOResponse` (datos de salida, sin campos sensibles como la contraseña).
 - **Mapper:** clases estáticas dedicadas a convertir entre `Entity` ↔ `DTO`, manteniendo el resto del código libre de esa lógica de transformación.
 - **Interfaces genéricas:** `InterfaceGenericService<Entity, DTORequest, DTOResponse>` centraliza la firma de los métodos CRUD comunes a las entidades, evitando duplicación de código.
-- **Inyección de dependencias por constructor:** en todos los `Service` y `Controller`, favoreciendo la inmutabilidad y la facilidad de testeo (frente a `@Autowired` en campo).
+- **Inyección de dependencias por constructor:** en todos los `Service` y `Controller`, así las dependencias no se pueden cambiar por error y es más fácil probarlas en los tests (en vez de usar `@Autowired` en el atributo).
 - **Excepciones personalizadas:** cada entidad cuenta con su propia jerarquía de excepciones (`XException` → `XExceptionNotFound`, `XExceptionAccesoDenegado`), capturadas de forma centralizada por un `GlobalExceptionHandler` (`@RestControllerAdvice`) que devuelve respuestas claras y con el código HTTP correcto.
 - **Encapsulación:** todos los campos de las entidades son privados, con acceso exclusivo a través de getters/setters.
 
@@ -319,7 +319,7 @@ El backend implementa autenticación y autorización mediante **Spring Security*
 - **Gestión de usuarios:** `JpaUserDetailsService` propio, que consulta la tabla `usuarios` real (sin usuarios hardcodeados en memoria).
 - **Roles:** cada usuario tiene uno o varios roles (`FAMILIA`, `CUIDADOR`) almacenados en una tabla `roles` con relación `@ManyToMany`.
 - **Autorización por endpoint:** `POST`, `PUT` y `DELETE` de `/cuidadores` solo para `CUIDADOR`; `POST`, `PUT` y `DELETE` de `/solicitudes` solo para `FAMILIA`.
-- **Protección frente a IDOR:** los servicios comprueban que el recurso pertenece al usuario autenticado y lanzan `XExceptionAccesoDenegado` (Usuario, PerfilCuidador, Solicitud y Valoración), por lo que no se pueden leer ni modificar datos ajenos adivinando ids.
+- **Protección de los datos de otros usuarios:** los servicios comprueban que el recurso pertenece al usuario que ha iniciado sesión y lanzan `XExceptionAccesoDenegado` (Usuario, PerfilCuidador, Solicitud y Valoración). Así nadie puede leer ni modificar datos ajenos probando ids.
 - **CORS:** solo se permite el origen `http://localhost:5173`, con los métodos `GET`, `POST`, `PUT`, `DELETE` y `PATCH`.
 - **Rutas públicas:** registro de usuario (`POST /usuarios`), listado de roles (`GET /roles`, lo necesita el formulario de registro) y login (`GET /login`); el resto de rutas requieren autenticación.
 - **Manejo de errores:** respuestas normalizadas y sin exposición de detalles internos (`GlobalExceptionHandler`).
@@ -341,7 +341,7 @@ El proyecto cuenta con **147 tests** que cubren la lógica de negocio, la capa d
 
 - **Tests unitarios de Service** (`Mockito`): cada `ServiceImpl` está testeado de forma aislada, mockeando sus repositorios. Hay una clase para los casos normales y otra para los errores (`...ErroresTest`).
 - **Tests de Controller** (`MockMvc` + `@WebMvcTest`): verifican que cada endpoint responde con el código de estado y el cuerpo JSON esperados.
-- **Tests de integración** (`Testcontainers`): `UsuarioRepositoryIntegrationTest` y `SecurityIntegrationTest` se ejecutan contra un MySQL real en contenedor. Este último comprueba las reglas de seguridad con peticiones reales.
+- **Tests de integración** (`Testcontainers`): `UsuarioRepositoryIntegrationTest` y `SecurityIntegrationTest` se ejecutan contra un MySQL real que Testcontainers arranca en un contenedor de Docker solo mientras dura el test. Este último comprueba las reglas de seguridad con peticiones reales.
 
 ```bash
 ./mvnw test
@@ -434,9 +434,9 @@ Documentar el porqué de las decisiones, no solo el qué, para dejar constancia 
 | **Interfaz genérica `InterfaceGenericService<Entity, DTORequest, DTOResponse>`** | Las entidades comparten las mismas operaciones CRUD; centralizar su firma en una interfaz genérica evita repetir el mismo contrato en cada módulo. |
 | **Excepciones personalizadas por entidad + `GlobalExceptionHandler` centralizado** | Permite devolver códigos HTTP y mensajes claros y específicos (`403`, `404`, `409`...) en lugar de errores genéricos, mejorando la experiencia de quien consume la API. |
 | **Autorización por rol en la creación, edición y borrado** | Refleja la lógica de negocio real: cada rol solo debe poder generar y gestionar el tipo de recurso que le corresponde dentro del flujo de la plataforma. |
-| **Comprobación de propietario en el Service (anti-IDOR)** | Un usuario autenticado solo puede tocar sus propios datos, aunque conozca el id de otro recurso. |
+| **Comprobar en el Service que el recurso es del usuario** | Un usuario autenticado solo puede tocar sus propios datos, aunque conozca el id de otro recurso. |
 | **`ddl-auto=update` en lugar de `create-drop`** | Al trabajar contra una base de datos persistente en Docker (no en memoria), se prioriza no perder datos entre reinicios de la aplicación durante el desarrollo. |
-| **Testcontainers para los tests de integración** | Prueban contra un MySQL real, igual que en ejecución, en lugar de una base de datos en memoria distinta. |
+| **Testcontainers para los tests de integración** | Prueban con un MySQL real, el mismo que usa la aplicación, en vez de una base de datos distinta en memoria. |
 
 ---
 
@@ -447,7 +447,7 @@ De forma transparente, estas son las áreas identificadas como pendientes de mej
 - **Autenticación mediante Basic Auth**, no JWT. La migración a JWT está prevista como siguiente paso.
 - **Credenciales por defecto de desarrollo:** se pueden cambiar con variables de entorno, pero los valores por defecto siguen en `application.properties` y `docker-compose.yml`.
 - **Pagos simulados:** no hay pasarela de pago real. El pago se crea al aceptar la solicitud y se marca como pagado con `PATCH /pagos/{id}/pagar`.
-- **Sin límite de intentos de login** (protección básica frente a fuerza bruta pendiente).
+- **Sin límite de intentos de login** (falta proteger la aplicación de quien pruebe contraseñas una y otra vez).
 
 ---
 
