@@ -168,7 +168,7 @@ El sistema gira en torno a **seis entidades principales**:
    ```
    La API quedará disponible en `http://localhost:8080/api/v1`
 
-4. **Ejecuta los tests** (opcional, pero recomendado; los de integración necesitan Docker arrancado)
+4. **Ejecuta los tests** (opcional, pero recomendado; los de integración necesitan la base de datos del paso 2 arrancada con `docker compose up -d`)
    ```bash
    ./mvnw test
    ```
@@ -345,6 +345,12 @@ El proyecto cuenta con **147 tests** que cubren la lógica de negocio, la capa d
 ```
 
 ![Resultado de los tests del backend](docs/screenshots/tests-backend.png)
+
+### Cobertura
+
+La cobertura se mide con **JaCoCo**. Al ejecutar `./mvnw test` se genera el informe en `target/site/jacoco/index.html`. El resultado actual es de un **90 % de instrucciones** y un **96 % de ramas**, por encima del 70 % mínimo que se pedía.
+
+![Cobertura de los tests del backend](docs/screenshots/cobertura-backend.png)
 
 Además de los casos normales, hay tests pensados para los **casos límite y de seguridad**:
 
