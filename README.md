@@ -168,6 +168,8 @@ El sistema gira en torno a **seis entidades principales**:
    ```
    La API quedará disponible en `http://localhost:8080/api/v1`
 
+   Al arrancar, la aplicación crea sola los roles `FAMILIA` y `CUIDADOR` si no existen (clase `RoleInitializer`). Así el registro funciona desde la primera vez, con una base de datos nueva, sin insertar nada a mano.
+
 4. **Ejecuta los tests** (opcional, pero recomendado; los de integración necesitan la base de datos del paso 2 arrancada con `docker compose up -d`)
    ```bash
    ./mvnw test
@@ -232,8 +234,9 @@ Todos los endpoints tienen como prefijo base: `/api/v1`
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| `POST` | `/roles` | Crear un rol | Público |
-| `GET` | `/roles` | Listar los roles | Autenticado |
+| `GET` | `/roles` | Listar los roles | Público |
+
+Los roles no se crean desde la API: se crean al arrancar la aplicación (`RoleInitializer`).
 
 ### Perfiles de cuidador (`/cuidadores`)
 
@@ -318,7 +321,7 @@ El backend implementa autenticación y autorización mediante **Spring Security*
 - **Autorización por endpoint:** `POST`, `PUT` y `DELETE` de `/cuidadores` solo para `CUIDADOR`; `POST`, `PUT` y `DELETE` de `/solicitudes` solo para `FAMILIA`.
 - **Protección frente a IDOR:** los servicios comprueban que el recurso pertenece al usuario autenticado y lanzan `XExceptionAccesoDenegado` (Usuario, PerfilCuidador, Solicitud y Valoración), por lo que no se pueden leer ni modificar datos ajenos adivinando ids.
 - **CORS:** solo se permite el origen `http://localhost:5173`, con los métodos `GET`, `POST`, `PUT`, `DELETE` y `PATCH`.
-- **Rutas públicas:** registro de usuario (`POST /usuarios`), creación de roles (`POST /roles`) y login (`GET /login`); el resto de rutas requieren autenticación.
+- **Rutas públicas:** registro de usuario (`POST /usuarios`), listado de roles (`GET /roles`, lo necesita el formulario de registro) y login (`GET /login`); el resto de rutas requieren autenticación.
 - **Manejo de errores:** respuestas normalizadas y sin exposición de detalles internos (`GlobalExceptionHandler`).
 
 > 🔜 **Próxima mejora:** migración de Basic Auth a autenticación mediante **JWT** (token de clave simétrica).
