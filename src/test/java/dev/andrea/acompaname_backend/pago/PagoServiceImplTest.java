@@ -130,17 +130,14 @@ public class PagoServiceImplTest {
     void testStoreEntityCreaElPagoComoPendiente() {
         SolicitudEntity solicitud = crearSolicitudMock();
         when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitud));
-        when(repository.save(Mockito.any(PagoEntity.class))).thenAnswer(invocation -> {
-            PagoEntity pago = invocation.getArgument(0);
-            pago.setId(1L);
-            return pago;
-        });
+        when(repository.save(Mockito.any(PagoEntity.class))).thenReturn(crearPagoMock(EstadoPago.PENDIENTE));
 
         PagoDTOResponse pago = service.storeEntity(new PagoDTORequest(new BigDecimal("90.00"), 1L));
 
         assertThat(pago.estado(), is(equalTo(EstadoPago.PENDIENTE)));
         assertThat(pago.importe(), is(equalTo(new BigDecimal("90.00"))));
         assertThat(pago.solicitudId(), is(equalTo(1L)));
+        verify(repository).save(Mockito.any(PagoEntity.class));
     }
 
     @Test
