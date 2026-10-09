@@ -1,8 +1,6 @@
 package dev.andrea.acompaname_backend.role;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -19,15 +17,20 @@ public class RoleInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        Set<String> existentes = repository.findAll().stream()
-                .map(RoleEntity::getName)
-                .collect(Collectors.toSet());
+        List<RoleEntity> existentes = repository.findAll();
 
         for (String nombre : ROLES) {
-            if (!existentes.contains(nombre)) {
-                RoleEntity rol = new RoleEntity();
-                rol.setName(nombre);
-                repository.save(rol);
+            boolean yaExiste = false;
+            for (RoleEntity rol : existentes) {
+                if (rol.getName().equals(nombre)) {
+                    yaExiste = true;
+                }
+            }
+
+            if (!yaExiste) {
+                RoleEntity nuevo = new RoleEntity();
+                nuevo.setName(nombre);
+                repository.save(nuevo);
             }
         }
     }
