@@ -21,7 +21,15 @@ public record PerfilCuidadorDTORequest(
 
         boolean disponibleAhora,
 
-        @NotNull(message = "El usuario id no puede ser nulo") Long usuarioId
+        @NotNull(message = "El usuario id no puede ser nulo") Long usuarioId,
+
+        @Size(max = 500, message = "El enlace de la foto no puede superar 500 caracteres") String foto
 
 ) {
+
+    // Constructor sin foto: el mismo que había antes de añadir este campo
+    public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
+            boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId) {
+        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, null);
+    }
 }
