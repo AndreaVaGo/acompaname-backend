@@ -109,11 +109,11 @@ dev.andrea.acompaname_backend
 
 **Patrones y principios aplicados:**
 
-- 📦 **DTO (Data Transfer Object):** las entidades JPA nunca se exponen directamente en la API. Cada recurso tiene su <ins>DTORequest</ins> (datos de entrada, con validación) y <ins>DTOResponse</ins> (datos de salida, sin campos sensibles como la contraseña).
-- 🔄 **Mapper:** clases estáticas dedicadas a convertir entre <ins>Entity</ins> ↔ <ins>DTO</ins>, manteniendo el resto del código libre de esa lógica de transformación.
-- 🧬 **Interfaces genéricas:** <ins>InterfaceGenericService&lt;Entity, DTORequest, DTOResponse&gt;</ins> centraliza la firma de los métodos CRUD comunes a las entidades, evitando duplicación de código.
-- 💉 **Inyección de dependencias por constructor:** en todos los <ins>Service</ins> y <ins>Controller</ins>, así las dependencias no se pueden cambiar por error y es más fácil probarlas en los tests (en vez de usar <ins>@Autowired</ins> en el atributo).
-- 🚨 **Excepciones personalizadas:** cada entidad cuenta con su propia jerarquía de excepciones (<ins>XException</ins> → <ins>XExceptionNotFound</ins>, <ins>XExceptionAccesoDenegado</ins>), capturadas de forma centralizada por un <ins>GlobalExceptionHandler</ins> (<ins>@RestControllerAdvice</ins>) que devuelve respuestas claras y con el código HTTP correcto.
+- 📦 **DTO (Data Transfer Object):** las entidades JPA nunca se exponen directamente en la API. Cada recurso tiene su <mark>DTORequest</mark> (datos de entrada, con validación) y <mark>DTOResponse</mark> (datos de salida, sin campos sensibles como la contraseña).
+- 🔄 **Mapper:** clases estáticas dedicadas a convertir entre <mark>Entity</mark> ↔ <mark>DTO</mark>, manteniendo el resto del código libre de esa lógica de transformación.
+- 🧬 **Interfaces genéricas:** <mark>InterfaceGenericService&lt;Entity, DTORequest, DTOResponse&gt;</mark> centraliza la firma de los métodos CRUD comunes a las entidades, evitando duplicación de código.
+- 💉 **Inyección de dependencias por constructor:** en todos los <mark>Service</mark> y <mark>Controller</mark>, así las dependencias no se pueden cambiar por error y es más fácil probarlas en los tests (en vez de usar <mark>@Autowired</mark> en el atributo).
+- 🚨 **Excepciones personalizadas:** cada entidad cuenta con su propia jerarquía de excepciones (<mark>XException</mark> → <mark>XExceptionNotFound</mark>, <mark>XExceptionAccesoDenegado</mark>), capturadas de forma centralizada por un <mark>GlobalExceptionHandler</mark> (<mark>@RestControllerAdvice</mark>) que devuelve respuestas claras y con el código HTTP correcto.
 - 🔒 **Encapsulación:** todos los campos de las entidades son privados, con acceso exclusivo a través de getters/setters.
 
 ---
@@ -124,12 +124,12 @@ El sistema gira en torno a **seis entidades principales**:
 
 | Entidad | Descripción |
 |---|---|
-| 👤 <ins>UsuarioEntity</ins> | Usuario del sistema (familia o cuidador). Relación <ins>@ManyToMany</ins> con <ins>RoleEntity</ins>. |
-| 🎭 <ins>RoleEntity</ins> | Rol del usuario (<ins>FAMILIA</ins> / <ins>CUIDADOR</ins>). |
-| 🧑‍⚕️ <ins>PerfilCuidadorEntity</ins> | Perfil profesional de un cuidador. Relación <ins>@OneToOne</ins> con <ins>UsuarioEntity</ins>. |
-| 📋 <ins>SolicitudEntity</ins> | Solicitud de servicio de una familia a un cuidador. Relaciones <ins>@ManyToOne</ins> con <ins>UsuarioEntity</ins> (familia) y <ins>PerfilCuidadorEntity</ins> (cuidador). |
-| ⭐ <ins>ValoracionEntity</ins> | Valoración de una solicitud completada. Relación <ins>@OneToOne</ins> con <ins>SolicitudEntity</ins>. |
-| 💳 <ins>PagoEntity</ins> | Pago de una solicitud (<ins>PENDIENTE</ins>, <ins>COMPLETADO</ins>, <ins>CANCELADO</ins>). Relación <ins>@OneToOne</ins> con <ins>SolicitudEntity</ins>. |
+| 👤 <mark>UsuarioEntity</mark> | Usuario del sistema (familia o cuidador). Relación <mark>@ManyToMany</mark> con <mark>RoleEntity</mark>. |
+| 🎭 <mark>RoleEntity</mark> | Rol del usuario (<mark>FAMILIA</mark> / <mark>CUIDADOR</mark>). |
+| 🧑‍⚕️ <mark>PerfilCuidadorEntity</mark> | Perfil profesional de un cuidador. Relación <mark>@OneToOne</mark> con <mark>UsuarioEntity</mark>. |
+| 📋 <mark>SolicitudEntity</mark> | Solicitud de servicio de una familia a un cuidador. Relaciones <mark>@ManyToOne</mark> con <mark>UsuarioEntity</mark> (familia) y <mark>PerfilCuidadorEntity</mark> (cuidador). |
+| ⭐ <mark>ValoracionEntity</mark> | Valoración de una solicitud completada. Relación <mark>@OneToOne</mark> con <mark>SolicitudEntity</mark>. |
+| 💳 <mark>PagoEntity</mark> | Pago de una solicitud (<mark>PENDIENTE</mark>, <mark>COMPLETADO</mark>, <mark>CANCELADO</mark>). Relación <mark>@OneToOne</mark> con <mark>SolicitudEntity</mark>. |
 
 ### Diagrama Entidad-Relación
 
@@ -146,7 +146,7 @@ El sistema gira en torno a **seis entidades principales**:
 ### Requisitos previos
 
 - Java 21
-- Maven (o usar el wrapper <ins>./mvnw</ins> incluido)
+- Maven (o usar el wrapper <mark>./mvnw</mark> incluido)
 - Docker y Docker Compose
 - Git
 
@@ -165,17 +165,17 @@ El sistema gira en torno a **seis entidades principales**:
    ```bash
    docker compose up -d
    ```
-   Esto crea un contenedor MySQL (<ins>acompaname-mysql</ins>) con la base de datos <ins>acompaname_db</ins>, disponible en el puerto <ins>3306</ins>.
+   Esto crea un contenedor MySQL (<mark>acompaname-mysql</mark>) con la base de datos <mark>acompaname_db</mark>, disponible en el puerto <mark>3306</mark>.
 
 3. **Arranca la aplicación**
    ```bash
    ./mvnw spring-boot:run
    ```
-   La API quedará disponible en <ins>http://localhost:8080/api/v1</ins>
+   La API quedará disponible en <mark>http://localhost:8080/api/v1</mark>
 
-   Al arrancar, la aplicación crea sola los roles <ins>FAMILIA</ins> y <ins>CUIDADOR</ins> si no existen (clase <ins>RoleInitializer</ins>). Así el registro funciona desde la primera vez, con una base de datos nueva, sin insertar nada a mano.
+   Al arrancar, la aplicación crea sola los roles <mark>FAMILIA</mark> y <mark>CUIDADOR</mark> si no existen (clase <mark>RoleInitializer</mark>). Así el registro funciona desde la primera vez, con una base de datos nueva, sin insertar nada a mano.
 
-4. **Ejecuta los tests** (opcional, pero recomendado; los de integración necesitan la base de datos del paso 2 arrancada con <ins>docker compose up -d</ins>)
+4. **Ejecuta los tests** (opcional, pero recomendado; los de integración necesitan la base de datos del paso 2 arrancada con <mark>docker compose up -d</mark>)
    ```bash
    ./mvnw test
    ```
@@ -188,24 +188,24 @@ La conexión a la base de datos se lee de variables de entorno. Si no existen, s
 
 | Variable | Valor por defecto | Para qué sirve |
 |---|---|---|
-| <ins>DB_HOST</ins> | <ins>localhost</ins> | Servidor de la base de datos |
-| <ins>DB_PORT</ins> | <ins>3306</ins> | Puerto |
-| <ins>DB_NAME</ins> | <ins>acompaname_db</ins> | Nombre de la base de datos |
-| <ins>DB_USER</ins> | <ins>acompaname_user</ins> | Usuario |
-| <ins>DB_PASSWORD</ins> | <ins>acompaname_pass</ins> | Contraseña del usuario |
-| <ins>DB_ROOT_PASSWORD</ins> | <ins>root</ins> | Contraseña root (solo la usa Docker Compose) |
+| <mark>DB_HOST</mark> | <mark>localhost</mark> | Servidor de la base de datos |
+| <mark>DB_PORT</mark> | <mark>3306</mark> | Puerto |
+| <mark>DB_NAME</mark> | <mark>acompaname_db</mark> | Nombre de la base de datos |
+| <mark>DB_USER</mark> | <mark>acompaname_user</mark> | Usuario |
+| <mark>DB_PASSWORD</mark> | <mark>acompaname_pass</mark> | Contraseña del usuario |
+| <mark>DB_ROOT_PASSWORD</mark> | <mark>root</mark> | Contraseña root (solo la usa Docker Compose) |
 
 Otros ajustes:
 
 | Ajuste | Valor |
 |---|---|
-| Contenedor | <ins>acompaname-mysql</ins> (mysql:8.0) |
-| Volumen | <ins>acompaname_data</ins> |
-| Prefijo de la API (<ins>api-endpoint</ins>) | <ins>api/v1</ins> |
-| Origen CORS permitido | <ins>http://localhost:5173</ins> (frontend) |
+| Contenedor | <mark>acompaname-mysql</mark> (mysql:8.0) |
+| Volumen | <mark>acompaname_data</mark> |
+| Prefijo de la API (<mark>api-endpoint</mark>) | <mark>api/v1</mark> |
+| Origen CORS permitido | <mark>http://localhost:5173</mark> (frontend) |
 
 > [!TIP]
-> Para usar otros valores, copia <ins>.env.example</ins> como <ins>.env</ins> en la raíz y cámbialos. Docker Compose lo lee solo. El archivo <ins>.env</ins> está en el <ins>.gitignore</ins>, así que no se sube a GitHub.
+> Para usar otros valores, copia <mark>.env.example</mark> como <mark>.env</mark> en la raíz y cámbialos. Docker Compose lo lee solo. El archivo <mark>.env</mark> está en el <mark>.gitignore</mark>, así que no se sube a GitHub.
 
 ```bash
 cp .env.example .env
@@ -218,10 +218,10 @@ cp .env.example .env
 
 ## 📡 Endpoints de la API
 
-Todos los endpoints tienen como prefijo base: <ins>/api/v1</ins>
+Todos los endpoints tienen como prefijo base: <mark>/api/v1</mark>
 
 > [!TIP]
-> **Leyenda de métodos:** 🟢 <ins>GET</ins> leer · 🟠 <ins>POST</ins> crear · 🔵 <ins>PUT</ins> actualizar · 🟣 <ins>PATCH</ins> cambiar un dato · 🔴 <ins>DELETE</ins> borrar.
+> **Leyenda de métodos:** 🟢 <mark>GET</mark> leer · 🟠 <mark>POST</mark> crear · 🔵 <mark>PUT</mark> actualizar · 🟣 <mark>PATCH</mark> cambiar un dato · 🔴 <mark>DELETE</mark> borrar.
 >
 > **Leyenda de acceso:** 🔓 público · 🔒 hay que iniciar sesión · 🧑‍⚕️ solo cuidadores · 👨‍👩‍👧 solo familias.
 
@@ -229,70 +229,70 @@ Todos los endpoints tienen como prefijo base: <ins>/api/v1</ins>
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| 🟢 <ins>GET</ins> | <ins>/login</ins> | Inicio de sesión (Basic Auth) | 🔓 Público (requiere credenciales válidas) |
-| 🟢 <ins>GET</ins> | <ins>/logout</ins> | Cierre de sesión | 🔒 Autenticado |
+| 🟢 <mark>GET</mark> | <mark>/login</mark> | Inicio de sesión (Basic Auth) | 🔓 Público (requiere credenciales válidas) |
+| 🟢 <mark>GET</mark> | <mark>/logout</mark> | Cierre de sesión | 🔒 Autenticado |
 
 ### Usuarios (`/usuarios`)
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| 🟠 <ins>POST</ins> | <ins>/usuarios</ins> | Registro de un nuevo usuario | 🔓 Público |
-| 🟢 <ins>GET</ins> | <ins>/usuarios</ins> | Listar todos los usuarios | 🔒 Autenticado |
-| 🟢 <ins>GET</ins> | <ins>/usuarios/{id}</ins> | Obtener un usuario por id | 🔒 Autenticado (propietario) |
-| 🔵 <ins>PUT</ins> | <ins>/usuarios/{id}</ins> | Actualizar un usuario | 🔒 Autenticado (propietario) |
-| 🔴 <ins>DELETE</ins> | <ins>/usuarios/{id}</ins> | Eliminar un usuario | 🔒 Autenticado (propietario) |
+| 🟠 <mark>POST</mark> | <mark>/usuarios</mark> | Registro de un nuevo usuario | 🔓 Público |
+| 🟢 <mark>GET</mark> | <mark>/usuarios</mark> | Listar todos los usuarios | 🔒 Autenticado |
+| 🟢 <mark>GET</mark> | <mark>/usuarios/{id}</mark> | Obtener un usuario por id | 🔒 Autenticado (propietario) |
+| 🔵 <mark>PUT</mark> | <mark>/usuarios/{id}</mark> | Actualizar un usuario | 🔒 Autenticado (propietario) |
+| 🔴 <mark>DELETE</mark> | <mark>/usuarios/{id}</mark> | Eliminar un usuario | 🔒 Autenticado (propietario) |
 
 ### Roles (`/roles`)
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| 🟢 <ins>GET</ins> | <ins>/roles</ins> | Listar los roles | 🔓 Público |
+| 🟢 <mark>GET</mark> | <mark>/roles</mark> | Listar los roles | 🔓 Público |
 
-Los roles no se crean desde la API: se crean al arrancar la aplicación (<ins>RoleInitializer</ins>).
+Los roles no se crean desde la API: se crean al arrancar la aplicación (<mark>RoleInitializer</mark>).
 
 ### Perfiles de cuidador (`/cuidadores`)
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| 🟠 <ins>POST</ins> | <ins>/cuidadores</ins> | Crear perfil de cuidador | 🧑‍⚕️ Rol <ins>CUIDADOR</ins> |
-| 🟢 <ins>GET</ins> | <ins>/cuidadores</ins> | Listar todos los perfiles | 🔓 Público |
-| 🟢 <ins>GET</ins> | <ins>/cuidadores/{id}</ins> | Obtener un perfil por id | 🔓 Público |
-| 🟢 <ins>GET</ins> | <ins>/cuidadores/mi-perfil</ins> | Obtener el perfil del cuidador autenticado | 🔒 Autenticado |
-| 🔵 <ins>PUT</ins> | <ins>/cuidadores/{id}</ins> | Actualizar un perfil | 🧑‍⚕️ Rol <ins>CUIDADOR</ins> (propietario) |
-| 🔴 <ins>DELETE</ins> | <ins>/cuidadores/{id}</ins> | Eliminar un perfil | 🧑‍⚕️ Rol <ins>CUIDADOR</ins> (propietario) |
+| 🟠 <mark>POST</mark> | <mark>/cuidadores</mark> | Crear perfil de cuidador | 🧑‍⚕️ Rol <mark>CUIDADOR</mark> |
+| 🟢 <mark>GET</mark> | <mark>/cuidadores</mark> | Listar todos los perfiles | 🔓 Público |
+| 🟢 <mark>GET</mark> | <mark>/cuidadores/{id}</mark> | Obtener un perfil por id | 🔓 Público |
+| 🟢 <mark>GET</mark> | <mark>/cuidadores/mi-perfil</mark> | Obtener el perfil del cuidador autenticado | 🔒 Autenticado |
+| 🔵 <mark>PUT</mark> | <mark>/cuidadores/{id}</mark> | Actualizar un perfil | 🧑‍⚕️ Rol <mark>CUIDADOR</mark> (propietario) |
+| 🔴 <mark>DELETE</mark> | <mark>/cuidadores/{id}</mark> | Eliminar un perfil | 🧑‍⚕️ Rol <mark>CUIDADOR</mark> (propietario) |
 
 ### Solicitudes (`/solicitudes`)
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| 🟠 <ins>POST</ins> | <ins>/solicitudes</ins> | Crear una solicitud de servicio | 👨‍👩‍👧 Rol <ins>FAMILIA</ins> |
-| 🟢 <ins>GET</ins> | <ins>/solicitudes</ins> | Listar todas las solicitudes | 🔒 Autenticado |
-| 🟢 <ins>GET</ins> | <ins>/solicitudes/{id}</ins> | Obtener una solicitud por id | 🔒 Autenticado |
-| 🟢 <ins>GET</ins> | <ins>/solicitudes/mis-solicitudes</ins> | Solicitudes del usuario autenticado | 🔒 Autenticado |
-| 🔵 <ins>PUT</ins> | <ins>/solicitudes/{id}</ins> | Actualizar una solicitud | 👨‍👩‍👧 Rol <ins>FAMILIA</ins> (propietario) |
-| 🔴 <ins>DELETE</ins> | <ins>/solicitudes/{id}</ins> | Eliminar una solicitud | 👨‍👩‍👧 Rol <ins>FAMILIA</ins> (propietario) |
-| 🟣 <ins>PATCH</ins> | <ins>/solicitudes/{id}/estado</ins> | Cambiar el estado (<ins>PENDIENTE</ins>, <ins>ACEPTADA</ins>, <ins>RECHAZADA</ins>, <ins>COMPLETADA</ins>) | 🔒 Autenticado |
+| 🟠 <mark>POST</mark> | <mark>/solicitudes</mark> | Crear una solicitud de servicio | 👨‍👩‍👧 Rol <mark>FAMILIA</mark> |
+| 🟢 <mark>GET</mark> | <mark>/solicitudes</mark> | Listar todas las solicitudes | 🔒 Autenticado |
+| 🟢 <mark>GET</mark> | <mark>/solicitudes/{id}</mark> | Obtener una solicitud por id | 🔒 Autenticado |
+| 🟢 <mark>GET</mark> | <mark>/solicitudes/mis-solicitudes</mark> | Solicitudes del usuario autenticado | 🔒 Autenticado |
+| 🔵 <mark>PUT</mark> | <mark>/solicitudes/{id}</mark> | Actualizar una solicitud | 👨‍👩‍👧 Rol <mark>FAMILIA</mark> (propietario) |
+| 🔴 <mark>DELETE</mark> | <mark>/solicitudes/{id}</mark> | Eliminar una solicitud | 👨‍👩‍👧 Rol <mark>FAMILIA</mark> (propietario) |
+| 🟣 <mark>PATCH</mark> | <mark>/solicitudes/{id}/estado</mark> | Cambiar el estado (<mark>PENDIENTE</mark>, <mark>ACEPTADA</mark>, <mark>RECHAZADA</mark>, <mark>COMPLETADA</mark>) | 🔒 Autenticado |
 
 ### Valoraciones (`/valoraciones`)
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| 🟠 <ins>POST</ins> | <ins>/valoraciones</ins> | Crear una valoración | 🔒 Autenticado |
-| 🟢 <ins>GET</ins> | <ins>/valoraciones</ins> | Listar todas las valoraciones | 🔒 Autenticado |
-| 🟢 <ins>GET</ins> | <ins>/valoraciones/{id}</ins> | Obtener una valoración por id | 🔒 Autenticado |
-| 🔵 <ins>PUT</ins> | <ins>/valoraciones/{id}</ins> | Actualizar una valoración | 🔒 Autenticado (propietario) |
-| 🔴 <ins>DELETE</ins> | <ins>/valoraciones/{id}</ins> | Eliminar una valoración | 🔒 Autenticado (propietario) |
+| 🟠 <mark>POST</mark> | <mark>/valoraciones</mark> | Crear una valoración | 🔒 Autenticado |
+| 🟢 <mark>GET</mark> | <mark>/valoraciones</mark> | Listar todas las valoraciones | 🔒 Autenticado |
+| 🟢 <mark>GET</mark> | <mark>/valoraciones/{id}</mark> | Obtener una valoración por id | 🔒 Autenticado |
+| 🔵 <mark>PUT</mark> | <mark>/valoraciones/{id}</mark> | Actualizar una valoración | 🔒 Autenticado (propietario) |
+| 🔴 <mark>DELETE</mark> | <mark>/valoraciones/{id}</mark> | Eliminar una valoración | 🔒 Autenticado (propietario) |
 
 ### Pagos (`/pagos`)
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| 🟠 <ins>POST</ins> | <ins>/pagos</ins> | Crear un pago | 🔒 Autenticado |
-| 🟢 <ins>GET</ins> | <ins>/pagos</ins> | Listar todos los pagos | 🔒 Autenticado |
-| 🟢 <ins>GET</ins> | <ins>/pagos/{id}</ins> | Obtener un pago por id | 🔒 Autenticado |
-| 🔵 <ins>PUT</ins> | <ins>/pagos/{id}</ins> | Actualizar un pago | 🔒 Autenticado |
-| 🔴 <ins>DELETE</ins> | <ins>/pagos/{id}</ins> | Eliminar un pago | 🔒 Autenticado |
-| 🟣 <ins>PATCH</ins> | <ins>/pagos/{id}/pagar</ins> | Marcar el pago como completado (simulado) | 🔒 Autenticado |
+| 🟠 <mark>POST</mark> | <mark>/pagos</mark> | Crear un pago | 🔒 Autenticado |
+| 🟢 <mark>GET</mark> | <mark>/pagos</mark> | Listar todos los pagos | 🔒 Autenticado |
+| 🟢 <mark>GET</mark> | <mark>/pagos/{id}</mark> | Obtener un pago por id | 🔒 Autenticado |
+| 🔵 <mark>PUT</mark> | <mark>/pagos/{id}</mark> | Actualizar un pago | 🔒 Autenticado |
+| 🔴 <mark>DELETE</mark> | <mark>/pagos/{id}</mark> | Eliminar un pago | 🔒 Autenticado |
+| 🟣 <mark>PATCH</mark> | <mark>/pagos/{id}/pagar</mark> | Marcar el pago como completado (simulado) | 🔒 Autenticado |
 
 ### Ejemplo de petición — Registro de usuario
 
@@ -309,7 +309,7 @@ Content-Type: application/json
 }
 ```
 
-**Respuesta (<ins>201 Created</ins>):**
+**Respuesta (<mark>201 Created</mark>):**
 ```json
 {
   "id": 1,
@@ -327,14 +327,14 @@ Content-Type: application/json
 El backend implementa autenticación y autorización mediante **Spring Security**:
 
 - 🔑 **Autenticación:** HTTP Basic Auth sobre las credenciales del usuario (email + contraseña).
-- 🔐 **Almacenamiento de contraseñas:** cifradas con <ins>BCryptPasswordEncoder</ins>; nunca se guardan ni se devuelven en texto plano.
-- 👥 **Gestión de usuarios:** <ins>JpaUserDetailsService</ins> propio, que consulta la tabla <ins>usuarios</ins> real (sin usuarios hardcodeados en memoria).
-- 🎭 **Roles:** cada usuario tiene uno o varios roles (<ins>FAMILIA</ins>, <ins>CUIDADOR</ins>) almacenados en una tabla <ins>roles</ins> con relación <ins>@ManyToMany</ins>.
-- 🚦 **Autorización por endpoint:** <ins>POST</ins>, <ins>PUT</ins> y <ins>DELETE</ins> de <ins>/cuidadores</ins> solo para <ins>CUIDADOR</ins>; <ins>POST</ins>, <ins>PUT</ins> y <ins>DELETE</ins> de <ins>/solicitudes</ins> solo para <ins>FAMILIA</ins>.
-- 🛡️ **Protección de los datos de otros usuarios:** los servicios comprueban que el recurso pertenece al usuario que ha iniciado sesión y lanzan <ins>XExceptionAccesoDenegado</ins> (Usuario, PerfilCuidador, Solicitud y Valoración). Así nadie puede leer ni modificar datos ajenos probando ids.
-- 🌐 **CORS:** solo se permite el origen <ins>http://localhost:5173</ins>, con los métodos <ins>GET</ins>, <ins>POST</ins>, <ins>PUT</ins>, <ins>DELETE</ins> y <ins>PATCH</ins>.
-- 🔓 **Rutas públicas:** registro de usuario (<ins>POST /usuarios</ins>), listado de roles (<ins>GET /roles</ins>, lo necesita el formulario de registro), login (<ins>GET /login</ins>) y consulta de cuidadores (<ins>GET /cuidadores</ins> y <ins>GET /cuidadores/{id}</ins>, para que se puedan ver sin iniciar sesión); el resto de rutas requieren autenticación.
-- 🚨 **Manejo de errores:** respuestas normalizadas y sin exposición de detalles internos (<ins>GlobalExceptionHandler</ins>).
+- 🔐 **Almacenamiento de contraseñas:** cifradas con <mark>BCryptPasswordEncoder</mark>; nunca se guardan ni se devuelven en texto plano.
+- 👥 **Gestión de usuarios:** <mark>JpaUserDetailsService</mark> propio, que consulta la tabla <mark>usuarios</mark> real (sin usuarios hardcodeados en memoria).
+- 🎭 **Roles:** cada usuario tiene uno o varios roles (<mark>FAMILIA</mark>, <mark>CUIDADOR</mark>) almacenados en una tabla <mark>roles</mark> con relación <mark>@ManyToMany</mark>.
+- 🚦 **Autorización por endpoint:** <mark>POST</mark>, <mark>PUT</mark> y <mark>DELETE</mark> de <mark>/cuidadores</mark> solo para <mark>CUIDADOR</mark>; <mark>POST</mark>, <mark>PUT</mark> y <mark>DELETE</mark> de <mark>/solicitudes</mark> solo para <mark>FAMILIA</mark>.
+- 🛡️ **Protección de los datos de otros usuarios:** los servicios comprueban que el recurso pertenece al usuario que ha iniciado sesión y lanzan <mark>XExceptionAccesoDenegado</mark> (Usuario, PerfilCuidador, Solicitud y Valoración). Así nadie puede leer ni modificar datos ajenos probando ids.
+- 🌐 **CORS:** solo se permite el origen <mark>http://localhost:5173</mark>, con los métodos <mark>GET</mark>, <mark>POST</mark>, <mark>PUT</mark>, <mark>DELETE</mark> y <mark>PATCH</mark>.
+- 🔓 **Rutas públicas:** registro de usuario (<mark>POST /usuarios</mark>), listado de roles (<mark>GET /roles</mark>, lo necesita el formulario de registro), login (<mark>GET /login</mark>) y consulta de cuidadores (<mark>GET /cuidadores</mark> y <mark>GET /cuidadores/{id}</mark>, para que se puedan ver sin iniciar sesión); el resto de rutas requieren autenticación.
+- 🚨 **Manejo de errores:** respuestas normalizadas y sin exposición de detalles internos (<mark>GlobalExceptionHandler</mark>).
 
 > [!NOTE]
 > **Próxima mejora:** migración de Basic Auth a autenticación mediante **JWT** (token de clave simétrica).
@@ -352,9 +352,9 @@ El proyecto cuenta con **152 tests** que cubren la lógica de negocio, la capa d
 | 🐳 Integración (Testcontainers + seguridad) | 11 |
 | 🚀 Arranque de la aplicación | 1 |
 
-- 🧩 **Tests unitarios de Service** (<ins>Mockito</ins>): cada <ins>ServiceImpl</ins> está testeado de forma aislada, mockeando sus repositorios. Hay una clase para los casos normales y otra para los errores (<ins>...ErroresTest</ins>).
-- 🌐 **Tests de Controller** (<ins>MockMvc</ins> + <ins>@WebMvcTest</ins>): verifican que cada endpoint responde con el código de estado y el cuerpo JSON esperados.
-- 🐳 **Tests de integración** (<ins>Testcontainers</ins>): <ins>UsuarioRepositoryIntegrationTest</ins> y <ins>SecurityIntegrationTest</ins> se ejecutan contra un MySQL real que Testcontainers arranca en un contenedor de Docker solo mientras dura el test. Este último comprueba las reglas de seguridad con peticiones reales.
+- 🧩 **Tests unitarios de Service** (<mark>Mockito</mark>): cada <mark>ServiceImpl</mark> está testeado de forma aislada, mockeando sus repositorios. Hay una clase para los casos normales y otra para los errores (<mark>...ErroresTest</mark>).
+- 🌐 **Tests de Controller** (<mark>MockMvc</mark> + <mark>@WebMvcTest</mark>): verifican que cada endpoint responde con el código de estado y el cuerpo JSON esperados.
+- 🐳 **Tests de integración** (<mark>Testcontainers</mark>): <mark>UsuarioRepositoryIntegrationTest</mark> y <mark>SecurityIntegrationTest</mark> se ejecutan contra un MySQL real que Testcontainers arranca en un contenedor de Docker solo mientras dura el test. Este último comprueba las reglas de seguridad con peticiones reales.
 
 ```bash
 ./mvnw test
@@ -364,7 +364,7 @@ El proyecto cuenta con **152 tests** que cubren la lógica de negocio, la capa d
 
 ### Cobertura
 
-La cobertura se mide con **JaCoCo**. Al ejecutar <ins>./mvnw test</ins> se genera el informe en <ins>target/site/jacoco/index.html</ins>. El resultado actual es de un **90 % de instrucciones** y un **96 % de ramas**, por encima del 70 % mínimo que se pedía.
+La cobertura se mide con **JaCoCo**. Al ejecutar <mark>./mvnw test</mark> se genera el informe en <mark>target/site/jacoco/index.html</mark>. El resultado actual es de un **90 % de instrucciones** y un **96 % de ramas**, por encima del 70 % mínimo que se pedía.
 
 ![Cobertura de los tests del backend](docs/screenshots/cobertura-backend.png)
 
@@ -374,7 +374,7 @@ Además de los casos normales, hay tests pensados para los **casos límite y de 
 - 🚫 **403:** que un usuario no pueda ver, editar ni borrar las solicitudes, el perfil, los datos o las valoraciones de otra persona. Se comprueba también que en esos casos no se guarda ni se borra nada.
 - ⚔️ **409:** registrar dos veces el mismo email.
 - ⚠️ **400:** enviar un pago sin importe o sin solicitud.
-- 🔒 **401:** llamar sin iniciar sesión a rutas privadas (pagos, solicitudes, <ins>mi-perfil</ins>). El listado y el perfil público de los cuidadores sí se pueden ver sin cuenta.
+- 🔒 **401:** llamar sin iniciar sesión a rutas privadas (pagos, solicitudes, <mark>mi-perfil</mark>). El listado y el perfil público de los cuidadores sí se pueden ver sin cuenta.
 - 💳 **Pago automático:** al aceptar una solicitud se crea el pago pendiente con la tarifa del cuidador, y al rechazarla no se crea ninguno.
 
 > [!TIP]
@@ -406,7 +406,7 @@ Además de los casos normales, hay tests pensados para los **casos límite y de 
 
 ## 🎨 Diseño y prototipo
 
-Bocetos, wireframes y mockups para móvil, tablet y escritorio. El conjunto completo está en [<ins>docs/design</ins>](docs/design).
+Bocetos, wireframes y mockups para móvil, tablet y escritorio. El conjunto completo está en [<mark>docs/design</mark>](docs/design).
 
 | Landing | Buscar | Perfil del cuidador |
 |---|---|---|
@@ -419,7 +419,7 @@ Bocetos, wireframes y mockups para móvil, tablet y escritorio. El conjunto comp
 
 ## 📋 Gestión del proyecto
 
-La planificación y el seguimiento del proyecto se han gestionado en **JIRA** (proyecto <ins>ACOM</ins>), organizados en:
+La planificación y el seguimiento del proyecto se han gestionado en **JIRA** (proyecto <mark>ACOM</mark>), organizados en:
 
 - 🗂️ 8 épicas: Autenticación y Seguridad, Gestión de Cuidadores, Solicitudes de Servicio, Valoraciones, Pagos, Calidad y pruebas, Diseño y UX, Infraestructura y entrega
 - 📖 19 historias de usuario con criterios de aceptación en formato Gherkin
@@ -441,15 +441,15 @@ Documentar el porqué de las decisiones, no solo el qué, para dejar constancia 
 
 | Decisión | Motivo |
 |---|---|
-| ✅ **Roles en tabla <ins>roles</ins> (<ins>@ManyToMany</ins>) en lugar de un enum simple** | Un enum bastaba funcionalmente (un usuario = un rol), pero modelar los roles como entidad propia sigue el patrón estándar de Spring Security, permite añadir permisos/roles nuevos sin tocar código, y es coherente con proyectos reales. |
+| ✅ **Roles en tabla <mark>roles</mark> (<mark>@ManyToMany</mark>) en lugar de un enum simple** | Un enum bastaba funcionalmente (un usuario = un rol), pero modelar los roles como entidad propia sigue el patrón estándar de Spring Security, permite añadir permisos/roles nuevos sin tocar código, y es coherente con proyectos reales. |
 | ✅ **Lombok** | Reduce drásticamente el código repetitivo de getters, setters y constructores en las entidades, mejorando la legibilidad sin perder funcionalidad. |
-| ✅ **<ins>UsuarioEntity</ins> no se separa en "datos de autenticación" y "datos de perfil"** | Se valoró separar en dos tablas (una solo para login, otra para el resto de datos), pero para el alcance de este proyecto se optó por mantenerlos juntos, priorizando simplicidad sobre una normalización que no aportaba valor funcional inmediato. |
+| ✅ **<mark>UsuarioEntity</mark> no se separa en "datos de autenticación" y "datos de perfil"** | Se valoró separar en dos tablas (una solo para login, otra para el resto de datos), pero para el alcance de este proyecto se optó por mantenerlos juntos, priorizando simplicidad sobre una normalización que no aportaba valor funcional inmediato. |
 | ✅ **DTOs explícitos en cada capa de entrada/salida** | Evita exponer las entidades JPA directamente (y con ellas, campos sensibles como la contraseña), y protege frente a *mass assignment* al aceptar solo los campos declarados explícitamente. |
-| ✅ **Interfaz genérica <ins>InterfaceGenericService&lt;Entity, DTORequest, DTOResponse&gt;</ins>** | Las entidades comparten las mismas operaciones CRUD; centralizar su firma en una interfaz genérica evita repetir el mismo contrato en cada módulo. |
-| ✅ **Excepciones personalizadas por entidad + <ins>GlobalExceptionHandler</ins> centralizado** | Permite devolver códigos HTTP y mensajes claros y específicos (<ins>403</ins>, <ins>404</ins>, <ins>409</ins>...) en lugar de errores genéricos, mejorando la experiencia de quien consume la API. |
+| ✅ **Interfaz genérica <mark>InterfaceGenericService&lt;Entity, DTORequest, DTOResponse&gt;</mark>** | Las entidades comparten las mismas operaciones CRUD; centralizar su firma en una interfaz genérica evita repetir el mismo contrato en cada módulo. |
+| ✅ **Excepciones personalizadas por entidad + <mark>GlobalExceptionHandler</mark> centralizado** | Permite devolver códigos HTTP y mensajes claros y específicos (<mark>403</mark>, <mark>404</mark>, <mark>409</mark>...) en lugar de errores genéricos, mejorando la experiencia de quien consume la API. |
 | ✅ **Autorización por rol en la creación, edición y borrado** | Refleja la lógica de negocio real: cada rol solo debe poder generar y gestionar el tipo de recurso que le corresponde dentro del flujo de la plataforma. |
 | ✅ **Comprobar en el Service que el recurso es del usuario** | Un usuario autenticado solo puede tocar sus propios datos, aunque conozca el id de otro recurso. |
-| ✅ **<ins>ddl-auto=update</ins> en lugar de <ins>create-drop</ins>** | Al trabajar contra una base de datos persistente en Docker (no en memoria), se prioriza no perder datos entre reinicios de la aplicación durante el desarrollo. |
+| ✅ **<mark>ddl-auto=update</mark> en lugar de <mark>create-drop</mark>** | Al trabajar contra una base de datos persistente en Docker (no en memoria), se prioriza no perder datos entre reinicios de la aplicación durante el desarrollo. |
 | ✅ **Testcontainers para los tests de integración** | Prueban con un MySQL real, el mismo que usa la aplicación, en vez de una base de datos distinta en memoria. |
 
 ---
@@ -460,8 +460,8 @@ Documentar el porqué de las decisiones, no solo el qué, para dejar constancia 
 > De forma transparente, estas son las áreas identificadas como pendientes de mejora en la versión actual.
 
 - 🔑 **Autenticación mediante Basic Auth**, no JWT. La migración a JWT está prevista como siguiente paso.
-- 🗝️ **Credenciales por defecto de desarrollo:** se pueden cambiar con variables de entorno, pero los valores por defecto siguen en <ins>application.properties</ins> y <ins>docker-compose.yml</ins>.
-- 💳 **Pagos simulados:** no hay pasarela de pago real. El pago se crea al aceptar la solicitud y se marca como pagado con <ins>PATCH /pagos/{id}/pagar</ins>.
+- 🗝️ **Credenciales por defecto de desarrollo:** se pueden cambiar con variables de entorno, pero los valores por defecto siguen en <mark>application.properties</mark> y <mark>docker-compose.yml</mark>.
+- 💳 **Pagos simulados:** no hay pasarela de pago real. El pago se crea al aceptar la solicitud y se marca como pagado con <mark>PATCH /pagos/{id}/pagar</mark>.
 - 🚧 **Sin límite de intentos de login** (falta proteger la aplicación de quien pruebe contraseñas una y otra vez).
 
 ---
