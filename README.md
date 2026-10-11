@@ -8,7 +8,7 @@ Este repositorio contiene la **API REST** del proyecto, desarrollada con **Sprin
 
 Proyecto final del bootcamp de Desarrollo Web Full Stack (850h) en **Factoría F5 — Digital Academy**.
 
-![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-152-success)
+![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-179-success)
 
 ---
 
@@ -46,7 +46,7 @@ La plataforma permite a las **familias**:
 - ⭐ Valorar el servicio recibido una vez completado
 
 Y a los **cuidadores**:
-- 🧑‍⚕️ Registrarse y crear su perfil profesional (especialidad, experiencia, tarifa, disponibilidad)
+- 🧑‍⚕️ Registrarse y crear su perfil profesional (especialidad, experiencia, tarifa, disponibilidad y foto)
 - 📥 Consultar y gestionar las solicitudes que reciben
 - ✅ Aceptar, rechazar o marcar como completadas las solicitudes
 
@@ -126,7 +126,7 @@ El sistema gira en torno a **seis entidades principales**:
 |---|---|
 | 👤 <mark>UsuarioEntity</mark> | Usuario del sistema (familia o cuidador). Relación <mark>@ManyToMany</mark> con <mark>RoleEntity</mark>. |
 | 🎭 <mark>RoleEntity</mark> | Rol del usuario (<mark>FAMILIA</mark> / <mark>CUIDADOR</mark>). |
-| 🧑‍⚕️ <mark>PerfilCuidadorEntity</mark> | Perfil profesional de un cuidador. Relación <mark>@OneToOne</mark> con <mark>UsuarioEntity</mark>. |
+| 🧑‍⚕️ <mark>PerfilCuidadorEntity</mark> | Perfil profesional de un cuidador, con su foto guardada como texto. Relación <mark>@OneToOne</mark> con <mark>UsuarioEntity</mark>. |
 | 📋 <mark>SolicitudEntity</mark> | Solicitud de servicio de una familia a un cuidador. Relaciones <mark>@ManyToOne</mark> con <mark>UsuarioEntity</mark> (familia) y <mark>PerfilCuidadorEntity</mark> (cuidador). |
 | ⭐ <mark>ValoracionEntity</mark> | Valoración de una solicitud completada. Relación <mark>@OneToOne</mark> con <mark>SolicitudEntity</mark>. |
 | 💳 <mark>PagoEntity</mark> | Pago de una solicitud (<mark>PENDIENTE</mark>, <mark>COMPLETADO</mark>, <mark>CANCELADO</mark>). Relación <mark>@OneToOne</mark> con <mark>SolicitudEntity</mark>. |
@@ -343,18 +343,20 @@ El backend implementa autenticación y autorización mediante **Spring Security*
 
 ## 🧪 Testing
 
-El proyecto cuenta con **152 tests** que cubren la lógica de negocio, la capa de exposición HTTP, la seguridad y la integración con base de datos real:
+El proyecto cuenta con **179 tests** que cubren la lógica de negocio, la capa de exposición HTTP, la seguridad y la integración con base de datos real:
 
 | Tipo | Tests |
 |---|---|
-| 🧩 Servicios (unitarios, con Mockito) | 89 |
-| 🌐 Controladores (MockMvc) | 51 |
-| 🐳 Integración (Testcontainers + seguridad) | 11 |
+| 🧩 Servicios (unitarios, con Mockito) | 92 |
+| 🌐 Controladores (MockMvc) | 52 |
+| 🐳 Integración (Testcontainers + seguridad) | 13 |
+| 🛡️ Excepciones y seguridad (unitarios) | 21 |
 | 🚀 Arranque de la aplicación | 1 |
 
 - 🧩 **Tests unitarios de Service** (<mark>Mockito</mark>): cada <mark>ServiceImpl</mark> está testeado de forma aislada, mockeando sus repositorios. Hay una clase para los casos normales y otra para los errores (<mark>...ErroresTest</mark>).
 - 🌐 **Tests de Controller** (<mark>MockMvc</mark> + <mark>@WebMvcTest</mark>): verifican que cada endpoint responde con el código de estado y el cuerpo JSON esperados.
-- 🐳 **Tests de integración** (<mark>Testcontainers</mark>): <mark>UsuarioRepositoryIntegrationTest</mark> y <mark>SecurityIntegrationTest</mark> se ejecutan contra un MySQL real que Testcontainers arranca en un contenedor de Docker solo mientras dura el test. Este último comprueba las reglas de seguridad con peticiones reales.
+- 🐳 **Tests de integración** (<mark>Testcontainers</mark>): <mark>UsuarioRepositoryIntegrationTest</mark>, <mark>PerfilCuidadorRepositoryIntegrationTest</mark> y <mark>SecurityIntegrationTest</mark> se ejecutan contra un MySQL real que Testcontainers arranca en un contenedor de Docker solo mientras dura el test. El de perfiles guarda una foto de 100.000 caracteres para comprobar que la base de datos la guarda entera, y el de seguridad comprueba las reglas de acceso con peticiones reales.
+- 🛡️ **Tests de excepciones y seguridad:** <mark>GlobalExceptionHandlerTest</mark> comprueba que cada error devuelve su código (<mark>403</mark>, <mark>404</mark>, <mark>409</mark> o <mark>500</mark>) y su mensaje, <mark>ExceptionsConCausaTest</mark> prueba los constructores de todas las excepciones y <mark>SecurityUserTest</mark> comprueba cómo se leen los datos y los roles del usuario que inicia sesión.
 
 ```bash
 ./mvnw test
@@ -364,7 +366,7 @@ El proyecto cuenta con **152 tests** que cubren la lógica de negocio, la capa d
 
 ### Cobertura
 
-La cobertura se mide con **JaCoCo**. Al ejecutar <mark>./mvnw test</mark> se genera el informe en <mark>target/site/jacoco/index.html</mark>. El resultado actual es de un **90 % de instrucciones** y un **96 % de ramas**, por encima del 70 % mínimo que se pedía.
+La cobertura se mide con **JaCoCo**. Al ejecutar <mark>./mvnw test</mark> se genera el informe en <mark>target/site/jacoco/index.html</mark>. El resultado actual es de un **96 % de instrucciones** y un **96 % de ramas**, por encima del 70 % mínimo que se pedía.
 
 ![Cobertura de los tests del backend](docs/screenshots/cobertura-backend.png)
 
@@ -448,6 +450,7 @@ Documentar el porqué de las decisiones, no solo el qué, para dejar constancia 
 | ✅ **Interfaz genérica <mark>InterfaceGenericService&lt;Entity, DTORequest, DTOResponse&gt;</mark>** | Las entidades comparten las mismas operaciones CRUD; centralizar su firma en una interfaz genérica evita repetir el mismo contrato en cada módulo. |
 | ✅ **Excepciones personalizadas por entidad + <mark>GlobalExceptionHandler</mark> centralizado** | Permite devolver códigos HTTP y mensajes claros y específicos (<mark>403</mark>, <mark>404</mark>, <mark>409</mark>...) en lugar de errores genéricos, mejorando la experiencia de quien consume la API. |
 | ✅ **Autorización por rol en la creación, edición y borrado** | Refleja la lógica de negocio real: cada rol solo debe poder generar y gestionar el tipo de recurso que le corresponde dentro del flujo de la plataforma. |
+| ✅ **La foto de perfil se guarda como texto (Base64) en la base de datos** | Es la opción más sencilla: no hace falta guardar archivos en el servidor. El frontend reduce la imagen a 300 px antes de enviarla, para que ocupe poco. Con muchos usuarios convendría guardar los archivos aparte y dejar en la base de datos solo el enlace. |
 | ✅ **Comprobar en el Service que el recurso es del usuario** | Un usuario autenticado solo puede tocar sus propios datos, aunque conozca el id de otro recurso. |
 | ✅ **<mark>ddl-auto=update</mark> en lugar de <mark>create-drop</mark>** | Al trabajar contra una base de datos persistente en Docker (no en memoria), se prioriza no perder datos entre reinicios de la aplicación durante el desarrollo. |
 | ✅ **Testcontainers para los tests de integración** | Prueban con un MySQL real, el mismo que usa la aplicación, en vez de una base de datos distinta en memoria. |
@@ -478,6 +481,7 @@ Documentar el porqué de las decisiones, no solo el qué, para dejar constancia 
 - 🔔 Notificaciones push
 - 📄 Generación de informes en PDF
 - 🔍 Filtros de búsqueda avanzados (especialidad, tarifa, disponibilidad)
+- 🖼️ Guardar las fotos de perfil como archivos en un almacenamiento externo (ahora se guardan reducidas, como texto)
 - ☁️ Despliegue (imagen Docker y base de datos en la nube)
 
 ---
