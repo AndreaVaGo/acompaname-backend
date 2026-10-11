@@ -23,7 +23,7 @@ public record PerfilCuidadorDTORequest(
 
         @NotNull(message = "El usuario id no puede ser nulo") Long usuarioId,
 
-        @Size(max = 500, message = "El enlace de la foto no puede superar 500 caracteres") String foto
+        @Size(max = 500000, message = "La foto es demasiado grande") String foto
 
 ) {
 
