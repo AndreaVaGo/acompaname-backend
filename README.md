@@ -6,7 +6,7 @@ Este repositorio contiene la **API REST** del proyecto, desarrollada con **Sprin
 
 Proyecto final del bootcamp de Desarrollo Web Full Stack (850h) en **Factoría F5 — Digital Academy**.
 
-![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-147-success)
+![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-152-success)
 
 ---
 
@@ -330,11 +330,11 @@ El backend implementa autenticación y autorización mediante **Spring Security*
 
 ## 🧪 Testing
 
-El proyecto cuenta con **147 tests** que cubren la lógica de negocio, la capa de exposición HTTP, la seguridad y la integración con base de datos real:
+El proyecto cuenta con **152 tests** que cubren la lógica de negocio, la capa de exposición HTTP, la seguridad y la integración con base de datos real:
 
 | Tipo | Tests |
 |---|---|
-| Servicios (unitarios, con Mockito) | 84 |
+| Servicios (unitarios, con Mockito) | 89 |
 | Controladores (MockMvc) | 51 |
 | Integración (Testcontainers + seguridad) | 11 |
 | Arranque de la aplicación | 1 |
