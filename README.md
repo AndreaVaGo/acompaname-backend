@@ -1,3 +1,5 @@
+![Acompáñame — Backend](docs/banner-back.png)
+
 # 🤝 Acompáñame — Backend
 
 **Acompáñame** es una plataforma de marketplace que conecta a familias que necesitan cuidados para un ser querido con cuidadores profesionales verificados. Nace para cubrir el hueco entre la atención residencial a tiempo completo y las listas de espera de la atención formal, dando una alternativa flexible tanto a personas mayores como a familias que viven lejos de sus seres queridos.
@@ -148,6 +150,9 @@ El sistema gira en torno a **seis entidades principales**:
 - Docker y Docker Compose
 - Git
 
+> [!IMPORTANT]
+> Docker tiene que estar en marcha antes de arrancar la aplicación y de ejecutar los tests: los necesitan la base de datos y los tests de integración.
+
 ### Pasos
 
 1. **Clona el repositorio**
@@ -199,13 +204,15 @@ Otros ajustes:
 | Prefijo de la API (`api-endpoint`) | `api/v1` |
 | Origen CORS permitido | `http://localhost:5173` (frontend) |
 
-Para usar otros valores, copia `.env.example` como `.env` en la raíz y cámbialos. Docker Compose lo lee solo. El archivo `.env` está en el `.gitignore`, así que no se sube a GitHub.
+> [!TIP]
+> Para usar otros valores, copia `.env.example` como `.env` en la raíz y cámbialos. Docker Compose lo lee solo. El archivo `.env` está en el `.gitignore`, así que no se sube a GitHub.
 
 ```bash
 cp .env.example .env
 ```
 
-> ⚠️ Los valores por defecto son **solo para desarrollo local**. En un despliegue real hay que definir otras contraseñas en el entorno.
+> [!WARNING]
+> Los valores por defecto son **solo para desarrollo local**. En un despliegue real hay que definir otras contraseñas en el entorno.
 
 ---
 
@@ -213,28 +220,33 @@ cp .env.example .env
 
 Todos los endpoints tienen como prefijo base: `/api/v1`
 
+> [!TIP]
+> **Leyenda de métodos:** 🟢 `GET` leer · 🟠 `POST` crear · 🔵 `PUT` actualizar · 🟣 `PATCH` cambiar un dato · 🔴 `DELETE` borrar.
+>
+> **Leyenda de acceso:** 🔓 público · 🔒 hay que iniciar sesión · 🧑‍⚕️ solo cuidadores · 👨‍👩‍👧 solo familias.
+
 ### Autenticación
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| `GET` | `/login` | Inicio de sesión (Basic Auth) | Público (requiere credenciales válidas) |
-| `GET` | `/logout` | Cierre de sesión | Autenticado |
+| 🟢 `GET` | `/login` | Inicio de sesión (Basic Auth) | 🔓 Público (requiere credenciales válidas) |
+| 🟢 `GET` | `/logout` | Cierre de sesión | 🔒 Autenticado |
 
 ### Usuarios (`/usuarios`)
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| `POST` | `/usuarios` | Registro de un nuevo usuario | Público |
-| `GET` | `/usuarios` | Listar todos los usuarios | Autenticado |
-| `GET` | `/usuarios/{id}` | Obtener un usuario por id | Autenticado (propietario) |
-| `PUT` | `/usuarios/{id}` | Actualizar un usuario | Autenticado (propietario) |
-| `DELETE` | `/usuarios/{id}` | Eliminar un usuario | Autenticado (propietario) |
+| 🟠 `POST` | `/usuarios` | Registro de un nuevo usuario | 🔓 Público |
+| 🟢 `GET` | `/usuarios` | Listar todos los usuarios | 🔒 Autenticado |
+| 🟢 `GET` | `/usuarios/{id}` | Obtener un usuario por id | 🔒 Autenticado (propietario) |
+| 🔵 `PUT` | `/usuarios/{id}` | Actualizar un usuario | 🔒 Autenticado (propietario) |
+| 🔴 `DELETE` | `/usuarios/{id}` | Eliminar un usuario | 🔒 Autenticado (propietario) |
 
 ### Roles (`/roles`)
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| `GET` | `/roles` | Listar los roles | Público |
+| 🟢 `GET` | `/roles` | Listar los roles | 🔓 Público |
 
 Los roles no se crean desde la API: se crean al arrancar la aplicación (`RoleInitializer`).
 
@@ -242,45 +254,45 @@ Los roles no se crean desde la API: se crean al arrancar la aplicación (`RoleIn
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| `POST` | `/cuidadores` | Crear perfil de cuidador | Rol `CUIDADOR` |
-| `GET` | `/cuidadores` | Listar todos los perfiles | Autenticado |
-| `GET` | `/cuidadores/{id}` | Obtener un perfil por id | Autenticado |
-| `GET` | `/cuidadores/mi-perfil` | Obtener el perfil del cuidador autenticado | Autenticado |
-| `PUT` | `/cuidadores/{id}` | Actualizar un perfil | Rol `CUIDADOR` (propietario) |
-| `DELETE` | `/cuidadores/{id}` | Eliminar un perfil | Rol `CUIDADOR` (propietario) |
+| 🟠 `POST` | `/cuidadores` | Crear perfil de cuidador | 🧑‍⚕️ Rol `CUIDADOR` |
+| 🟢 `GET` | `/cuidadores` | Listar todos los perfiles | 🔓 Público |
+| 🟢 `GET` | `/cuidadores/{id}` | Obtener un perfil por id | 🔓 Público |
+| 🟢 `GET` | `/cuidadores/mi-perfil` | Obtener el perfil del cuidador autenticado | 🔒 Autenticado |
+| 🔵 `PUT` | `/cuidadores/{id}` | Actualizar un perfil | 🧑‍⚕️ Rol `CUIDADOR` (propietario) |
+| 🔴 `DELETE` | `/cuidadores/{id}` | Eliminar un perfil | 🧑‍⚕️ Rol `CUIDADOR` (propietario) |
 
 ### Solicitudes (`/solicitudes`)
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| `POST` | `/solicitudes` | Crear una solicitud de servicio | Rol `FAMILIA` |
-| `GET` | `/solicitudes` | Listar todas las solicitudes | Autenticado |
-| `GET` | `/solicitudes/{id}` | Obtener una solicitud por id | Autenticado |
-| `GET` | `/solicitudes/mis-solicitudes` | Solicitudes del usuario autenticado | Autenticado |
-| `PUT` | `/solicitudes/{id}` | Actualizar una solicitud | Rol `FAMILIA` (propietario) |
-| `DELETE` | `/solicitudes/{id}` | Eliminar una solicitud | Rol `FAMILIA` (propietario) |
-| `PATCH` | `/solicitudes/{id}/estado` | Cambiar el estado (`PENDIENTE`, `ACEPTADA`, `RECHAZADA`, `COMPLETADA`) | Autenticado |
+| 🟠 `POST` | `/solicitudes` | Crear una solicitud de servicio | 👨‍👩‍👧 Rol `FAMILIA` |
+| 🟢 `GET` | `/solicitudes` | Listar todas las solicitudes | 🔒 Autenticado |
+| 🟢 `GET` | `/solicitudes/{id}` | Obtener una solicitud por id | 🔒 Autenticado |
+| 🟢 `GET` | `/solicitudes/mis-solicitudes` | Solicitudes del usuario autenticado | 🔒 Autenticado |
+| 🔵 `PUT` | `/solicitudes/{id}` | Actualizar una solicitud | 👨‍👩‍👧 Rol `FAMILIA` (propietario) |
+| 🔴 `DELETE` | `/solicitudes/{id}` | Eliminar una solicitud | 👨‍👩‍👧 Rol `FAMILIA` (propietario) |
+| 🟣 `PATCH` | `/solicitudes/{id}/estado` | Cambiar el estado (`PENDIENTE`, `ACEPTADA`, `RECHAZADA`, `COMPLETADA`) | 🔒 Autenticado |
 
 ### Valoraciones (`/valoraciones`)
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| `POST` | `/valoraciones` | Crear una valoración | Autenticado |
-| `GET` | `/valoraciones` | Listar todas las valoraciones | Autenticado |
-| `GET` | `/valoraciones/{id}` | Obtener una valoración por id | Autenticado |
-| `PUT` | `/valoraciones/{id}` | Actualizar una valoración | Autenticado (propietario) |
-| `DELETE` | `/valoraciones/{id}` | Eliminar una valoración | Autenticado (propietario) |
+| 🟠 `POST` | `/valoraciones` | Crear una valoración | 🔒 Autenticado |
+| 🟢 `GET` | `/valoraciones` | Listar todas las valoraciones | 🔒 Autenticado |
+| 🟢 `GET` | `/valoraciones/{id}` | Obtener una valoración por id | 🔒 Autenticado |
+| 🔵 `PUT` | `/valoraciones/{id}` | Actualizar una valoración | 🔒 Autenticado (propietario) |
+| 🔴 `DELETE` | `/valoraciones/{id}` | Eliminar una valoración | 🔒 Autenticado (propietario) |
 
 ### Pagos (`/pagos`)
 
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
-| `POST` | `/pagos` | Crear un pago | Autenticado |
-| `GET` | `/pagos` | Listar todos los pagos | Autenticado |
-| `GET` | `/pagos/{id}` | Obtener un pago por id | Autenticado |
-| `PUT` | `/pagos/{id}` | Actualizar un pago | Autenticado |
-| `DELETE` | `/pagos/{id}` | Eliminar un pago | Autenticado |
-| `PATCH` | `/pagos/{id}/pagar` | Marcar el pago como completado (simulado) | Autenticado |
+| 🟠 `POST` | `/pagos` | Crear un pago | 🔒 Autenticado |
+| 🟢 `GET` | `/pagos` | Listar todos los pagos | 🔒 Autenticado |
+| 🟢 `GET` | `/pagos/{id}` | Obtener un pago por id | 🔒 Autenticado |
+| 🔵 `PUT` | `/pagos/{id}` | Actualizar un pago | 🔒 Autenticado |
+| 🔴 `DELETE` | `/pagos/{id}` | Eliminar un pago | 🔒 Autenticado |
+| 🟣 `PATCH` | `/pagos/{id}/pagar` | Marcar el pago como completado (simulado) | 🔒 Autenticado |
 
 ### Ejemplo de petición — Registro de usuario
 
@@ -314,17 +326,18 @@ Content-Type: application/json
 
 El backend implementa autenticación y autorización mediante **Spring Security**:
 
-- **Autenticación:** HTTP Basic Auth sobre las credenciales del usuario (email + contraseña).
-- **Almacenamiento de contraseñas:** cifradas con `BCryptPasswordEncoder`; nunca se guardan ni se devuelven en texto plano.
-- **Gestión de usuarios:** `JpaUserDetailsService` propio, que consulta la tabla `usuarios` real (sin usuarios hardcodeados en memoria).
-- **Roles:** cada usuario tiene uno o varios roles (`FAMILIA`, `CUIDADOR`) almacenados en una tabla `roles` con relación `@ManyToMany`.
-- **Autorización por endpoint:** `POST`, `PUT` y `DELETE` de `/cuidadores` solo para `CUIDADOR`; `POST`, `PUT` y `DELETE` de `/solicitudes` solo para `FAMILIA`.
-- **Protección de los datos de otros usuarios:** los servicios comprueban que el recurso pertenece al usuario que ha iniciado sesión y lanzan `XExceptionAccesoDenegado` (Usuario, PerfilCuidador, Solicitud y Valoración). Así nadie puede leer ni modificar datos ajenos probando ids.
-- **CORS:** solo se permite el origen `http://localhost:5173`, con los métodos `GET`, `POST`, `PUT`, `DELETE` y `PATCH`.
-- **Rutas públicas:** registro de usuario (`POST /usuarios`), listado de roles (`GET /roles`, lo necesita el formulario de registro) y login (`GET /login`); el resto de rutas requieren autenticación.
-- **Manejo de errores:** respuestas normalizadas y sin exposición de detalles internos (`GlobalExceptionHandler`).
+- 🔑 **Autenticación:** HTTP Basic Auth sobre las credenciales del usuario (email + contraseña).
+- 🔐 **Almacenamiento de contraseñas:** cifradas con `BCryptPasswordEncoder`; nunca se guardan ni se devuelven en texto plano.
+- 👥 **Gestión de usuarios:** `JpaUserDetailsService` propio, que consulta la tabla `usuarios` real (sin usuarios hardcodeados en memoria).
+- 🎭 **Roles:** cada usuario tiene uno o varios roles (`FAMILIA`, `CUIDADOR`) almacenados en una tabla `roles` con relación `@ManyToMany`.
+- 🚦 **Autorización por endpoint:** `POST`, `PUT` y `DELETE` de `/cuidadores` solo para `CUIDADOR`; `POST`, `PUT` y `DELETE` de `/solicitudes` solo para `FAMILIA`.
+- 🛡️ **Protección de los datos de otros usuarios:** los servicios comprueban que el recurso pertenece al usuario que ha iniciado sesión y lanzan `XExceptionAccesoDenegado` (Usuario, PerfilCuidador, Solicitud y Valoración). Así nadie puede leer ni modificar datos ajenos probando ids.
+- 🌐 **CORS:** solo se permite el origen `http://localhost:5173`, con los métodos `GET`, `POST`, `PUT`, `DELETE` y `PATCH`.
+- 🔓 **Rutas públicas:** registro de usuario (`POST /usuarios`), listado de roles (`GET /roles`, lo necesita el formulario de registro), login (`GET /login`) y consulta de cuidadores (`GET /cuidadores` y `GET /cuidadores/{id}`, para que se puedan ver sin iniciar sesión); el resto de rutas requieren autenticación.
+- 🚨 **Manejo de errores:** respuestas normalizadas y sin exposición de detalles internos (`GlobalExceptionHandler`).
 
-> 🔜 **Próxima mejora:** migración de Basic Auth a autenticación mediante **JWT** (token de clave simétrica).
+> [!NOTE]
+> **Próxima mejora:** migración de Basic Auth a autenticación mediante **JWT** (token de clave simétrica).
 
 ---
 
@@ -334,10 +347,10 @@ El proyecto cuenta con **152 tests** que cubren la lógica de negocio, la capa d
 
 | Tipo | Tests |
 |---|---|
-| Servicios (unitarios, con Mockito) | 89 |
-| Controladores (MockMvc) | 51 |
-| Integración (Testcontainers + seguridad) | 11 |
-| Arranque de la aplicación | 1 |
+| 🧩 Servicios (unitarios, con Mockito) | 89 |
+| 🌐 Controladores (MockMvc) | 51 |
+| 🐳 Integración (Testcontainers + seguridad) | 11 |
+| 🚀 Arranque de la aplicación | 1 |
 
 - **Tests unitarios de Service** (`Mockito`): cada `ServiceImpl` está testeado de forma aislada, mockeando sus repositorios. Hay una clase para los casos normales y otra para los errores (`...ErroresTest`).
 - **Tests de Controller** (`MockMvc` + `@WebMvcTest`): verifican que cada endpoint responde con el código de estado y el cuerpo JSON esperados.
@@ -442,7 +455,8 @@ Documentar el porqué de las decisiones, no solo el qué, para dejar constancia 
 
 ## ⚠️ Limitaciones conocidas
 
-De forma transparente, estas son las áreas identificadas como pendientes de mejora en la versión actual:
+> [!NOTE]
+> De forma transparente, estas son las áreas identificadas como pendientes de mejora en la versión actual.
 
 - **Autenticación mediante Basic Auth**, no JWT. La migración a JWT está prevista como siguiente paso.
 - **Credenciales por defecto de desarrollo:** se pueden cambiar con variables de entorno, pero los valores por defecto siguen en `application.properties` y `docker-compose.yml`.
