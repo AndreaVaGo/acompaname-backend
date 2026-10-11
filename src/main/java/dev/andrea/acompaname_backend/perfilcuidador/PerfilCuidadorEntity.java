@@ -3,6 +3,7 @@ package dev.andrea.acompaname_backend.perfilcuidador;
 import java.math.BigDecimal;
 
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -39,4 +40,14 @@ public class PerfilCuidadorEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", referencedColumnName = "id")
     private UsuarioEntity usuario;
+
+    // Enlace a la foto de perfil (puede estar vacío)
+    @Column(length = 500)
+    private String foto;
+
+    // Constructor sin foto: el mismo que había antes de añadir este campo
+    public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
+            String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario) {
+        this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, null);
+    }
 }
