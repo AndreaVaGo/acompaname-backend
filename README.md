@@ -386,7 +386,7 @@ Además de los casos normales, hay tests pensados para los **casos límite y de 
 
 ### Casos de uso
 
-| Visitante | Familia | Cuidador |
+| <ins>Visitante</ins> | <ins>Familia</ins> | <ins>Cuidador</ins> |
 |---|---|---|
 | ![Visitante](docs/diagrams/casos-visitante.png) | ![Familia](docs/diagrams/casos-familia.png) | ![Cuidador](docs/diagrams/casos-cuidador.png) |
 
@@ -408,7 +408,7 @@ Además de los casos normales, hay tests pensados para los **casos límite y de 
 
 Bocetos, wireframes y mockups para móvil, tablet y escritorio. El conjunto completo está en [<mark>docs/design</mark>](docs/design).
 
-| Landing | Buscar | Perfil del cuidador |
+| <ins>Landing</ins> | <ins>Buscar</ins> | <ins>Perfil del cuidador</ins> |
 |---|---|---|
 | ![Landing](docs/design/01-landing_escritorio.png) | ![Buscar](docs/design/04-buscar_escritorio.png) | ![Perfil](docs/design/05-perfil-cuidador_escritorio.png) |
 
