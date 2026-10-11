@@ -173,14 +173,14 @@ public class PerfilCuidadorControllerTest {
         @Test
         void testStoreFotoDemasiadoLarga() throws Exception {
                 PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", 4, new BigDecimal("18.00"),
-                                "Bio", true, true, 2L, "a".repeat(501));
+                                "Bio", true, true, 2L, "a".repeat(500001));
 
                 MockHttpServletResponse response = mockMvc.perform(post("/api/v1/cuidadores")
                                 .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
                                 .andReturn()
                                 .getResponse();
                 assertThat(response.getStatus(), is(equalTo(400)));
-                assertThat(response.getContentAsString(), containsString("El enlace de la foto no puede superar 500 caracteres"));
+                assertThat(response.getContentAsString(), containsString("La foto es demasiado grande"));
                 Mockito.verifyNoInteractions(service);
         }
 }
