@@ -44,9 +44,13 @@ public class SolicitudServiceImpl implements SolicitudService {
                 .orElseThrow(() -> new SolicitudExceptionNotFound("Solicitud no encontrada. Id " + id + " no existe."));
     }
 
-    private void verificarPropietario(SolicitudEntity solicitud) {
+    private String emailLogueado() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String emailLogueado = auth.getName();
+        return auth.getName();
+    }
+
+    private void verificarPropietario(SolicitudEntity solicitud) {
+        String emailLogueado = emailLogueado();
         if (!solicitud.getFamilia().getEmail().equals(emailLogueado)
                 && !solicitud.getCuidador().getUsuario().getEmail().equals(emailLogueado)) {
             throw new SolicitudExceptionAccesoDenegado("No tiene permiso para acceder a esta solicitud");
@@ -55,9 +59,7 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     // Solo el cuidador de la solicitud puede aceptarla, rechazarla o completarla
     private void verificarCuidador(SolicitudEntity solicitud) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String emailLogueado = auth.getName();
-        if (!solicitud.getCuidador().getUsuario().getEmail().equals(emailLogueado)) {
+        if (!solicitud.getCuidador().getUsuario().getEmail().equals(emailLogueado())) {
             throw new SolicitudExceptionAccesoDenegado("Solo el cuidador de la solicitud puede cambiar su estado");
         }
     }
@@ -85,8 +87,7 @@ public class SolicitudServiceImpl implements SolicitudService {
                 .orElseThrow(() -> new PerfilCuidadorExceptionNotFound(
                         "Perfil de cuidador no encontrado. Id " + dto.cuidadorId() + " no existe."));
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!familia.getEmail().equals(auth.getName())) {
+        if (!familia.getEmail().equals(emailLogueado())) {
             throw new SolicitudExceptionAccesoDenegado("No puede crear solicitudes en nombre de otra familia");
         }
 
@@ -136,8 +137,7 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     @Override
     public List<SolicitudDTOResponse> getMisSolicitudes() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String emailLogueado = auth.getName();
+        String emailLogueado = emailLogueado();
 
         return repository.findAll().stream()
                 .filter(solicitud -> solicitud.getFamilia().getEmail().equals(emailLogueado)
