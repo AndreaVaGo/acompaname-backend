@@ -39,16 +39,16 @@ Proyecto final del bootcamp de Desarrollo Web Full Stack (850h) en **Factoría F
 **Acompáñame** resuelve un problema real: encontrar apoyo puntual y de confianza para el cuidado de personas mayores o dependientes, sin necesidad de contratar servicios residenciales completos.
 
 La plataforma permite a las **familias**:
-- Registrarse y gestionar su cuenta
-- Buscar y consultar perfiles de cuidadores
-- Crear solicitudes de servicio detallando el tipo de cuidado necesario
-- Pagar el servicio (pago simulado)
-- Valorar el servicio recibido una vez completado
+- 📝 Registrarse y gestionar su cuenta
+- 🔎 Buscar y consultar perfiles de cuidadores
+- 📋 Crear solicitudes de servicio detallando el tipo de cuidado necesario
+- 💳 Pagar el servicio (pago simulado)
+- ⭐ Valorar el servicio recibido una vez completado
 
 Y a los **cuidadores**:
-- Registrarse y crear su perfil profesional (especialidad, experiencia, tarifa, disponibilidad)
-- Consultar y gestionar las solicitudes que reciben
-- Aceptar, rechazar o marcar como completadas las solicitudes
+- 🧑‍⚕️ Registrarse y crear su perfil profesional (especialidad, experiencia, tarifa, disponibilidad)
+- 📥 Consultar y gestionar las solicitudes que reciben
+- ✅ Aceptar, rechazar o marcar como completadas las solicitudes
 
 ---
 
@@ -56,16 +56,16 @@ Y a los **cuidadores**:
 
 | Categoría | Tecnología |
 |---|---|
-| Lenguaje | Java 21 |
-| Framework | Spring Boot 4.1.1 |
-| Seguridad | Spring Security (autenticación Basic Auth + roles) |
-| Persistencia | Spring Data JPA / Hibernate |
-| Base de datos | MySQL 8.0 (dockerizada) |
-| Build tool | Maven |
-| Menos código repetido (getters, setters, constructores) | Lombok |
-| Testing | JUnit 5, Mockito, MockMvc, Testcontainers |
-| Contenerización | Docker / Docker Compose |
-| Control de versiones | Git / GitHub |
+| ☕ Lenguaje | Java 21 |
+| 🍃 Framework | Spring Boot 4.1.1 |
+| 🔐 Seguridad | Spring Security (autenticación Basic Auth + roles) |
+| 🗃️ Persistencia | Spring Data JPA / Hibernate |
+| 🐬 Base de datos | MySQL 8.0 (dockerizada) |
+| 🔨 Build tool | Maven |
+| ✂️ Menos código repetido (getters, setters, constructores) | Lombok |
+| 🧪 Testing | JUnit 5, Mockito, MockMvc, Testcontainers |
+| 🐳 Contenerización | Docker / Docker Compose |
+| 🌿 Control de versiones | Git / GitHub |
 
 ---
 
@@ -109,12 +109,12 @@ dev.andrea.acompaname_backend
 
 **Patrones y principios aplicados:**
 
-- **DTO (Data Transfer Object):** las entidades JPA nunca se exponen directamente en la API. Cada recurso tiene su `DTORequest` (datos de entrada, con validación) y `DTOResponse` (datos de salida, sin campos sensibles como la contraseña).
-- **Mapper:** clases estáticas dedicadas a convertir entre `Entity` ↔ `DTO`, manteniendo el resto del código libre de esa lógica de transformación.
-- **Interfaces genéricas:** `InterfaceGenericService<Entity, DTORequest, DTOResponse>` centraliza la firma de los métodos CRUD comunes a las entidades, evitando duplicación de código.
-- **Inyección de dependencias por constructor:** en todos los `Service` y `Controller`, así las dependencias no se pueden cambiar por error y es más fácil probarlas en los tests (en vez de usar `@Autowired` en el atributo).
-- **Excepciones personalizadas:** cada entidad cuenta con su propia jerarquía de excepciones (`XException` → `XExceptionNotFound`, `XExceptionAccesoDenegado`), capturadas de forma centralizada por un `GlobalExceptionHandler` (`@RestControllerAdvice`) que devuelve respuestas claras y con el código HTTP correcto.
-- **Encapsulación:** todos los campos de las entidades son privados, con acceso exclusivo a través de getters/setters.
+- 📦 **DTO (Data Transfer Object):** las entidades JPA nunca se exponen directamente en la API. Cada recurso tiene su `DTORequest` (datos de entrada, con validación) y `DTOResponse` (datos de salida, sin campos sensibles como la contraseña).
+- 🔄 **Mapper:** clases estáticas dedicadas a convertir entre `Entity` ↔ `DTO`, manteniendo el resto del código libre de esa lógica de transformación.
+- 🧬 **Interfaces genéricas:** `InterfaceGenericService<Entity, DTORequest, DTOResponse>` centraliza la firma de los métodos CRUD comunes a las entidades, evitando duplicación de código.
+- 💉 **Inyección de dependencias por constructor:** en todos los `Service` y `Controller`, así las dependencias no se pueden cambiar por error y es más fácil probarlas en los tests (en vez de usar `@Autowired` en el atributo).
+- 🚨 **Excepciones personalizadas:** cada entidad cuenta con su propia jerarquía de excepciones (`XException` → `XExceptionNotFound`, `XExceptionAccesoDenegado`), capturadas de forma centralizada por un `GlobalExceptionHandler` (`@RestControllerAdvice`) que devuelve respuestas claras y con el código HTTP correcto.
+- 🔒 **Encapsulación:** todos los campos de las entidades son privados, con acceso exclusivo a través de getters/setters.
 
 ---
 
@@ -124,12 +124,12 @@ El sistema gira en torno a **seis entidades principales**:
 
 | Entidad | Descripción |
 |---|---|
-| `UsuarioEntity` | Usuario del sistema (familia o cuidador). Relación `@ManyToMany` con `RoleEntity`. |
-| `RoleEntity` | Rol del usuario (`FAMILIA` / `CUIDADOR`). |
-| `PerfilCuidadorEntity` | Perfil profesional de un cuidador. Relación `@OneToOne` con `UsuarioEntity`. |
-| `SolicitudEntity` | Solicitud de servicio de una familia a un cuidador. Relaciones `@ManyToOne` con `UsuarioEntity` (familia) y `PerfilCuidadorEntity` (cuidador). |
-| `ValoracionEntity` | Valoración de una solicitud completada. Relación `@OneToOne` con `SolicitudEntity`. |
-| `PagoEntity` | Pago de una solicitud (`PENDIENTE`, `COMPLETADO`, `CANCELADO`). Relación `@OneToOne` con `SolicitudEntity`. |
+| 👤 `UsuarioEntity` | Usuario del sistema (familia o cuidador). Relación `@ManyToMany` con `RoleEntity`. |
+| 🎭 `RoleEntity` | Rol del usuario (`FAMILIA` / `CUIDADOR`). |
+| 🧑‍⚕️ `PerfilCuidadorEntity` | Perfil profesional de un cuidador. Relación `@OneToOne` con `UsuarioEntity`. |
+| 📋 `SolicitudEntity` | Solicitud de servicio de una familia a un cuidador. Relaciones `@ManyToOne` con `UsuarioEntity` (familia) y `PerfilCuidadorEntity` (cuidador). |
+| ⭐ `ValoracionEntity` | Valoración de una solicitud completada. Relación `@OneToOne` con `SolicitudEntity`. |
+| 💳 `PagoEntity` | Pago de una solicitud (`PENDIENTE`, `COMPLETADO`, `CANCELADO`). Relación `@OneToOne` con `SolicitudEntity`. |
 
 ### Diagrama Entidad-Relación
 
@@ -352,9 +352,9 @@ El proyecto cuenta con **152 tests** que cubren la lógica de negocio, la capa d
 | 🐳 Integración (Testcontainers + seguridad) | 11 |
 | 🚀 Arranque de la aplicación | 1 |
 
-- **Tests unitarios de Service** (`Mockito`): cada `ServiceImpl` está testeado de forma aislada, mockeando sus repositorios. Hay una clase para los casos normales y otra para los errores (`...ErroresTest`).
-- **Tests de Controller** (`MockMvc` + `@WebMvcTest`): verifican que cada endpoint responde con el código de estado y el cuerpo JSON esperados.
-- **Tests de integración** (`Testcontainers`): `UsuarioRepositoryIntegrationTest` y `SecurityIntegrationTest` se ejecutan contra un MySQL real que Testcontainers arranca en un contenedor de Docker solo mientras dura el test. Este último comprueba las reglas de seguridad con peticiones reales.
+- 🧩 **Tests unitarios de Service** (`Mockito`): cada `ServiceImpl` está testeado de forma aislada, mockeando sus repositorios. Hay una clase para los casos normales y otra para los errores (`...ErroresTest`).
+- 🌐 **Tests de Controller** (`MockMvc` + `@WebMvcTest`): verifican que cada endpoint responde con el código de estado y el cuerpo JSON esperados.
+- 🐳 **Tests de integración** (`Testcontainers`): `UsuarioRepositoryIntegrationTest` y `SecurityIntegrationTest` se ejecutan contra un MySQL real que Testcontainers arranca en un contenedor de Docker solo mientras dura el test. Este último comprueba las reglas de seguridad con peticiones reales.
 
 ```bash
 ./mvnw test
@@ -370,14 +370,15 @@ La cobertura se mide con **JaCoCo**. Al ejecutar `./mvnw test` se genera el info
 
 Además de los casos normales, hay tests pensados para los **casos límite y de seguridad**:
 
-- **404:** pedir, editar o borrar algo que no existe (pagos, solicitudes, usuarios, perfiles y valoraciones).
-- **403:** que un usuario no pueda ver, editar ni borrar las solicitudes, el perfil, los datos o las valoraciones de otra persona. Se comprueba también que en esos casos no se guarda ni se borra nada.
-- **409:** registrar dos veces el mismo email.
-- **400:** enviar un pago sin importe o sin solicitud.
-- **401:** llamar sin iniciar sesión a rutas privadas (pagos, solicitudes, `mi-perfil`). El listado y el perfil público de los cuidadores sí se pueden ver sin cuenta.
-- **Pago automático:** al aceptar una solicitud se crea el pago pendiente con la tarifa del cuidador, y al rechazarla no se crea ninguno.
+- 🔎 **404:** pedir, editar o borrar algo que no existe (pagos, solicitudes, usuarios, perfiles y valoraciones).
+- 🚫 **403:** que un usuario no pueda ver, editar ni borrar las solicitudes, el perfil, los datos o las valoraciones de otra persona. Se comprueba también que en esos casos no se guarda ni se borra nada.
+- ⚔️ **409:** registrar dos veces el mismo email.
+- ⚠️ **400:** enviar un pago sin importe o sin solicitud.
+- 🔒 **401:** llamar sin iniciar sesión a rutas privadas (pagos, solicitudes, `mi-perfil`). El listado y el perfil público de los cuidadores sí se pueden ver sin cuenta.
+- 💳 **Pago automático:** al aceptar una solicitud se crea el pago pendiente con la tarifa del cuidador, y al rechazarla no se crea ninguno.
 
-Al escribir estos tests encontré varios fallos reales y los arreglé: un pago que no existía devolvía error 500 en vez de 404, cualquier usuario podía editar o borrar la valoración de otra persona, y aceptar una solicitud no generaba el pago. Además, los errores no controlados ahora se escriben en el log para poder saber qué ha pasado.
+> [!TIP]
+> Al escribir estos tests encontré varios fallos reales y los arreglé: un pago que no existía devolvía error 500 en vez de 404, cualquier usuario podía editar o borrar la valoración de otra persona, y aceptar una solicitud no generaba el pago. Además, los errores no controlados ahora se escriben en el log para poder saber qué ha pasado.
 
 ---
 
@@ -411,8 +412,8 @@ Bocetos, wireframes y mockups para móvil, tablet y escritorio. El conjunto comp
 |---|---|---|
 | ![Landing](docs/design/01-landing_escritorio.png) | ![Buscar](docs/design/04-buscar_escritorio.png) | ![Perfil](docs/design/05-perfil-cuidador_escritorio.png) |
 
-- **Figma:** https://www.figma.com/design/iNrrCJOe6CkQXTxhGzK7rj/Acomp%C3%A1%C3%B1ame
-- **Prototipo en Lovable:** https://care-connection-hub-18.lovable.app
+- 🎨 **Figma:** https://www.figma.com/design/iNrrCJOe6CkQXTxhGzK7rj/Acomp%C3%A1%C3%B1ame
+- 💜 **Prototipo en Lovable:** https://care-connection-hub-18.lovable.app
 
 ---
 
@@ -420,10 +421,10 @@ Bocetos, wireframes y mockups para móvil, tablet y escritorio. El conjunto comp
 
 La planificación y el seguimiento del proyecto se han gestionado en **JIRA** (proyecto `ACOM`), organizados en:
 
-- 8 épicas: Autenticación y Seguridad, Gestión de Cuidadores, Solicitudes de Servicio, Valoraciones, Pagos, Calidad y pruebas, Diseño y UX, Infraestructura y entrega
-- 19 historias de usuario con criterios de aceptación en formato Gherkin
-- 16 tareas técnicas
-- 5 sprints entre agosto y octubre de 2026
+- 🗂️ 8 épicas: Autenticación y Seguridad, Gestión de Cuidadores, Solicitudes de Servicio, Valoraciones, Pagos, Calidad y pruebas, Diseño y UX, Infraestructura y entrega
+- 📖 19 historias de usuario con criterios de aceptación en formato Gherkin
+- 🔧 16 tareas técnicas
+- 🏃 5 sprints entre agosto y octubre de 2026
 
 🔗 Enlace al tablero de JIRA: https://saludosalamanecer-1780468848301.atlassian.net/jira/software/projects/ACOM/boards/34/timeline?rangeMode=MONTHS
 
@@ -440,43 +441,44 @@ Documentar el porqué de las decisiones, no solo el qué, para dejar constancia 
 
 | Decisión | Motivo |
 |---|---|
-| **Roles en tabla `roles` (`@ManyToMany`) en lugar de un enum simple** | Un enum bastaba funcionalmente (un usuario = un rol), pero modelar los roles como entidad propia sigue el patrón estándar de Spring Security, permite añadir permisos/roles nuevos sin tocar código, y es coherente con proyectos reales. |
-| **Lombok** | Reduce drásticamente el código repetitivo de getters, setters y constructores en las entidades, mejorando la legibilidad sin perder funcionalidad. |
-| **`UsuarioEntity` no se separa en "datos de autenticación" y "datos de perfil"** | Se valoró separar en dos tablas (una solo para login, otra para el resto de datos), pero para el alcance de este proyecto se optó por mantenerlos juntos, priorizando simplicidad sobre una normalización que no aportaba valor funcional inmediato. |
-| **DTOs explícitos en cada capa de entrada/salida** | Evita exponer las entidades JPA directamente (y con ellas, campos sensibles como la contraseña), y protege frente a *mass assignment* al aceptar solo los campos declarados explícitamente. |
-| **Interfaz genérica `InterfaceGenericService<Entity, DTORequest, DTOResponse>`** | Las entidades comparten las mismas operaciones CRUD; centralizar su firma en una interfaz genérica evita repetir el mismo contrato en cada módulo. |
-| **Excepciones personalizadas por entidad + `GlobalExceptionHandler` centralizado** | Permite devolver códigos HTTP y mensajes claros y específicos (`403`, `404`, `409`...) en lugar de errores genéricos, mejorando la experiencia de quien consume la API. |
-| **Autorización por rol en la creación, edición y borrado** | Refleja la lógica de negocio real: cada rol solo debe poder generar y gestionar el tipo de recurso que le corresponde dentro del flujo de la plataforma. |
-| **Comprobar en el Service que el recurso es del usuario** | Un usuario autenticado solo puede tocar sus propios datos, aunque conozca el id de otro recurso. |
-| **`ddl-auto=update` en lugar de `create-drop`** | Al trabajar contra una base de datos persistente en Docker (no en memoria), se prioriza no perder datos entre reinicios de la aplicación durante el desarrollo. |
-| **Testcontainers para los tests de integración** | Prueban con un MySQL real, el mismo que usa la aplicación, en vez de una base de datos distinta en memoria. |
+| ✅ **Roles en tabla `roles` (`@ManyToMany`) en lugar de un enum simple** | Un enum bastaba funcionalmente (un usuario = un rol), pero modelar los roles como entidad propia sigue el patrón estándar de Spring Security, permite añadir permisos/roles nuevos sin tocar código, y es coherente con proyectos reales. |
+| ✅ **Lombok** | Reduce drásticamente el código repetitivo de getters, setters y constructores en las entidades, mejorando la legibilidad sin perder funcionalidad. |
+| ✅ **`UsuarioEntity` no se separa en "datos de autenticación" y "datos de perfil"** | Se valoró separar en dos tablas (una solo para login, otra para el resto de datos), pero para el alcance de este proyecto se optó por mantenerlos juntos, priorizando simplicidad sobre una normalización que no aportaba valor funcional inmediato. |
+| ✅ **DTOs explícitos en cada capa de entrada/salida** | Evita exponer las entidades JPA directamente (y con ellas, campos sensibles como la contraseña), y protege frente a *mass assignment* al aceptar solo los campos declarados explícitamente. |
+| ✅ **Interfaz genérica `InterfaceGenericService<Entity, DTORequest, DTOResponse>`** | Las entidades comparten las mismas operaciones CRUD; centralizar su firma en una interfaz genérica evita repetir el mismo contrato en cada módulo. |
+| ✅ **Excepciones personalizadas por entidad + `GlobalExceptionHandler` centralizado** | Permite devolver códigos HTTP y mensajes claros y específicos (`403`, `404`, `409`...) en lugar de errores genéricos, mejorando la experiencia de quien consume la API. |
+| ✅ **Autorización por rol en la creación, edición y borrado** | Refleja la lógica de negocio real: cada rol solo debe poder generar y gestionar el tipo de recurso que le corresponde dentro del flujo de la plataforma. |
+| ✅ **Comprobar en el Service que el recurso es del usuario** | Un usuario autenticado solo puede tocar sus propios datos, aunque conozca el id de otro recurso. |
+| ✅ **`ddl-auto=update` en lugar de `create-drop`** | Al trabajar contra una base de datos persistente en Docker (no en memoria), se prioriza no perder datos entre reinicios de la aplicación durante el desarrollo. |
+| ✅ **Testcontainers para los tests de integración** | Prueban con un MySQL real, el mismo que usa la aplicación, en vez de una base de datos distinta en memoria. |
 
 ---
 
 ## ⚠️ Limitaciones conocidas
 
-> [!NOTE]
+> [!WARNING]
 > De forma transparente, estas son las áreas identificadas como pendientes de mejora en la versión actual.
 
-- **Autenticación mediante Basic Auth**, no JWT. La migración a JWT está prevista como siguiente paso.
-- **Credenciales por defecto de desarrollo:** se pueden cambiar con variables de entorno, pero los valores por defecto siguen en `application.properties` y `docker-compose.yml`.
-- **Pagos simulados:** no hay pasarela de pago real. El pago se crea al aceptar la solicitud y se marca como pagado con `PATCH /pagos/{id}/pagar`.
-- **Sin límite de intentos de login** (falta proteger la aplicación de quien pruebe contraseñas una y otra vez).
+- 🔑 **Autenticación mediante Basic Auth**, no JWT. La migración a JWT está prevista como siguiente paso.
+- 🗝️ **Credenciales por defecto de desarrollo:** se pueden cambiar con variables de entorno, pero los valores por defecto siguen en `application.properties` y `docker-compose.yml`.
+- 💳 **Pagos simulados:** no hay pasarela de pago real. El pago se crea al aceptar la solicitud y se marca como pagado con `PATCH /pagos/{id}/pagar`.
+- 🚧 **Sin límite de intentos de login** (falta proteger la aplicación de quien pruebe contraseñas una y otra vez).
 
 ---
 
 ## 🗺 Roadmap / Mejoras futuras
 
-Funcionalidades identificadas como **Fase 2**, fuera del alcance del MVP entregado:
+> [!TIP]
+> Funcionalidades identificadas como **Fase 2**, fuera del alcance del MVP entregado.
 
-- Autenticación mediante JWT
-- Pasarela de pago real (por ejemplo Stripe en modo test)
-- Geolocalización de cuidadores en tiempo real
-- Videollamadas y chat en tiempo real
-- Notificaciones push
-- Generación de informes en PDF
-- Filtros de búsqueda avanzados (especialidad, tarifa, disponibilidad)
-- Despliegue (imagen Docker y base de datos en la nube)
+- 🔑 Autenticación mediante JWT
+- 💳 Pasarela de pago real (por ejemplo Stripe en modo test)
+- 📍 Geolocalización de cuidadores en tiempo real
+- 💬 Videollamadas y chat en tiempo real
+- 🔔 Notificaciones push
+- 📄 Generación de informes en PDF
+- 🔍 Filtros de búsqueda avanzados (especialidad, tarifa, disponibilidad)
+- ☁️ Despliegue (imagen Docker y base de datos en la nube)
 
 ---
 
@@ -484,12 +486,12 @@ Funcionalidades identificadas como **Fase 2**, fuera del alcance del MVP entrega
 
 | Recurso | Enlace |
 |---|---|
-| Repositorio Backend | [github.com/AndreaVaGo/acompaname-backend](https://github.com/AndreaVaGo/acompaname-backend) |
-| Repositorio Frontend | [github.com/AndreaVaGo/acompaname-frontend](https://github.com/AndreaVaGo/acompaname-frontend) |
-| Presentación | [docs/presentacion.pdf](docs/presentacion.pdf) |
-| Tablero JIRA | https://saludosalamanecer-1780468848301.atlassian.net/jira/software/projects/ACOM/boards/34/timeline?rangeMode=MONTHS |
-| Diseño en Figma | https://www.figma.com/design/iNrrCJOe6CkQXTxhGzK7rj/Acomp%C3%A1%C3%B1ame |
-| Prototipo Lovable | https://care-connection-hub-18.lovable.app |
+| 🍃 Repositorio Backend | [github.com/AndreaVaGo/acompaname-backend](https://github.com/AndreaVaGo/acompaname-backend) |
+| 🖥️ Repositorio Frontend | [github.com/AndreaVaGo/acompaname-frontend](https://github.com/AndreaVaGo/acompaname-frontend) |
+| 🎤 Presentación | [docs/presentacion.pdf](docs/presentacion.pdf) |
+| 📊 Tablero JIRA | https://saludosalamanecer-1780468848301.atlassian.net/jira/software/projects/ACOM/boards/34/timeline?rangeMode=MONTHS |
+| 🎨 Diseño en Figma | https://www.figma.com/design/iNrrCJOe6CkQXTxhGzK7rj/Acomp%C3%A1%C3%B1ame |
+| 💜 Prototipo Lovable | https://care-connection-hub-18.lovable.app |
 
 ---
 
@@ -497,7 +499,7 @@ Funcionalidades identificadas como **Fase 2**, fuera del alcance del MVP entrega
 
 Proyecto desarrollado por **Andrea Vallina González** como Proyecto Final del bootcamp de Desarrollo Web Full Stack en **Factoría F5 — Digital Academy**.
 
-- GitHub: [@AndreaVaGo](https://github.com/AndreaVaGo)
-- LinkedIn: [Andrea Vallina González](https://www.linkedin.com/in/andrea-vallina-gonzalez/)
+- 🐙 GitHub: [@AndreaVaGo](https://github.com/AndreaVaGo)
+- 💼 LinkedIn: [Andrea Vallina González](https://www.linkedin.com/in/andrea-vallina-gonzalez/)
 
 ---
