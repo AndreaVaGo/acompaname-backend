@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTORequest;
 import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTOResponse;
@@ -15,7 +16,6 @@ import dev.andrea.acompaname_backend.perfilcuidador.mappers.PerfilCuidadorMapper
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
@@ -33,10 +33,13 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
                 "Perfil de cuidador no encontrado. Id " + id + " no existe."));
     }
 
-    private void verificarPropietario(PerfilCuidadorEntity perfil) {
+    private String emailLogueado() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String emailLogueado = auth.getName();
-        if (!perfil.getUsuario().getEmail().equals(emailLogueado)) {
+        return auth.getName();
+    }
+
+    private void verificarPropietario(PerfilCuidadorEntity perfil) {
+        if (!perfil.getUsuario().getEmail().equals(emailLogueado())) {
             throw new PerfilCuidadorExceptionAccesoDenegado("No tiene permiso para modificar este perfil");
         }
     }
@@ -58,16 +61,15 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
     @Override
     public PerfilCuidadorDTOResponse storeEntity(PerfilCuidadorDTORequest dto) {
         boolean yaExiste = repository.findAll().stream()
-            .anyMatch(p -> p.getUsuario().getId().equals(dto.usuarioId()));
-        if(yaExiste) {
+                .anyMatch(p -> p.getUsuario().getId().equals(dto.usuarioId()));
+        if (yaExiste) {
             throw new PerfilCuidadorExceptionAccesoDenegado("Este usuario ya tiene un perfil cuidador creado");
         }
 
         UsuarioEntity usuario = usuarioRepository.findById(dto.usuarioId())
                 .orElseThrow(() -> new UsuarioExceptionNotFound(
                         "Usuario no encontrado. Id " + dto.usuarioId() + " no existe."));
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (!usuario.getEmail().equals(auth.getName())) {
+        if (!usuario.getEmail().equals(emailLogueado())) {
             throw new PerfilCuidadorExceptionAccesoDenegado("No puede crear un perfil para otro usuario");
         }
         PerfilCuidadorEntity perfilToSave = PerfilCuidadorMapper.toEntity(dto, usuario);
@@ -101,8 +103,7 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
 
     @Override
     public PerfilCuidadorDTOResponse getMiPerfil() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String emailLogueado = auth.getName();
+        String emailLogueado = emailLogueado();
 
         PerfilCuidadorEntity perfil = repository.findAll().stream()
                 .filter(p -> p.getUsuario().getEmail().equals(emailLogueado))
