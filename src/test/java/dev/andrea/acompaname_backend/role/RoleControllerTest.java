@@ -25,22 +25,17 @@ public class RoleControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockitoBean
-    private RoleRepository repository;
+    private RoleService service;
     @Autowired
     ObjectMapper mapper;
 
-    private RoleEntity rol(Long id, String nombre) {
-        RoleEntity rol = new RoleEntity();
-        rol.setId(id);
-        rol.setName(nombre);
-        return rol;
-    }
-
     @Test
     void testIndexDevuelveLosRoles() throws Exception {
-        when(repository.findAll()).thenReturn(List.of(rol(1L, "FAMILIA"), rol(2L, "CUIDADOR")));
-        String json = mapper.writeValueAsString(
-                List.of(new RoleDTOResponse(1L, "FAMILIA"), new RoleDTOResponse(2L, "CUIDADOR")));
+        List<RoleDTOResponse> roles = List.of(
+                new RoleDTOResponse(1L, "FAMILIA"),
+                new RoleDTOResponse(2L, "CUIDADOR"));
+        when(service.index()).thenReturn(roles);
+        String json = mapper.writeValueAsString(roles);
 
         MockHttpServletResponse response = mockMvc.perform(get("/api/v1/roles"))
                 .andReturn()
@@ -52,7 +47,7 @@ public class RoleControllerTest {
 
     @Test
     void testIndexSinRolesDevuelveListaVacia() throws Exception {
-        when(repository.findAll()).thenReturn(List.of());
+        when(service.index()).thenReturn(List.of());
 
         MockHttpServletResponse response = mockMvc.perform(get("/api/v1/roles"))
                 .andReturn()
