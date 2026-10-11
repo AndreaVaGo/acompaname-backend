@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
@@ -20,7 +21,6 @@ import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionAccesoDe
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionEmailDuplicado;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
 import dev.andrea.acompaname_backend.usuario.mappers.UsuarioMapper;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
@@ -43,10 +43,13 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .orElseThrow(() -> new UsuarioExceptionNotFound("Usuario no encontrado. Id " + id + " no existe."));
     }
 
-    private void verificarPropietario(UsuarioEntity usuario) {
+    private String emailLogueado() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String emailLogueado = auth.getName();
-        if (!usuario.getEmail().equals(emailLogueado)) {
+        return auth.getName();
+    }
+
+    private void verificarPropietario(UsuarioEntity usuario) {
+        if (!usuario.getEmail().equals(emailLogueado())) {
             throw new UsuarioExceptionAccesoDenegado("No tiene permiso para acceder a este usuario");
         }
     }
@@ -54,8 +57,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public List<UsuarioDTOResponse> getEntities() {
         // Cada usuario solo ve sus propios datos, no los de los demás
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return repository.findByEmail(auth.getName()).stream()
+        return repository.findByEmail(emailLogueado()).stream()
                 .map(UsuarioMapper::toDTO)
                 .collect(Collectors.toList());
     }
