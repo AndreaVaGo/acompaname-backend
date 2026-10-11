@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import dev.andrea.acompaname_backend.solicitud.EstadoSolicitud;
 import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
@@ -17,7 +18,6 @@ import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionAc
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionConflicto;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionNotFound;
 import dev.andrea.acompaname_backend.valoracion.mappers.ValoracionMapper;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ValoracionServiceImpl implements ValoracionService {
@@ -35,10 +35,13 @@ public class ValoracionServiceImpl implements ValoracionService {
                 () -> new ValoracionExceptionNotFound("Valoracion no encontrada. Id " + id + " no existe."));
     }
 
-    private void verificarPropietario(SolicitudEntity solicitud) {
+    private String emailLogueado() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String emailLogueado = auth.getName();
-        if (!solicitud.getFamilia().getEmail().equals(emailLogueado)) {
+        return auth.getName();
+    }
+
+    private void verificarPropietario(SolicitudEntity solicitud) {
+        if (!solicitud.getFamilia().getEmail().equals(emailLogueado())) {
             throw new ValoracionExceptionAccesoDenegado("No tiene permiso sobre esta valoración");
         }
     }
@@ -59,7 +62,6 @@ public class ValoracionServiceImpl implements ValoracionService {
     @Transactional
     @Override
     public ValoracionDTOResponse storeEntity(ValoracionDTORequest dto) {
-        
         SolicitudEntity solicitud = solicitudRepository.findById(dto.solicitudId())
                 .orElseThrow(() -> new SolicitudExceptionNotFound(
                         "Solicitud no encontrada. Id " + dto.solicitudId() + " no existe."));
@@ -94,5 +96,4 @@ public class ValoracionServiceImpl implements ValoracionService {
         ValoracionEntity valoracionActualizada = repository.save(valoracionExistente);
         return ValoracionMapper.toDTO(valoracionActualizada);
     }
-
 }
