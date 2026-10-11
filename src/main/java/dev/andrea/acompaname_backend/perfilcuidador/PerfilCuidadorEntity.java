@@ -41,8 +41,8 @@ public class PerfilCuidadorEntity {
     @JoinColumn(name = "usuario_id", referencedColumnName = "id")
     private UsuarioEntity usuario;
 
-    // Enlace a la foto de perfil (puede estar vacío)
-    @Column(length = 500)
+    // Foto de perfil guardada como texto (puede estar vacía)
+    @Column(columnDefinition = "LONGTEXT")
     private String foto;
 
     // Constructor sin foto: el mismo que había antes de añadir este campo
