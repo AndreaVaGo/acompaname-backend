@@ -3,6 +3,7 @@ package dev.andrea.acompaname_backend.perfilcuidador;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -118,5 +119,58 @@ public class PerfilCuidadorServiceImplTest {
                 "Nueva bio actualizada", false, false, 1L);
         PerfilCuidadorDTOResponse resultado = service.update(1L, dto);
         assertThat(resultado.especialidad(), is(equalTo("Pediatría")));
+    }
+
+    @Test
+    void testGetByIdDevuelveLaFoto() {
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
+                Set.of(crearRolMock()));
+        PerfilCuidadorEntity perfilMock = new PerfilCuidadorEntity(1L, "Enfermeria", 3, new BigDecimal("20.00"),
+                "Bio de prueba", true, false, usuario);
+        perfilMock.setFoto("https://ejemplo.com/foto.jpg");
+        when(repository.findById(1L)).thenReturn(Optional.of(perfilMock));
+
+        PerfilCuidadorDTOResponse perfil = service.getById(1L);
+
+        assertThat(perfil.foto(), is(equalTo("https://ejemplo.com/foto.jpg")));
+    }
+
+    @Test
+    void testUpdateGuardaLaFoto() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
+                Set.of(crearRolMock()));
+        PerfilCuidadorEntity perfilExistente = new PerfilCuidadorEntity(1L, "Enfermeria", 3, new BigDecimal("20.00"),
+                "Bio de prueba", true, false, usuario);
+        when(repository.findById(1L)).thenReturn(Optional.of(perfilExistente));
+        when(repository.save(Mockito.any(PerfilCuidadorEntity.class))).thenReturn(perfilExistente);
+        PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Pediatría", 6, new BigDecimal("22.00"),
+                "Nueva bio actualizada", false, false, 1L, "https://ejemplo.com/nueva.jpg");
+
+        PerfilCuidadorDTOResponse resultado = service.update(1L, dto);
+
+        assertThat(resultado.foto(), is(equalTo("https://ejemplo.com/nueva.jpg")));
+    }
+
+    @Test
+    void testUpdateSinFotoQuitaLaFoto() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
+                Set.of(crearRolMock()));
+        PerfilCuidadorEntity perfilExistente = new PerfilCuidadorEntity(1L, "Enfermeria", 3, new BigDecimal("20.00"),
+                "Bio de prueba", true, false, usuario);
+        perfilExistente.setFoto("https://ejemplo.com/foto.jpg");
+        when(repository.findById(1L)).thenReturn(Optional.of(perfilExistente));
+        when(repository.save(Mockito.any(PerfilCuidadorEntity.class))).thenReturn(perfilExistente);
+        PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Pediatría", 6, new BigDecimal("22.00"),
+                "Nueva bio actualizada", false, false, 1L);
+
+        PerfilCuidadorDTOResponse resultado = service.update(1L, dto);
+
+        assertThat(resultado.foto(), is(nullValue()));
     }
 }
