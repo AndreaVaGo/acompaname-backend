@@ -17,6 +17,7 @@ public class SolicitudMapper {
         solicitud.setNotas(dto.notas());
         solicitud.setEdadPaciente(dto.edadPaciente());
         solicitud.setFechaCuidado(dto.fechaCuidado());
+        solicitud.setFechaFin(dto.fechaFin());
         solicitud.setEstado(EstadoSolicitud.PENDIENTE);
         solicitud.setFamilia(familia);
         solicitud.setCuidador(cuidador);
@@ -25,9 +26,9 @@ public class SolicitudMapper {
 
     public static SolicitudDTOResponse toDTO(SolicitudEntity entity) {
         return new SolicitudDTOResponse(entity.getId(), entity.getTipoCuidado(), entity.getNombrePaciente(),
-                entity.getNotas(), entity.getEdadPaciente(), entity.getFechaCuidado(), entity.getEstado(),
-                entity.getFamilia().getId(), entity.getCuidador().getId(),
+                entity.getNotas(), entity.getEdadPaciente(), entity.getFechaCuidado(), entity.getFechaFin(),
+                entity.getEstado(), entity.getFamilia().getId(), entity.getCuidador().getId(),
                 entity.getFamilia().getNombre(), entity.getCuidador().getUsuario().getNombre());
     }
-    
+
 }
