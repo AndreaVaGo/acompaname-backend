@@ -24,6 +24,7 @@ import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTORespon
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
+import dev.andrea.acompaname_backend.valoracion.ValoracionRepository;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,10 +37,12 @@ public class PerfilCuidadorServiceImplTest {
     private PerfilCuidadorRepository repository;
     @Mock
     private UsuarioRepository usuarioRepository;
+    @Mock
+    private ValoracionRepository valoracionRepository;
 
     @BeforeEach
     void setup() {
-        service = new PerfilCuidadorServiceImpl(repository, usuarioRepository);
+        service = new PerfilCuidadorServiceImpl(repository, usuarioRepository, valoracionRepository);
     }
 
     private RoleEntity crearRolMock() {
@@ -172,5 +175,37 @@ public class PerfilCuidadorServiceImplTest {
         PerfilCuidadorDTOResponse resultado = service.update(1L, dto);
 
         assertThat(resultado.foto(), is(nullValue()));
+    }
+
+    @Test
+    void testGetByIdDevuelveLaValoracionMediaRedondeada() {
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
+                Set.of(crearRolMock()));
+        PerfilCuidadorEntity perfilMock = new PerfilCuidadorEntity(1L, "Enfermeria", 3, new BigDecimal("20.00"),
+                "Bio de prueba", true, false, usuario);
+        when(repository.findById(1L)).thenReturn(Optional.of(perfilMock));
+        when(valoracionRepository.mediaPorCuidador(1L)).thenReturn(4.666666);
+        when(valoracionRepository.countBySolicitudCuidadorId(1L)).thenReturn(3L);
+
+        PerfilCuidadorDTOResponse perfil = service.getById(1L);
+
+        assertThat(perfil.valoracionMedia(), is(equalTo(4.7)));
+        assertThat(perfil.numValoraciones(), is(equalTo(3L)));
+    }
+
+    @Test
+    void testGetByIdSinValoracionesDevuelveMediaNula() {
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
+                Set.of(crearRolMock()));
+        PerfilCuidadorEntity perfilMock = new PerfilCuidadorEntity(1L, "Enfermeria", 3, new BigDecimal("20.00"),
+                "Bio de prueba", true, false, usuario);
+        when(repository.findById(1L)).thenReturn(Optional.of(perfilMock));
+        when(valoracionRepository.mediaPorCuidador(1L)).thenReturn(null);
+        when(valoracionRepository.countBySolicitudCuidadorId(1L)).thenReturn(0L);
+
+        PerfilCuidadorDTOResponse perfil = service.getById(1L);
+
+        assertThat(perfil.valoracionMedia(), is(nullValue()));
+        assertThat(perfil.numValoraciones(), is(equalTo(0L)));
     }
 }
