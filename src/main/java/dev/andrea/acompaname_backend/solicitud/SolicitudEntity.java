@@ -36,6 +36,7 @@ public class SolicitudEntity {
     private String notas;
     private Integer edadPaciente;
     private LocalDate fechaCuidado;
+    private LocalDate fechaFin;
     @Enumerated(EnumType.STRING)
     private EstadoSolicitud estado;
 
@@ -46,4 +47,10 @@ public class SolicitudEntity {
     @ManyToOne
     @JoinColumn(name = "cuidador_id")
     private PerfilCuidadorEntity cuidador;
+
+    // Constructor sin fecha de fin, para no romper el código que ya existía
+    public SolicitudEntity(Long id, String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
+            LocalDate fechaCuidado, EstadoSolicitud estado, UsuarioEntity familia, PerfilCuidadorEntity cuidador) {
+        this(id, tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, null, estado, familia, cuidador);
+    }
 }
