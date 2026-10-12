@@ -23,13 +23,21 @@ public record PerfilCuidadorDTORequest(
 
         @NotNull(message = "El usuario id no puede ser nulo") Long usuarioId,
 
-        @Size(max = 500000, message = "La foto es demasiado grande") String foto
+        @Size(max = 500000, message = "La foto es demasiado grande") String foto,
+
+        @Size(max = 100, message = "La ciudad no puede superar 100 caracteres") String ciudad
 
 ) {
 
-    // Constructor sin foto: el mismo que había antes de añadir este campo
+    // Constructor sin foto ni ciudad: el mismo que había al principio
     public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
             boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId) {
-        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, null);
+        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, null, null);
+    }
+
+    // Constructor sin ciudad: el mismo que había antes de añadir este campo
+    public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
+            boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String foto) {
+        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, foto, null);
     }
 }
