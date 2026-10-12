@@ -97,6 +97,23 @@ public class SolicitudControllerTest {
         }
 
         @Test
+        void testStoreConFechaFin() throws Exception {
+                SolicitudDTORequest dto = new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", 80,
+                                LocalDate.now().plusDays(7), LocalDate.now().plusDays(14), 1L, 1L);
+                SolicitudDTOResponse dtoResponse = new SolicitudDTOResponse(1L, "Acompañamiento", "Manuel", "Sin notas",
+                                80, LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 17), EstadoSolicitud.PENDIENTE,
+                                1L, 1L, "Ana", "Pepe");
+                when(service.storeEntity(Mockito.any(SolicitudDTORequest.class))).thenReturn(dtoResponse);
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/solicitudes")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(201)));
+                assertThat(response.getContentAsString(), containsString("2026-09-17"));
+        }
+
+        @Test
         void testStoreEdadNegativa() throws Exception {
                 SolicitudDTORequest dto = new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", -5,
                                 LocalDate.now().plusDays(7), 1L, 1L);
@@ -134,6 +151,20 @@ public class SolicitudControllerTest {
                 assertThat(response.getStatus(), is(equalTo(400)));
                 assertThat(response.getContentAsString(),
                                 containsString("La fecha del cuidado no puede estar en el pasado"));
+        }
+
+        @Test
+        void testStoreFechaFinEnElPasado() throws Exception {
+                SolicitudDTORequest dto = new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", 80,
+                                LocalDate.now().plusDays(7), LocalDate.now().minusDays(1), 1L, 1L);
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/solicitudes")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(400)));
+                assertThat(response.getContentAsString(),
+                                containsString("La fecha de fin no puede estar en el pasado"));
         }
 
         @Test
