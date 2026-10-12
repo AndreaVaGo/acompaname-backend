@@ -16,6 +16,7 @@ public class PerfilCuidadorMapper {
         perfil.setTieneVehiculo(dto.tieneVehiculo());
         perfil.setDisponibleAhora(dto.disponibleAhora());
         perfil.setFoto(dto.foto());
+        perfil.setCiudad(dto.ciudad());
         perfil.setUsuario(usuario);
         return perfil;
     }
@@ -31,7 +32,8 @@ public class PerfilCuidadorMapper {
         entity.isDisponibleAhora(),
         entity.getUsuario().getId(),
         entity.getUsuario().getNombre(),
-        entity.getFoto());
+        entity.getFoto(),
+        entity.getCiudad());
         return dtoResponse;
 
     }
