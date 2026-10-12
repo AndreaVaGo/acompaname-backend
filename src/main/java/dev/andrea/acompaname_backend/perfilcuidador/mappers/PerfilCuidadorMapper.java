@@ -7,6 +7,11 @@ import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 
 public class PerfilCuidadorMapper {
 
+    // Si el cuidador no ha elegido tipo de cuidado, se considera que ofrece los dos
+    private static String tipoCuidadoOPorDefecto(String tipoCuidado) {
+        return tipoCuidado == null ? "ambos" : tipoCuidado;
+    }
+
     public static PerfilCuidadorEntity toEntity(PerfilCuidadorDTORequest dto, UsuarioEntity usuario) {
         PerfilCuidadorEntity perfil = new PerfilCuidadorEntity();
         perfil.setEspecialidad(dto.especialidad());
@@ -16,6 +21,7 @@ public class PerfilCuidadorMapper {
         perfil.setTieneVehiculo(dto.tieneVehiculo());
         perfil.setDisponibleAhora(dto.disponibleAhora());
         perfil.setFoto(dto.foto());
+        perfil.setTipoCuidado(tipoCuidadoOPorDefecto(dto.tipoCuidado()));
         perfil.setUsuario(usuario);
         return perfil;
     }
@@ -39,7 +45,8 @@ public class PerfilCuidadorMapper {
                 entity.getUsuario().getNombre(),
                 entity.getFoto(),
                 valoracionMedia,
-                numValoraciones);
+                numValoraciones,
+                tipoCuidadoOPorDefecto(entity.getTipoCuidado()));
         return dtoResponse;
 
     }
