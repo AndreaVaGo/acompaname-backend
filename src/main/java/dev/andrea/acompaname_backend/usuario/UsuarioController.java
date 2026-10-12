@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.andrea.acompaname_backend.usuario.dtos.CambiarPasswordDTO;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
 import jakarta.validation.Valid;
@@ -54,6 +56,13 @@ public class UsuarioController {
         UsuarioDTOResponse dtoResponse = service.update(id, dto);
         return ResponseEntity.status(200).body(dtoResponse);
 
+    }
+
+    @PatchMapping("{id}/password")
+    public ResponseEntity<Void> cambiarPassword(@PathVariable Long id,
+            @Valid @RequestBody CambiarPasswordDTO dto) {
+        service.cambiarPassword(id, dto);
+        return ResponseEntity.noContent().build();
     }
 
 }
