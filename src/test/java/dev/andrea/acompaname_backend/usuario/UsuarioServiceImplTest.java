@@ -26,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
+import dev.andrea.acompaname_backend.usuario.dtos.ActualizarContactoDTO;
 import dev.andrea.acompaname_backend.usuario.dtos.CambiarPasswordDTO;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
@@ -147,5 +148,26 @@ public class UsuarioServiceImplTest {
 
         assertThat(usuarioMock.getPassword(), is(equalTo("cifradaNueva")));
         verify(repository).save(usuarioMock);
+    }
+
+    @Test
+    void testActualizarContactoCambiaNombreEmailYTelefono() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        RoleEntity rol = crearRolMock();
+        UsuarioEntity usuarioMock = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "cifrada",
+                Set.of(rol));
+        when(repository.findById(1L)).thenReturn(Optional.of(usuarioMock));
+        when(repository.findByEmail("nuevo@test.com")).thenReturn(Optional.empty());
+        when(repository.save(usuarioMock)).thenReturn(usuarioMock);
+
+        UsuarioDTOResponse resultado = service.actualizarContacto(1L,
+                new ActualizarContactoDTO("Juan Nuevo", "nuevo@test.com", "699000111"));
+
+        assertThat(resultado.nombre(), is(equalTo("Juan Nuevo")));
+        assertThat(resultado.email(), is(equalTo("nuevo@test.com")));
+        assertThat(resultado.telefono(), is(equalTo("699000111")));
+        assertThat(usuarioMock.getPassword(), is(equalTo("cifrada")));
     }
 }
