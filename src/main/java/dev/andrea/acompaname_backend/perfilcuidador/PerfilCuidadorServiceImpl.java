@@ -16,16 +16,20 @@ import dev.andrea.acompaname_backend.perfilcuidador.mappers.PerfilCuidadorMapper
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
+import dev.andrea.acompaname_backend.valoracion.ValoracionRepository;
 
 @Service
 public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
 
     private final PerfilCuidadorRepository repository;
     private final UsuarioRepository usuarioRepository;
+    private final ValoracionRepository valoracionRepository;
 
-    public PerfilCuidadorServiceImpl(PerfilCuidadorRepository repository, UsuarioRepository usuarioRepository) {
+    public PerfilCuidadorServiceImpl(PerfilCuidadorRepository repository, UsuarioRepository usuarioRepository,
+            ValoracionRepository valoracionRepository) {
         this.repository = repository;
         this.usuarioRepository = usuarioRepository;
+        this.valoracionRepository = valoracionRepository;
     }
 
     private PerfilCuidadorEntity findEntityById(Long id) {
@@ -44,17 +48,27 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
         }
     }
 
+    // Convierte el perfil a DTO añadiendo la valoración media (1 decimal) y cuántas valoraciones tiene
+    private PerfilCuidadorDTOResponse aDTO(PerfilCuidadorEntity perfil) {
+        Double media = valoracionRepository.mediaPorCuidador(perfil.getId());
+        if (media != null) {
+            media = Math.round(media * 10) / 10.0;
+        }
+        Long numValoraciones = valoracionRepository.countBySolicitudCuidadorId(perfil.getId());
+        return PerfilCuidadorMapper.toDTO(perfil, media, numValoraciones);
+    }
+
     @Override
     public List<PerfilCuidadorDTOResponse> getEntities() {
         return repository.findAll().stream()
-                .map(PerfilCuidadorMapper::toDTO)
+                .map(this::aDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     public PerfilCuidadorDTOResponse getById(Long id) {
         PerfilCuidadorEntity perfil = findEntityById(id);
-        return PerfilCuidadorMapper.toDTO(perfil);
+        return aDTO(perfil);
     }
 
     @Transactional
@@ -98,7 +112,7 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
         perfilCuidadorExistente.setDisponibleAhora(dto.disponibleAhora());
         perfilCuidadorExistente.setFoto(dto.foto());
         PerfilCuidadorEntity perfilCuidadorActualizado = repository.save(perfilCuidadorExistente);
-        return PerfilCuidadorMapper.toDTO(perfilCuidadorActualizado);
+        return aDTO(perfilCuidadorActualizado);
     }
 
     @Override
@@ -110,6 +124,6 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
                 .findFirst()
                 .orElseThrow(() -> new PerfilCuidadorExceptionNotFound("No tienes un perfil de cuidador creado."));
 
-        return PerfilCuidadorMapper.toDTO(perfil);
+        return aDTO(perfil);
     }
 }
