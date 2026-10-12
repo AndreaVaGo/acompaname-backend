@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
@@ -23,13 +24,21 @@ public record PerfilCuidadorDTORequest(
 
         @NotNull(message = "El usuario id no puede ser nulo") Long usuarioId,
 
-        @Size(max = 500000, message = "La foto es demasiado grande") String foto
+        @Size(max = 500000, message = "La foto es demasiado grande") String foto,
+
+        @Pattern(regexp = "hospitalario|domicilio|ambos", message = "El tipo de cuidado debe ser hospitalario, domicilio o ambos") String tipoCuidado
 
 ) {
 
-    // Constructor sin foto: el mismo que había antes de añadir este campo
+    // Constructor sin tipo de cuidado: el mismo que había antes de añadir este campo
+    public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
+            boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String foto) {
+        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, foto, null);
+    }
+
+    // Constructor sin foto: el mismo que había antes de añadir ese campo
     public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
             boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId) {
-        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, null);
+        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, null, null);
     }
 }
