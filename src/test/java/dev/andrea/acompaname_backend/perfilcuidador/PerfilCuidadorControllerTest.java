@@ -183,4 +183,50 @@ public class PerfilCuidadorControllerTest {
                 assertThat(response.getContentAsString(), containsString("La foto es demasiado grande"));
                 Mockito.verifyNoInteractions(service);
         }
+
+        @Test
+        void testStoreConTipoDeCuidadoInvalidoDevuelve400() throws Exception {
+                PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", 4, new BigDecimal("18.00"),
+                                "Bio", true, true, 2L, null, "nocturno");
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/cuidadores")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(400)));
+                assertThat(response.getContentAsString(),
+                                containsString("El tipo de cuidado debe ser hospitalario, domicilio o ambos"));
+                Mockito.verifyNoInteractions(service);
+        }
+
+        @Test
+        void testStoreConTipoDeCuidadoValido() throws Exception {
+                PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", 4, new BigDecimal("18.00"),
+                                "Bio", true, true, 2L, null, "domicilio");
+                PerfilCuidadorDTOResponse dtoResponse = new PerfilCuidadorDTOResponse(1L, "Geriatría", 4,
+                                new BigDecimal("18.00"), "Bio", true, true, 2L, "Pepe", null, null, 0L, "domicilio");
+                when(service.storeEntity(Mockito.any(PerfilCuidadorDTORequest.class))).thenReturn(dtoResponse);
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/cuidadores")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(201)));
+                assertThat(response.getContentAsString(), containsString("domicilio"));
+        }
+
+        @Test
+        void testStoreSinTipoDeCuidadoEsValido() throws Exception {
+                PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", 4, new BigDecimal("18.00"),
+                                "Bio", true, true, 2L);
+                PerfilCuidadorDTOResponse dtoResponse = new PerfilCuidadorDTOResponse(1L, "Geriatría", 4,
+                                new BigDecimal("18.00"), "Bio", true, true, 2L, "Pepe");
+                when(service.storeEntity(Mockito.any(PerfilCuidadorDTORequest.class))).thenReturn(dtoResponse);
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/cuidadores")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(201)));
+        }
 }
