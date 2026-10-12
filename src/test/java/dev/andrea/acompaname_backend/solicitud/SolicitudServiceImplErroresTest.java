@@ -34,6 +34,7 @@ import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTOResponse;
 import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionFechaInvalida;
 import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
@@ -109,6 +110,12 @@ public class SolicitudServiceImplErroresTest {
     private SolicitudDTORequest dtoCualquiera(Long familiaId, Long cuidadorId) {
         return new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", 80, LocalDate.of(2026, 9, 10),
                 familiaId, cuidadorId);
+    }
+
+    // Igual que dtoCualquiera pero con fecha de fin
+    private SolicitudDTORequest dtoConFechaFin(LocalDate fechaFin) {
+        return new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", 80, LocalDate.of(2026, 9, 10),
+                fechaFin, 1L, 1L);
     }
 
     @Test
@@ -251,6 +258,35 @@ public class SolicitudServiceImplErroresTest {
 
         assertThrows(SolicitudExceptionAccesoDenegado.class, () -> service.storeEntity(dtoCualquiera(1L, 1L)));
         verify(repository, never()).save(Mockito.any(SolicitudEntity.class));
+    }
+
+    @Test
+    void testStoreConFechaFinAnteriorALaDeInicioDaErrorYNoGuarda() {
+        SolicitudDTORequest dto = dtoConFechaFin(LocalDate.of(2026, 9, 5));
+
+        assertThrows(SolicitudExceptionFechaInvalida.class, () -> service.storeEntity(dto));
+        verify(repository, never()).save(Mockito.any(SolicitudEntity.class));
+    }
+
+    @Test
+    void testUpdateConFechaFinAnteriorALaDeInicioDaErrorYNoGuarda() {
+        SolicitudDTORequest dto = dtoConFechaFin(LocalDate.of(2026, 9, 5));
+
+        assertThrows(SolicitudExceptionFechaInvalida.class, () -> service.update(1L, dto));
+        verify(repository, never()).save(Mockito.any(SolicitudEntity.class));
+    }
+
+    @Test
+    void testStoreConFechaFinIgualALaDeInicioEsValida() {
+        loguearComo("ana@test.com");
+        SolicitudEntity solicitudAna = solicitudAnaPepe();
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(solicitudAna.getFamilia()));
+        when(perfilCuidadorRepository.findById(1L)).thenReturn(Optional.of(solicitudAna.getCuidador()));
+        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitudAna);
+
+        service.storeEntity(dtoConFechaFin(LocalDate.of(2026, 9, 10)));
+
+        verify(repository).save(Mockito.any(SolicitudEntity.class));
     }
 
     @Test
