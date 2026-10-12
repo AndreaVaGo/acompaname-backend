@@ -32,6 +32,7 @@ import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
+import dev.andrea.acompaname_backend.valoracion.ValoracionRepository;
 
 // Tests de los casos de error y de seguridad de PerfilCuidadorServiceImpl:
 // perfil que no existe (404), perfil de otro cuidador (403) y perfil duplicado.
@@ -41,6 +42,8 @@ public class PerfilCuidadorServiceImplErroresTest {
     private PerfilCuidadorRepository repository;
     @Mock
     private UsuarioRepository usuarioRepository;
+    @Mock
+    private ValoracionRepository valoracionRepository;
 
     private PerfilCuidadorServiceImpl service;
     private SecurityContext contextoOriginal;
@@ -50,7 +53,7 @@ public class PerfilCuidadorServiceImplErroresTest {
         // Uso un contexto de seguridad vacío para no afectar a los otros tests
         contextoOriginal = SecurityContextHolder.getContext();
         SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
-        service = new PerfilCuidadorServiceImpl(repository, usuarioRepository);
+        service = new PerfilCuidadorServiceImpl(repository, usuarioRepository, valoracionRepository);
     }
 
     @AfterEach
