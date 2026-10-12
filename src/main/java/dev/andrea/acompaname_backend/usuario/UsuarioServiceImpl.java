@@ -15,11 +15,13 @@ import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
+import dev.andrea.acompaname_backend.usuario.dtos.CambiarPasswordDTO;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionEmailDuplicado;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
+import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionPasswordInvalida;
 import dev.andrea.acompaname_backend.usuario.mappers.UsuarioMapper;
 
 @Service
@@ -131,5 +133,20 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioExistente.setRoles(roles);
         UsuarioEntity usuarioActualizado = repository.save(usuarioExistente);
         return UsuarioMapper.toDTO(usuarioActualizado);
+    }
+
+    @Transactional
+    @Override
+    public void cambiarPassword(Long id, CambiarPasswordDTO dto) {
+        UsuarioEntity usuario = findEntityById(id);
+        verificarPropietario(usuario);
+        if (!passwordEncoder.matches(dto.passwordActual(), usuario.getPassword())) {
+            throw new UsuarioExceptionPasswordInvalida("La contraseña actual no es correcta");
+        }
+        if (passwordEncoder.matches(dto.passwordNueva(), usuario.getPassword())) {
+            throw new UsuarioExceptionPasswordInvalida("La nueva contraseña debe ser distinta de la actual");
+        }
+        usuario.setPassword(passwordEncoder.encode(dto.passwordNueva()));
+        repository.save(usuario);
     }
 }
