@@ -111,6 +111,10 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
         perfilCuidadorExistente.setTieneVehiculo(dto.tieneVehiculo());
         perfilCuidadorExistente.setDisponibleAhora(dto.disponibleAhora());
         perfilCuidadorExistente.setFoto(dto.foto());
+        // Si no llega el tipo de cuidado, se deja el que ya tenía
+        if (dto.tipoCuidado() != null) {
+            perfilCuidadorExistente.setTipoCuidado(dto.tipoCuidado());
+        }
         PerfilCuidadorEntity perfilCuidadorActualizado = repository.save(perfilCuidadorExistente);
         return aDTO(perfilCuidadorActualizado);
     }
