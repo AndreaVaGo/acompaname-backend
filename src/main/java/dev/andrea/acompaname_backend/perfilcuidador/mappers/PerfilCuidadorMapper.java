@@ -20,18 +20,26 @@ public class PerfilCuidadorMapper {
         return perfil;
     }
 
+    // Sin valoraciones: la media queda en null y el número en 0
     public static PerfilCuidadorDTOResponse toDTO(PerfilCuidadorEntity entity) {
-       PerfilCuidadorDTOResponse dtoResponse = new PerfilCuidadorDTOResponse(
-        entity.getId(),
-        entity.getEspecialidad(),
-        entity.getAnosExperiencia(),
-        entity.getTarifaHora(),
-        entity.getBio(),
-        entity.isTieneVehiculo(),
-        entity.isDisponibleAhora(),
-        entity.getUsuario().getId(),
-        entity.getUsuario().getNombre(),
-        entity.getFoto());
+        return toDTO(entity, null, 0L);
+    }
+
+    public static PerfilCuidadorDTOResponse toDTO(PerfilCuidadorEntity entity, Double valoracionMedia,
+            Long numValoraciones) {
+        PerfilCuidadorDTOResponse dtoResponse = new PerfilCuidadorDTOResponse(
+                entity.getId(),
+                entity.getEspecialidad(),
+                entity.getAnosExperiencia(),
+                entity.getTarifaHora(),
+                entity.getBio(),
+                entity.isTieneVehiculo(),
+                entity.isDisponibleAhora(),
+                entity.getUsuario().getId(),
+                entity.getUsuario().getNombre(),
+                entity.getFoto(),
+                valoracionMedia,
+                numValoraciones);
         return dtoResponse;
 
     }
