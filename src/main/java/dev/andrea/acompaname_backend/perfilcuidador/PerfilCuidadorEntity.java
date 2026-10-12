@@ -45,9 +45,18 @@ public class PerfilCuidadorEntity {
     @Column(columnDefinition = "LONGTEXT")
     private String foto;
 
-    // Constructor sin foto: el mismo que había antes de añadir este campo
+    // Ciudad donde trabaja el cuidador (puede estar vacía)
+    private String ciudad;
+
+    // Constructor sin foto ni ciudad: el mismo que había al principio
     public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
             String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario) {
-        this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, null);
+        this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, null, null);
+    }
+
+    // Constructor sin ciudad: el mismo que había antes de añadir este campo
+    public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
+            String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario, String foto) {
+        this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, foto, null);
     }
 }
