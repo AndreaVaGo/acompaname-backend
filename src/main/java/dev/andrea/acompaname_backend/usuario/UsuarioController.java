@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.andrea.acompaname_backend.usuario.dtos.ActualizarContactoDTO;
 import dev.andrea.acompaname_backend.usuario.dtos.CambiarPasswordDTO;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
@@ -63,6 +64,13 @@ public class UsuarioController {
             @Valid @RequestBody CambiarPasswordDTO dto) {
         service.cambiarPassword(id, dto);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("{id}/contacto")
+    public ResponseEntity<UsuarioDTOResponse> actualizarContacto(@PathVariable Long id,
+            @Valid @RequestBody ActualizarContactoDTO dto) {
+        UsuarioDTOResponse dtoResponse = service.actualizarContacto(id, dto);
+        return ResponseEntity.status(200).body(dtoResponse);
     }
 
 }
