@@ -82,4 +82,56 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
 
         UsuarioEntity usuario = usuarioRepository.findById(dto.usuarioId())
                 .orElseThrow(() -> new UsuarioExceptionNotFound(
-                        "Usuario no encontrado. Id " +
+                        "Usuario no encontrado. Id " + dto.usuarioId() + " no existe."));
+        if (!usuario.getEmail().equals(emailLogueado())) {
+            throw new PerfilCuidadorExceptionAccesoDenegado("No puede crear un perfil para otro usuario");
+        }
+        PerfilCuidadorEntity perfilToSave = PerfilCuidadorMapper.toEntity(dto, usuario);
+        PerfilCuidadorEntity perfilSaved = repository.save(perfilToSave);
+        return PerfilCuidadorMapper.toDTO(perfilSaved);
+    }
+
+    @Transactional
+    @Override
+    public void deleteById(Long id) {
+        PerfilCuidadorEntity perfil = findEntityById(id);
+        verificarPropietario(perfil);
+        repository.deleteById(id);
+    }
+
+    @Transactional
+    @Override
+    public PerfilCuidadorDTOResponse update(Long id, PerfilCuidadorDTORequest dto) {
+        PerfilCuidadorEntity perfilCuidadorExistente = findEntityById(id);
+        verificarPropietario(perfilCuidadorExistente);
+        perfilCuidadorExistente.setEspecialidad(dto.especialidad());
+        perfilCuidadorExistente.setAnosExperiencia(dto.anosExperiencia());
+        perfilCuidadorExistente.setTarifaHora(dto.tarifaHora());
+        perfilCuidadorExistente.setBio(dto.bio());
+        perfilCuidadorExistente.setTieneVehiculo(dto.tieneVehiculo());
+        perfilCuidadorExistente.setDisponibleAhora(dto.disponibleAhora());
+        perfilCuidadorExistente.setFoto(dto.foto());
+        // Si no llega el tipo de cuidado, se deja el que ya tenía
+        if (dto.tipoCuidado() != null) {
+            perfilCuidadorExistente.setTipoCuidado(dto.tipoCuidado());
+        }
+        // Si no llegan servicios, se dejan los que ya tenía (una lista vacía los borra todos)
+        if (dto.servicios() != null) {
+            perfilCuidadorExistente.setServicios(String.join(",", dto.servicios()));
+        }
+        PerfilCuidadorEntity perfilCuidadorActualizado = repository.save(perfilCuidadorExistente);
+        return aDTO(perfilCuidadorActualizado);
+    }
+
+    @Override
+    public PerfilCuidadorDTOResponse getMiPerfil() {
+        String emailLogueado = emailLogueado();
+
+        PerfilCuidadorEntity perfil = repository.findAll().stream()
+                .filter(p -> p.getUsuario().getEmail().equals(emailLogueado))
+                .findFirst()
+                .orElseThrow(() -> new PerfilCuidadorExceptionNotFound("No tienes un perfil de cuidador creado."));
+
+        return aDTO(perfil);
+    }
+}
