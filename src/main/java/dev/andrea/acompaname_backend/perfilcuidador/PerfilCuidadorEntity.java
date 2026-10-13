@@ -52,25 +52,36 @@ public class PerfilCuidadorEntity {
     // Si es null o está vacío, no ha marcado ninguno
     private String servicios;
 
-    // Constructor sin servicios: el mismo que había antes de añadir este campo
+    // Sexo del cuidador: "MUJER" o "HOMBRE". Es opcional: si es null, no lo ha indicado
+    private String sexo;
+
+    // Constructor sin sexo: el mismo que había antes de añadir este campo
+    public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
+            String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario, String foto,
+            String tipoCuidado, String servicios) {
+        this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, foto,
+                tipoCuidado, servicios, null);
+    }
+
+    // Constructor sin servicios: el mismo que había antes de añadir ese campo
     public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
             String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario, String foto,
             String tipoCuidado) {
         this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, foto,
-                tipoCuidado, null);
+                tipoCuidado, null, null);
     }
 
     // Constructor sin tipo de cuidado: el mismo que había antes de añadir ese campo
     public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
             String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario, String foto) {
         this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, foto,
-                null, null);
+                null, null, null);
     }
 
     // Constructor sin foto: el mismo que había antes de añadir ese campo
     public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
             String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario) {
         this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, null,
-                null, null);
+                null, null, null);
     }
 }
