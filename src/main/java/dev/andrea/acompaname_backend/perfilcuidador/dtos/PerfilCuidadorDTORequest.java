@@ -29,28 +29,39 @@ public record PerfilCuidadorDTORequest(
 
         @Pattern(regexp = "hospitalario|domicilio|ambos", message = "El tipo de cuidado debe ser hospitalario, domicilio o ambos") String tipoCuidado,
 
-        List<String> servicios
+        List<String> servicios,
+
+        // MUJER, HOMBRE o vacío (vacío = prefiero no indicarlo)
+        @Pattern(regexp = "MUJER|HOMBRE|", message = "El sexo debe ser MUJER o HOMBRE") String sexo
 
 ) {
 
-    // Constructor sin servicios: el mismo que había antes de añadir este campo
+    // Constructor sin sexo: el mismo que había antes de añadir este campo
+    public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
+            boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String foto, String tipoCuidado,
+            List<String> servicios) {
+        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, foto,
+                tipoCuidado, servicios, null);
+    }
+
+    // Constructor sin servicios: el mismo que había antes de añadir ese campo
     public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
             boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String foto, String tipoCuidado) {
         this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, foto,
-                tipoCuidado, null);
+                tipoCuidado, null, null);
     }
 
     // Constructor sin tipo de cuidado: el mismo que había antes de añadir ese campo
     public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
             boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String foto) {
         this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, foto, null,
-                null);
+                null, null);
     }
 
     // Constructor sin foto: el mismo que había antes de añadir ese campo
     public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
             boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId) {
         this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, null, null,
-                null);
+                null, null);
     }
 }
