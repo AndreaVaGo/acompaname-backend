@@ -1,6 +1,7 @@
 package dev.andrea.acompaname_backend.perfilcuidador.dtos;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,19 +27,30 @@ public record PerfilCuidadorDTORequest(
 
         @Size(max = 500000, message = "La foto es demasiado grande") String foto,
 
-        @Pattern(regexp = "hospitalario|domicilio|ambos", message = "El tipo de cuidado debe ser hospitalario, domicilio o ambos") String tipoCuidado
+        @Pattern(regexp = "hospitalario|domicilio|ambos", message = "El tipo de cuidado debe ser hospitalario, domicilio o ambos") String tipoCuidado,
+
+        List<String> servicios
 
 ) {
 
-    // Constructor sin tipo de cuidado: el mismo que había antes de añadir este campo
+    // Constructor sin servicios: el mismo que había antes de añadir este campo
+    public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
+            boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String foto, String tipoCuidado) {
+        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, foto,
+                tipoCuidado, null);
+    }
+
+    // Constructor sin tipo de cuidado: el mismo que había antes de añadir ese campo
     public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
             boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String foto) {
-        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, foto, null);
+        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, foto, null,
+                null);
     }
 
     // Constructor sin foto: el mismo que había antes de añadir ese campo
     public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
             boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId) {
-        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, null, null);
+        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, null, null,
+                null);
     }
 }

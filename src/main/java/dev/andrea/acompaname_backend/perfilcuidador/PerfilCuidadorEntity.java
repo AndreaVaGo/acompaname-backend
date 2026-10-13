@@ -48,17 +48,29 @@ public class PerfilCuidadorEntity {
     // Tipo de cuidado que ofrece: hospitalario, domicilio o ambos (si es null se trata como ambos)
     private String tipoCuidado;
 
-    // Constructor sin tipo de cuidado: el mismo que había antes de añadir este campo
+    // Servicios en los que tiene experiencia, separados por comas (por ejemplo "movilidad,medicacion").
+    // Si es null o está vacío, no ha marcado ninguno
+    private String servicios;
+
+    // Constructor sin servicios: el mismo que había antes de añadir este campo
+    public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
+            String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario, String foto,
+            String tipoCuidado) {
+        this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, foto,
+                tipoCuidado, null);
+    }
+
+    // Constructor sin tipo de cuidado: el mismo que había antes de añadir ese campo
     public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
             String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario, String foto) {
         this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, foto,
-                null);
+                null, null);
     }
 
     // Constructor sin foto: el mismo que había antes de añadir ese campo
     public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
             String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario) {
         this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, null,
-                null);
+                null, null);
     }
 }
