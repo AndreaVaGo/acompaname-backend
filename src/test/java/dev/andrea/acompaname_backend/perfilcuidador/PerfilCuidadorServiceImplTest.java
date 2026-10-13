@@ -260,4 +260,95 @@ public class PerfilCuidadorServiceImplTest {
 
         assertThat(resultado.tipoCuidado(), is(equalTo("hospitalario")));
     }
+
+    @Test
+    void testGetByIdSinServiciosDevuelveListaVacia() {
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
+                Set.of(crearRolMock()));
+        PerfilCuidadorEntity perfilMock = new PerfilCuidadorEntity(1L, "Enfermeria", 3, new BigDecimal("20.00"),
+                "Bio de prueba", true, false, usuario);
+        when(repository.findById(1L)).thenReturn(Optional.of(perfilMock));
+
+        PerfilCuidadorDTOResponse perfil = service.getById(1L);
+
+        assertThat(perfil.servicios().size(), is(equalTo(0)));
+    }
+
+    @Test
+    void testGetByIdDevuelveLosServicios() {
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
+                Set.of(crearRolMock()));
+        PerfilCuidadorEntity perfilMock = new PerfilCuidadorEntity(1L, "Enfermeria", 3, new BigDecimal("20.00"),
+                "Bio de prueba", true, false, usuario);
+        perfilMock.setServicios("movilidad,medicacion");
+        when(repository.findById(1L)).thenReturn(Optional.of(perfilMock));
+
+        PerfilCuidadorDTOResponse perfil = service.getById(1L);
+
+        assertThat(perfil.servicios().size(), is(equalTo(2)));
+        assertThat(perfil.servicios().get(0), is(equalTo("movilidad")));
+        assertThat(perfil.servicios().get(1), is(equalTo("medicacion")));
+    }
+
+    @Test
+    void testUpdateGuardaLosServicios() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
+                Set.of(crearRolMock()));
+        PerfilCuidadorEntity perfilExistente = new PerfilCuidadorEntity(1L, "Enfermeria", 3, new BigDecimal("20.00"),
+                "Bio de prueba", true, false, usuario);
+        when(repository.findById(1L)).thenReturn(Optional.of(perfilExistente));
+        when(repository.save(Mockito.any(PerfilCuidadorEntity.class))).thenReturn(perfilExistente);
+        PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Pediatría", 6, new BigDecimal("22.00"),
+                "Nueva bio actualizada", false, false, 1L, null, null, List.of("higiene", "nocturno"));
+
+        PerfilCuidadorDTOResponse resultado = service.update(1L, dto);
+
+        assertThat(resultado.servicios().size(), is(equalTo(2)));
+        assertThat(resultado.servicios().get(0), is(equalTo("higiene")));
+        assertThat(resultado.servicios().get(1), is(equalTo("nocturno")));
+    }
+
+    @Test
+    void testUpdateSinServiciosMantieneLosQueTenia() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
+                Set.of(crearRolMock()));
+        PerfilCuidadorEntity perfilExistente = new PerfilCuidadorEntity(1L, "Enfermeria", 3, new BigDecimal("20.00"),
+                "Bio de prueba", true, false, usuario);
+        perfilExistente.setServicios("paliativos");
+        when(repository.findById(1L)).thenReturn(Optional.of(perfilExistente));
+        when(repository.save(Mockito.any(PerfilCuidadorEntity.class))).thenReturn(perfilExistente);
+        PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Pediatría", 6, new BigDecimal("22.00"),
+                "Nueva bio actualizada", false, false, 1L);
+
+        PerfilCuidadorDTOResponse resultado = service.update(1L, dto);
+
+        assertThat(resultado.servicios().size(), is(equalTo(1)));
+        assertThat(resultado.servicios().get(0), is(equalTo("paliativos")));
+    }
+
+    @Test
+    void testUpdateConListaVaciaBorraLosServicios() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
+                Set.of(crearRolMock()));
+        PerfilCuidadorEntity perfilExistente = new PerfilCuidadorEntity(1L, "Enfermeria", 3, new BigDecimal("20.00"),
+                "Bio de prueba", true, false, usuario);
+        perfilExistente.setServicios("paliativos,higiene");
+        when(repository.findById(1L)).thenReturn(Optional.of(perfilExistente));
+        when(repository.save(Mockito.any(PerfilCuidadorEntity.class))).thenReturn(perfilExistente);
+        PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Pediatría", 6, new BigDecimal("22.00"),
+                "Nueva bio actualizada", false, false, 1L, null, null, List.of());
+
+        PerfilCuidadorDTOResponse resultado = service.update(1L, dto);
+
+        assertThat(resultado.servicios().size(), is(equalTo(0)));
+    }
 }
