@@ -1,5 +1,8 @@
 package dev.andrea.acompaname_backend.perfilcuidador.mappers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTORequest;
 import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTOResponse;
@@ -12,6 +15,26 @@ public class PerfilCuidadorMapper {
         return tipoCuidado == null ? "ambos" : tipoCuidado;
     }
 
+    // Pasa la lista de servicios a un texto con comas para guardarlo en la base de datos
+    private static String serviciosATexto(List<String> servicios) {
+        if (servicios == null || servicios.isEmpty()) {
+            return null;
+        }
+        return String.join(",", servicios);
+    }
+
+    // Pasa el texto de la base de datos a una lista (si no hay nada, lista vacía)
+    private static List<String> serviciosALista(String servicios) {
+        List<String> lista = new ArrayList<>();
+        if (servicios == null || servicios.isBlank()) {
+            return lista;
+        }
+        for (String servicio : servicios.split(",")) {
+            lista.add(servicio);
+        }
+        return lista;
+    }
+
     public static PerfilCuidadorEntity toEntity(PerfilCuidadorDTORequest dto, UsuarioEntity usuario) {
         PerfilCuidadorEntity perfil = new PerfilCuidadorEntity();
         perfil.setEspecialidad(dto.especialidad());
@@ -22,6 +45,7 @@ public class PerfilCuidadorMapper {
         perfil.setDisponibleAhora(dto.disponibleAhora());
         perfil.setFoto(dto.foto());
         perfil.setTipoCuidado(tipoCuidadoOPorDefecto(dto.tipoCuidado()));
+        perfil.setServicios(serviciosATexto(dto.servicios()));
         perfil.setUsuario(usuario);
         return perfil;
     }
@@ -46,7 +70,8 @@ public class PerfilCuidadorMapper {
                 entity.getFoto(),
                 valoracionMedia,
                 numValoraciones,
-                tipoCuidadoOPorDefecto(entity.getTipoCuidado()));
+                tipoCuidadoOPorDefecto(entity.getTipoCuidado()),
+                serviciosALista(entity.getServicios()));
         return dtoResponse;
 
     }
