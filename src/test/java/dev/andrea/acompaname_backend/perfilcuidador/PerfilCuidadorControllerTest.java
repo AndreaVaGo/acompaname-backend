@@ -229,4 +229,38 @@ public class PerfilCuidadorControllerTest {
                                 .getResponse();
                 assertThat(response.getStatus(), is(equalTo(201)));
         }
+
+        @Test
+        void testStoreConServicios() throws Exception {
+                PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", 4, new BigDecimal("18.00"),
+                                "Bio", true, true, 2L, null, null, List.of("movilidad", "higiene"));
+                PerfilCuidadorDTOResponse dtoResponse = new PerfilCuidadorDTOResponse(1L, "Geriatría", 4,
+                                new BigDecimal("18.00"), "Bio", true, true, 2L, "Pepe", null, null, 0L, "ambos",
+                                List.of("movilidad", "higiene"));
+                when(service.storeEntity(Mockito.any(PerfilCuidadorDTORequest.class))).thenReturn(dtoResponse);
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/cuidadores")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(201)));
+                assertThat(response.getContentAsString(), containsString("movilidad"));
+                assertThat(response.getContentAsString(), containsString("higiene"));
+        }
+
+        @Test
+        void testGetByIdDevuelveLosServicios() throws Exception {
+                PerfilCuidadorDTOResponse perfil = new PerfilCuidadorDTOResponse(1L, "Fisioterapia", 5,
+                                new BigDecimal("15.00"), "Bio", true, true, 2L, "Pepe", null, null, 0L, "ambos",
+                                List.of("paliativos"));
+                when(service.getById(1L)).thenReturn(perfil);
+
+                MockHttpServletResponse response = mockMvc.perform(get("/api/v1/cuidadores/1"))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse();
+
+                assertThat(response.getStatus(), is(equalTo(200)));
+                assertThat(response.getContentAsString(), containsString("paliativos"));
+        }
 }
