@@ -15,6 +15,14 @@ public class PerfilCuidadorMapper {
         return tipoCuidado == null ? "ambos" : tipoCuidado;
     }
 
+    // Si el sexo viene vacío, se guarda null (no lo ha indicado)
+    private static String sexoONull(String sexo) {
+        if (sexo == null || sexo.isBlank()) {
+            return null;
+        }
+        return sexo;
+    }
+
     // Pasa la lista de servicios a un texto con comas para guardarlo en la base de datos
     private static String serviciosATexto(List<String> servicios) {
         if (servicios == null || servicios.isEmpty()) {
@@ -46,6 +54,7 @@ public class PerfilCuidadorMapper {
         perfil.setFoto(dto.foto());
         perfil.setTipoCuidado(tipoCuidadoOPorDefecto(dto.tipoCuidado()));
         perfil.setServicios(serviciosATexto(dto.servicios()));
+        perfil.setSexo(sexoONull(dto.sexo()));
         perfil.setUsuario(usuario);
         return perfil;
     }
@@ -71,7 +80,8 @@ public class PerfilCuidadorMapper {
                 valoracionMedia,
                 numValoraciones,
                 tipoCuidadoOPorDefecto(entity.getTipoCuidado()),
-                serviciosALista(entity.getServicios()));
+                serviciosALista(entity.getServicios()),
+                entity.getSexo());
         return dtoResponse;
 
     }
