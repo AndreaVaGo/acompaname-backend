@@ -119,6 +119,14 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
         if (dto.servicios() != null) {
             perfilCuidadorExistente.setServicios(String.join(",", dto.servicios()));
         }
+        // Si no llega el sexo, se deja el que ya tenía (un texto vacío lo borra)
+        if (dto.sexo() != null) {
+            if (dto.sexo().isBlank()) {
+                perfilCuidadorExistente.setSexo(null);
+            } else {
+                perfilCuidadorExistente.setSexo(dto.sexo());
+            }
+        }
         PerfilCuidadorEntity perfilCuidadorActualizado = repository.save(perfilCuidadorExistente);
         return aDTO(perfilCuidadorActualizado);
     }
