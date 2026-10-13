@@ -263,4 +263,51 @@ public class PerfilCuidadorControllerTest {
                 assertThat(response.getStatus(), is(equalTo(200)));
                 assertThat(response.getContentAsString(), containsString("paliativos"));
         }
+
+        @Test
+        void testStoreConSexoValido() throws Exception {
+                PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", 4, new BigDecimal("18.00"),
+                                "Bio", true, true, 2L, null, null, null, "MUJER");
+                PerfilCuidadorDTOResponse dtoResponse = new PerfilCuidadorDTOResponse(1L, "Geriatría", 4,
+                                new BigDecimal("18.00"), "Bio", true, true, 2L, "Pepe", null, null, 0L, "ambos",
+                                List.of(), "MUJER");
+                when(service.storeEntity(Mockito.any(PerfilCuidadorDTORequest.class))).thenReturn(dtoResponse);
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/cuidadores")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(201)));
+                assertThat(response.getContentAsString(), containsString("MUJER"));
+        }
+
+        @Test
+        void testStoreConSexoInvalidoDevuelve400() throws Exception {
+                PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", 4, new BigDecimal("18.00"),
+                                "Bio", true, true, 2L, null, null, null, "OTRO");
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/cuidadores")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(400)));
+                assertThat(response.getContentAsString(), containsString("El sexo debe ser MUJER o HOMBRE"));
+                Mockito.verifyNoInteractions(service);
+        }
+
+        @Test
+        void testGetByIdDevuelveElSexo() throws Exception {
+                PerfilCuidadorDTOResponse perfil = new PerfilCuidadorDTOResponse(1L, "Fisioterapia", 5,
+                                new BigDecimal("15.00"), "Bio", true, true, 2L, "Pepe", null, null, 0L, "ambos",
+                                List.of(), "HOMBRE");
+                when(service.getById(1L)).thenReturn(perfil);
+
+                MockHttpServletResponse response = mockMvc.perform(get("/api/v1/cuidadores/1"))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse();
+
+                assertThat(response.getStatus(), is(equalTo(200)));
+                assertThat(response.getContentAsString(), containsString("HOMBRE"));
+        }
 }
