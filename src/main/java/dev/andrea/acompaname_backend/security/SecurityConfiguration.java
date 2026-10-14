@@ -39,7 +39,7 @@ public class SecurityConfiguration {
                 .formLogin(form -> form.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/usuarios").permitAll()
-                        .requestMatchers("/" + endpoint + "/roles").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/" + endpoint + "/roles").permitAll()
                         .requestMatchers("/" + endpoint + "/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores/mi-perfil").authenticated()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores").permitAll()
