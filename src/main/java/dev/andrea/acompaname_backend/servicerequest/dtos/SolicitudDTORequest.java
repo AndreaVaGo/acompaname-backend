@@ -28,10 +28,20 @@ public record SolicitudDTORequest(
 
                 @NotNull(message = "El id del cuidado no puede ser nulo") Long cuidadorId,
 
-                List<String> necesidades
+                List<String> necesidades,
+
+                @Size(max = 200, message = "La dirección no puede superar 200 caracteres") String direccion
 
 ) 
 {
+
+        // Constructor sin dirección, para no romper el código que ya existía
+        public SolicitudDTORequest(String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
+                        LocalDate fechaCuidado, LocalDate fechaFin, Long familiaId, Long cuidadorId,
+                        List<String> necesidades) {
+                this(tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, fechaFin, familiaId, cuidadorId,
+                                necesidades, null);
+        }
 
         // Constructor sin necesidades, para no romper el código que ya existía
         public SolicitudDTORequest(String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
