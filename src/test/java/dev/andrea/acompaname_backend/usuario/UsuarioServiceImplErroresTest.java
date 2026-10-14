@@ -23,8 +23,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
-import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
+import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
+import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
 import dev.andrea.acompaname_backend.usuario.dtos.ActualizarContactoDTO;

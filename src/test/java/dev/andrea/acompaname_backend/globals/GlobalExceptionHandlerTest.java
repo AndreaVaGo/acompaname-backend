@@ -9,8 +9,8 @@ import org.springframework.http.ResponseEntity;
 
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
-import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;
+import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionAccesoDenegado;

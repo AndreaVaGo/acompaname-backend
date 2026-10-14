@@ -28,7 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import dev.andrea.acompaname_backend.payment.dtos.PagoDTORequest;
 import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
+import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.solicitud.EstadoSolicitud;
 import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;

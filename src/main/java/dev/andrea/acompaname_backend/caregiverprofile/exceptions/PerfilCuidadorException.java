@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.perfilcuidador.exceptions;
+package dev.andrea.acompaname_backend.caregiverprofile.exceptions;
 
 public class PerfilCuidadorException extends RuntimeException {
 

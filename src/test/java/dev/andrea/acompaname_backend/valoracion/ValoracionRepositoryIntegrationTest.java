@@ -16,8 +16,8 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
-import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
+import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
+import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.solicitud.EstadoSolicitud;
 import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
 import dev.andrea.acompaname_backend.solicitud.SolicitudRepository;

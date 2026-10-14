@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.perfilcuidador;
+package dev.andrea.acompaname_backend.caregiverprofile;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -19,8 +19,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTORequest;
-import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTOResponse;
+import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTORequest;
+import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTOResponse;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioRepository;

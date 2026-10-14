@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.perfilcuidador;
+package dev.andrea.acompaname_backend.caregiverprofile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,11 +8,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTORequest;
-import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTOResponse;
-import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;
-import dev.andrea.acompaname_backend.perfilcuidador.mappers.PerfilCuidadorMapper;
+import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTORequest;
+import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTOResponse;
+import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionNotFound;
+import dev.andrea.acompaname_backend.caregiverprofile.mappers.PerfilCuidadorMapper;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;

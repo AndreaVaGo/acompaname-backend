@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.perfilcuidador;
+package dev.andrea.acompaname_backend.caregiverprofile;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -24,8 +24,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTORequest;
-import dev.andrea.acompaname_backend.perfilcuidador.dtos.PerfilCuidadorDTOResponse;
+import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTORequest;
+import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTOResponse;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = PerfilCuidadorController.class)

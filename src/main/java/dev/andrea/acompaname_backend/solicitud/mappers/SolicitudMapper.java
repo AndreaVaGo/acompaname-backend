@@ -3,7 +3,7 @@ package dev.andrea.acompaname_backend.solicitud.mappers;
 import java.util.ArrayList;
 import java.util.List;
 
-import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
+import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.solicitud.EstadoSolicitud;
 import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTORequest;

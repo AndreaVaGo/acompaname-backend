@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.perfilcuidador;
+package dev.andrea.acompaname_backend.caregiverprofile;
 
 import java.math.BigDecimal;
 

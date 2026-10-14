@@ -2,7 +2,7 @@ package dev.andrea.acompaname_backend.solicitud;
 
 import java.time.LocalDate;
 
-import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
+import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
