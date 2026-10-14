@@ -13,6 +13,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -191,5 +192,143 @@ public class SolicitudServiceImplTest {
                 SolicitudDTOResponse resultado = service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA);
 
                 assertThat(resultado.estado(), is(equalTo(EstadoSolicitud.ACEPTADA)));
+        }
+
+        @Test
+        void testStoreEntityGuardaLasNecesidadesComoTexto() {
+                Authentication auth = new UsernamePasswordAuthenticationToken("ana@test.com", null);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234",
+                                Set.of(rolFamilia()));
+                when(usuarioRepository.findById(1L)).thenReturn(Optional.of(familia));
+                PerfilCuidadorEntity cuidador = new PerfilCuidadorEntity(1L, "Geriatría", 4,
+                                new java.math.BigDecimal("18.00"),
+                                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678",
+                                                Set.of(rolCuidador())));
+                when(perfilCuidadorRepository.findById(1L)).thenReturn(Optional.of(cuidador));
+                when(repository.save(Mockito.any(SolicitudEntity.class)))
+                                .thenAnswer(invocacion -> invocacion.getArgument(0));
+
+                SolicitudDTORequest dto = new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", 80,
+                                LocalDate.of(2026, 9, 10), null, 1L, 1L, List.of("movilidad", "higiene"));
+                SolicitudDTOResponse resultado = service.storeEntity(dto);
+
+                ArgumentCaptor<SolicitudEntity> captor = ArgumentCaptor.forClass(SolicitudEntity.class);
+                Mockito.verify(repository).save(captor.capture());
+                assertThat(captor.getValue().getNecesidades(), is(equalTo("movilidad,higiene")));
+                assertThat(resultado.necesidades().size(), is(equalTo(2)));
+                assertThat(resultado.necesidades().get(0), is(equalTo("movilidad")));
+                assertThat(resultado.necesidades().get(1), is(equalTo("higiene")));
+        }
+
+        @Test
+        void testGetByIdDevuelveLasNecesidadesComoLista() {
+                Authentication auth = new UsernamePasswordAuthenticationToken("ana@test.com", null);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234",
+                                Set.of(rolFamilia()));
+                PerfilCuidadorEntity cuidador = new PerfilCuidadorEntity(1L, "Geriatría", 4,
+                                new java.math.BigDecimal("18.00"),
+                                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678",
+                                                Set.of(rolCuidador())));
+                SolicitudEntity solicitudMock = new SolicitudEntity(1L, "Acompañamiento", "Manuel", "Sin notas", 80,
+                                LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, familia, cuidador);
+                solicitudMock.setNecesidades("medicacion,nocturno");
+                when(repository.findById(1L)).thenReturn(Optional.of(solicitudMock));
+
+                SolicitudDTOResponse solicitud = service.getById(1L);
+
+                assertThat(solicitud.necesidades().size(), is(equalTo(2)));
+                assertThat(solicitud.necesidades().get(0), is(equalTo("medicacion")));
+                assertThat(solicitud.necesidades().get(1), is(equalTo("nocturno")));
+        }
+
+        @Test
+        void testGetByIdSinNecesidadesDevuelveListaVacia() {
+                Authentication auth = new UsernamePasswordAuthenticationToken("ana@test.com", null);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234",
+                                Set.of(rolFamilia()));
+                PerfilCuidadorEntity cuidador = new PerfilCuidadorEntity(1L, "Geriatría", 4,
+                                new java.math.BigDecimal("18.00"),
+                                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678",
+                                                Set.of(rolCuidador())));
+                SolicitudEntity solicitudMock = new SolicitudEntity(1L, "Acompañamiento", "Manuel", "Sin notas", 80,
+                                LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, familia, cuidador);
+                when(repository.findById(1L)).thenReturn(Optional.of(solicitudMock));
+
+                SolicitudDTOResponse solicitud = service.getById(1L);
+
+                assertThat(solicitud.necesidades().size(), is(equalTo(0)));
+        }
+
+        @Test
+        void testUpdateCambiaLasNecesidades() {
+                Authentication auth = new UsernamePasswordAuthenticationToken("ana@test.com", null);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234",
+                                Set.of(rolFamilia()));
+                PerfilCuidadorEntity cuidador = new PerfilCuidadorEntity(1L, "Geriatría", 4,
+                                new java.math.BigDecimal("18.00"),
+                                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678",
+                                                Set.of(rolCuidador())));
+                SolicitudEntity solicitudExistente = new SolicitudEntity(1L, "Acompañamiento", "Manuel", "Sin notas",
+                                80, LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, familia, cuidador);
+                solicitudExistente.setNecesidades("movilidad");
+                when(repository.findById(1L)).thenReturn(Optional.of(solicitudExistente));
+                when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitudExistente);
+
+                SolicitudDTORequest dto = new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", 80,
+                                LocalDate.of(2026, 9, 15), null, 1L, 1L, List.of("higiene", "alimentacion"));
+                SolicitudDTOResponse resultado = service.update(1L, dto);
+
+                assertThat(solicitudExistente.getNecesidades(), is(equalTo("higiene,alimentacion")));
+                assertThat(resultado.necesidades().size(), is(equalTo(2)));
+        }
+
+        @Test
+        void testUpdateSinNecesidadesMantieneLasQueHabia() {
+                Authentication auth = new UsernamePasswordAuthenticationToken("ana@test.com", null);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234",
+                                Set.of(rolFamilia()));
+                PerfilCuidadorEntity cuidador = new PerfilCuidadorEntity(1L, "Geriatría", 4,
+                                new java.math.BigDecimal("18.00"),
+                                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678",
+                                                Set.of(rolCuidador())));
+                SolicitudEntity solicitudExistente = new SolicitudEntity(1L, "Acompañamiento", "Manuel", "Sin notas",
+                                80, LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, familia, cuidador);
+                solicitudExistente.setNecesidades("movilidad");
+                when(repository.findById(1L)).thenReturn(Optional.of(solicitudExistente));
+                when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitudExistente);
+
+                SolicitudDTORequest dto = new SolicitudDTORequest("Acompañamiento", "Manuel", "Notas nuevas", 80,
+                                LocalDate.of(2026, 9, 15), 1L, 1L);
+                service.update(1L, dto);
+
+                assertThat(solicitudExistente.getNecesidades(), is(equalTo("movilidad")));
+        }
+
+        @Test
+        void testUpdateConListaVaciaBorraLasNecesidades() {
+                Authentication auth = new UsernamePasswordAuthenticationToken("ana@test.com", null);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                UsuarioEntity familia = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234",
+                                Set.of(rolFamilia()));
+                PerfilCuidadorEntity cuidador = new PerfilCuidadorEntity(1L, "Geriatría", 4,
+                                new java.math.BigDecimal("18.00"),
+                                "Bio", true, true, new UsuarioEntity(2L, "Pepe", "pepe@test.com", "600333444", "5678",
+                                                Set.of(rolCuidador())));
+                SolicitudEntity solicitudExistente = new SolicitudEntity(1L, "Acompañamiento", "Manuel", "Sin notas",
+                                80, LocalDate.of(2026, 9, 10), EstadoSolicitud.PENDIENTE, familia, cuidador);
+                solicitudExistente.setNecesidades("movilidad");
+                when(repository.findById(1L)).thenReturn(Optional.of(solicitudExistente));
+                when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitudExistente);
+
+                SolicitudDTORequest dto = new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", 80,
+                                LocalDate.of(2026, 9, 15), null, 1L, 1L, List.of());
+                SolicitudDTOResponse resultado = service.update(1L, dto);
+
+                assertThat(resultado.necesidades().size(), is(equalTo(0)));
         }
 }

@@ -1,6 +1,7 @@
 package dev.andrea.acompaname_backend.solicitud.dtos;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Max;
@@ -25,12 +26,21 @@ public record SolicitudDTORequest(
 
                 @NotNull(message = "El id de la familia no puede ser nulo") Long familiaId,
 
-                @NotNull(message = "El id del cuidado no puede ser nulo") Long cuidadorId
+                @NotNull(message = "El id del cuidado no puede ser nulo") Long cuidadorId,
+
+                List<String> necesidades
 
 ) 
 {
 
-        // Constructor sin fecha de fin, para no romper el código que ya existía
+        // Constructor sin necesidades, para no romper el código que ya existía
+        public SolicitudDTORequest(String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
+                        LocalDate fechaCuidado, LocalDate fechaFin, Long familiaId, Long cuidadorId) {
+                this(tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, fechaFin, familiaId, cuidadorId,
+                                null);
+        }
+
+        // Constructor sin fecha de fin ni necesidades, para no romper el código que ya existía
         public SolicitudDTORequest(String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
                         LocalDate fechaCuidado, Long familiaId, Long cuidadorId) {
                 this(tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, null, familiaId, cuidadorId);

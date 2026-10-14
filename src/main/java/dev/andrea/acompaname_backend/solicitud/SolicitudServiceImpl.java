@@ -125,6 +125,10 @@ public class SolicitudServiceImpl implements SolicitudService {
         solicitudExistente.setEdadPaciente(dto.edadPaciente());
         solicitudExistente.setFechaCuidado(dto.fechaCuidado());
         solicitudExistente.setFechaFin(dto.fechaFin());
+        // Si no vienen necesidades se mantienen las que había; una lista vacía las borra
+        if (dto.necesidades() != null) {
+            solicitudExistente.setNecesidades(String.join(",", dto.necesidades()));
+        }
         SolicitudEntity solicitudActualizada = repository.save(solicitudExistente);
         return SolicitudMapper.toDTO(solicitudActualizada);
     }

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -184,5 +185,42 @@ public class SolicitudControllerTest {
                                 .getResponse();
                 assertThat(response.getStatus(), is(equalTo(204)));
                 Mockito.verify(service).deleteById(1L);
+        }
+
+        @Test
+        void testStoreConNecesidades() throws Exception {
+                SolicitudDTORequest dto = new SolicitudDTORequest("Acompañamiento", "Manuel", "Sin notas", 80,
+                                LocalDate.now().plusDays(7), null, 1L, 1L, List.of("movilidad", "higiene"));
+                SolicitudDTOResponse dtoResponse = new SolicitudDTOResponse(1L, "Acompañamiento", "Manuel", "Sin notas",
+                                80, LocalDate.of(2026, 9, 10), null, EstadoSolicitud.PENDIENTE, 1L, 1L, "Ana", "Pepe",
+                                List.of("movilidad", "higiene"));
+                when(service.storeEntity(Mockito.any(SolicitudDTORequest.class))).thenReturn(dtoResponse);
+
+                MockHttpServletResponse response = mockMvc.perform(post("/api/v1/solicitudes")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+
+                assertThat(response.getStatus(), is(equalTo(201)));
+                assertThat(response.getContentAsString(), containsString("\"necesidades\":[\"movilidad\",\"higiene\"]"));
+                ArgumentCaptor<SolicitudDTORequest> captor = ArgumentCaptor.forClass(SolicitudDTORequest.class);
+                Mockito.verify(service).storeEntity(captor.capture());
+                assertThat(captor.getValue().necesidades().size(), is(equalTo(2)));
+                assertThat(captor.getValue().necesidades().get(0), is(equalTo("movilidad")));
+        }
+
+        @Test
+        void testGetByIdConNecesidades() throws Exception {
+                SolicitudDTOResponse solicitud = new SolicitudDTOResponse(1L, "Acompañamiento", "Manuel", "Sin notas",
+                                80, LocalDate.of(2026, 9, 10), null, EstadoSolicitud.PENDIENTE, 1L, 1L, "Ana", "Pepe",
+                                List.of("medicacion"));
+                when(service.getById(1L)).thenReturn(solicitud);
+
+                MockHttpServletResponse response = mockMvc.perform(get("/api/v1/solicitudes/1"))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse();
+
+                assertThat(response.getContentAsString(), containsString("\"necesidades\":[\"medicacion\"]"));
         }
 }

@@ -48,7 +48,18 @@ public class SolicitudEntity {
     @JoinColumn(name = "cuidador_id")
     private PerfilCuidadorEntity cuidador;
 
-    // Constructor sin fecha de fin, para no romper el código que ya existía
+    // Necesidades del paciente, guardadas como códigos separados por comas (por ejemplo "movilidad,higiene")
+    private String necesidades;
+
+    // Constructor sin necesidades, para no romper el código que ya existía
+    public SolicitudEntity(Long id, String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
+            LocalDate fechaCuidado, LocalDate fechaFin, EstadoSolicitud estado, UsuarioEntity familia,
+            PerfilCuidadorEntity cuidador) {
+        this(id, tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, fechaFin, estado, familia, cuidador,
+                null);
+    }
+
+    // Constructor sin fecha de fin ni necesidades, para no romper el código que ya existía
     public SolicitudEntity(Long id, String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
             LocalDate fechaCuidado, EstadoSolicitud estado, UsuarioEntity familia, PerfilCuidadorEntity cuidador) {
         this(id, tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, null, estado, familia, cuidador);
