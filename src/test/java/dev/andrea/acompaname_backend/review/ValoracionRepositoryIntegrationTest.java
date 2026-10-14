@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.valoracion;
+package dev.andrea.acompaname_backend.review;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;

@@ -1,8 +1,8 @@
-package dev.andrea.acompaname_backend.valoracion;
+package dev.andrea.acompaname_backend.review;
 
 import dev.andrea.acompaname_backend.generics.InterfaceGenericService;
-import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTORequest;
-import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTOResponse;
+import dev.andrea.acompaname_backend.review.dtos.ValoracionDTORequest;
+import dev.andrea.acompaname_backend.review.dtos.ValoracionDTOResponse;
 
 public interface ValoracionService extends InterfaceGenericService<ValoracionEntity, ValoracionDTORequest, ValoracionDTOResponse> {
 

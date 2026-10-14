@@ -16,7 +16,7 @@ import dev.andrea.acompaname_backend.caregiverprofile.mappers.PerfilCuidadorMapp
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
-import dev.andrea.acompaname_backend.valoracion.ValoracionRepository;
+import dev.andrea.acompaname_backend.review.ValoracionRepository;
 
 @Service
 public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {

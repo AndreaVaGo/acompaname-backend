@@ -20,10 +20,10 @@ import dev.andrea.acompaname_backend.user.exceptions.UsuarioException;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionEmailDuplicado;
-import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionException;
-import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionNotFound;
-import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionConflicto;
+import dev.andrea.acompaname_backend.review.exceptions.ValoracionException;
+import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionNotFound;
+import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionConflicto;
 
 public class ExceptionsConCausaTest {
 

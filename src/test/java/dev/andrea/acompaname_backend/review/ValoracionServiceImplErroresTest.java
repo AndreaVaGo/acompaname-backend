@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.valoracion;
+package dev.andrea.acompaname_backend.review;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.never;
@@ -28,10 +28,10 @@ import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
-import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTORequest;
-import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionConflicto;
-import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionNotFound;
+import dev.andrea.acompaname_backend.review.dtos.ValoracionDTORequest;
+import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionConflicto;
+import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionNotFound;
 
 // Tests de los casos de error y de seguridad de ValoracionServiceImpl:
 // valoración que no existe (404) y valoraciones que no son mías (403).

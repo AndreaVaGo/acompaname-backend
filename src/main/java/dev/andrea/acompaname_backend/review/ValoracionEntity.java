@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.valoracion;
+package dev.andrea.acompaname_backend.review;
 
 import java.time.LocalDate;
 

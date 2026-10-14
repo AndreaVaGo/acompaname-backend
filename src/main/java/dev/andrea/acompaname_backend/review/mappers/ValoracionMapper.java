@@ -1,9 +1,9 @@
-package dev.andrea.acompaname_backend.valoracion.mappers;
+package dev.andrea.acompaname_backend.review.mappers;
 
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
-import dev.andrea.acompaname_backend.valoracion.ValoracionEntity;
-import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTORequest;
-import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTOResponse;
+import dev.andrea.acompaname_backend.review.ValoracionEntity;
+import dev.andrea.acompaname_backend.review.dtos.ValoracionDTORequest;
+import dev.andrea.acompaname_backend.review.dtos.ValoracionDTOResponse;
 
 public class ValoracionMapper {
 

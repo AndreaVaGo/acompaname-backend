@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.valoracion.exceptions;
+package dev.andrea.acompaname_backend.review.exceptions;
 
 public class ValoracionException extends RuntimeException {
     public ValoracionException(String message) {

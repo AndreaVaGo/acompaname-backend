@@ -24,7 +24,7 @@ import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTOResp
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
-import dev.andrea.acompaname_backend.valoracion.ValoracionRepository;
+import dev.andrea.acompaname_backend.review.ValoracionRepository;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

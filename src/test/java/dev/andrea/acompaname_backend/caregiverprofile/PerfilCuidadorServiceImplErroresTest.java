@@ -32,7 +32,7 @@ import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
-import dev.andrea.acompaname_backend.valoracion.ValoracionRepository;
+import dev.andrea.acompaname_backend.review.ValoracionRepository;
 
 // Tests de los casos de error y de seguridad de PerfilCuidadorServiceImpl:
 // perfil que no existe (404), perfil de otro cuidador (403) y perfil duplicado.

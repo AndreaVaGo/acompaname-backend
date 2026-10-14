@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.valoracion;
+package dev.andrea.acompaname_backend.review;
 
 import java.util.List;
 
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTORequest;
-import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTOResponse;
+import dev.andrea.acompaname_backend.review.dtos.ValoracionDTORequest;
+import dev.andrea.acompaname_backend.review.dtos.ValoracionDTOResponse;
 import jakarta.validation.Valid;
 
 @RestController

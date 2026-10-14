@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.valoracion;
+package dev.andrea.acompaname_backend.review;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -27,8 +27,8 @@ import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
-import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTORequest;
-import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTOResponse;
+import dev.andrea.acompaname_backend.review.dtos.ValoracionDTORequest;
+import dev.andrea.acompaname_backend.review.dtos.ValoracionDTOResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class ValoracionServiceImplTest {

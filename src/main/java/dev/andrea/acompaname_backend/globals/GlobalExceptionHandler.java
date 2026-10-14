@@ -20,9 +20,9 @@ import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptio
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionEmailDuplicado;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
-import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionConflicto;
-import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionNotFound;
+import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionConflicto;
+import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionNotFound;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

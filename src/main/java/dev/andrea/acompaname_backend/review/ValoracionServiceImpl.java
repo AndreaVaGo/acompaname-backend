@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.valoracion;
+package dev.andrea.acompaname_backend.review;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,12 +12,12 @@ import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
-import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTORequest;
-import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTOResponse;
-import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionConflicto;
-import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionNotFound;
-import dev.andrea.acompaname_backend.valoracion.mappers.ValoracionMapper;
+import dev.andrea.acompaname_backend.review.dtos.ValoracionDTORequest;
+import dev.andrea.acompaname_backend.review.dtos.ValoracionDTOResponse;
+import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionConflicto;
+import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionNotFound;
+import dev.andrea.acompaname_backend.review.mappers.ValoracionMapper;
 
 @Service
 public class ValoracionServiceImpl implements ValoracionService {

@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.valoracion.dtos;
+package dev.andrea.acompaname_backend.review.dtos;
 
 import java.time.LocalDate;
 import jakarta.validation.constraints.Max;
