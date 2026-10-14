@@ -104,4 +104,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleValoracionConflictoException(ValoracionExceptionConflicto exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
     }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<String> handleMetodoNoPermitido(HttpRequestMethodNotSupportedException exception) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body("Método no permitido");
+    }
 }
