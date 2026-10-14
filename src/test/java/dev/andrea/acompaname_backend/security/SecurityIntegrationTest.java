@@ -97,4 +97,30 @@ public class SecurityIntegrationTest {
                 .content("{}"))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    @WithAnonymousUser
+    void testListadoDeRolesEsPublico() throws Exception {
+        mockMvc.perform(get("/api/v1/roles"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void testCrearRolSinLoginDa401() throws Exception {
+        mockMvc.perform(post("/api/v1/roles")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"ADMIN\"}"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "familia@test.com", authorities = { "FAMILIA" })
+    void testNoExisteEndpointParaCrearRoles() throws Exception {
+        mockMvc.perform(post("/api/v1/roles")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"ADMIN\"}")
+                .with(csrf()))
+                .andExpect(status().isMethodNotAllowed());
+    }
 }
