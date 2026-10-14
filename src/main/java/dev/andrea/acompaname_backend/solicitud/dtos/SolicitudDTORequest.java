@@ -21,11 +21,19 @@ public record SolicitudDTORequest(
 
                 @NotNull(message = "La fecha del cuidado no puede ser nulo") @FutureOrPresent(message = "La fecha del cuidado no puede estar en el pasado") LocalDate fechaCuidado,
 
+                @FutureOrPresent(message = "La fecha de fin no puede estar en el pasado") LocalDate fechaFin,
+
                 @NotNull(message = "El id de la familia no puede ser nulo") Long familiaId,
 
                 @NotNull(message = "El id del cuidado no puede ser nulo") Long cuidadorId
 
 ) 
 {
+
+        // Constructor sin fecha de fin, para no romper el código que ya existía
+        public SolicitudDTORequest(String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
+                        LocalDate fechaCuidado, Long familiaId, Long cuidadorId) {
+                this(tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, null, familiaId, cuidadorId);
+        }
 
 }

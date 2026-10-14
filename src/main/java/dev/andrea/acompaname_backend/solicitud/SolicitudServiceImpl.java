@@ -17,6 +17,7 @@ import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExc
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTOResponse;
 import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionFechaInvalida;
 import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.solicitud.mappers.SolicitudMapper;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
@@ -64,6 +65,13 @@ public class SolicitudServiceImpl implements SolicitudService {
         }
     }
 
+    // La fecha de fin es opcional, pero si viene no puede ser anterior a la de inicio
+    private void verificarFechas(SolicitudDTORequest dto) {
+        if (dto.fechaFin() != null && dto.fechaFin().isBefore(dto.fechaCuidado())) {
+            throw new SolicitudExceptionFechaInvalida("La fecha de fin no puede ser anterior a la fecha de inicio");
+        }
+    }
+
     @Override
     public List<SolicitudDTOResponse> getEntities() {
         // Cada usuario solo ve sus solicitudes, no las de los demás
@@ -80,6 +88,7 @@ public class SolicitudServiceImpl implements SolicitudService {
     @Transactional
     @Override
     public SolicitudDTOResponse storeEntity(SolicitudDTORequest dto) {
+        verificarFechas(dto);
         UsuarioEntity familia = usuarioRepository.findById(dto.familiaId())
                 .orElseThrow(() -> new UsuarioExceptionNotFound(
                         "Usuario no encontrado. Id " + dto.familiaId() + " no existe."));
@@ -107,6 +116,7 @@ public class SolicitudServiceImpl implements SolicitudService {
     @Transactional
     @Override
     public SolicitudDTOResponse update(Long id, SolicitudDTORequest dto) {
+        verificarFechas(dto);
         SolicitudEntity solicitudExistente = findEntityById(id);
         verificarPropietario(solicitudExistente);
         solicitudExistente.setTipoCuidado(dto.tipoCuidado());
@@ -114,6 +124,7 @@ public class SolicitudServiceImpl implements SolicitudService {
         solicitudExistente.setNotas(dto.notas());
         solicitudExistente.setEdadPaciente(dto.edadPaciente());
         solicitudExistente.setFechaCuidado(dto.fechaCuidado());
+        solicitudExistente.setFechaFin(dto.fechaFin());
         SolicitudEntity solicitudActualizada = repository.save(solicitudExistente);
         return SolicitudMapper.toDTO(solicitudActualizada);
     }
