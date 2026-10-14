@@ -51,6 +51,17 @@ public class SolicitudEntity {
     // Necesidades del paciente, guardadas como códigos separados por comas (por ejemplo "movilidad,higiene")
     private String necesidades;
 
+    // Dirección del domicilio o nombre del hospital (planta, habitación...) donde se hará el cuidado
+    private String direccion;
+
+    // Constructor sin dirección, para no romper el código que ya existía
+    public SolicitudEntity(Long id, String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
+            LocalDate fechaCuidado, LocalDate fechaFin, EstadoSolicitud estado, UsuarioEntity familia,
+            PerfilCuidadorEntity cuidador, String necesidades) {
+        this(id, tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, fechaFin, estado, familia, cuidador,
+                necesidades, null);
+    }
+
     // Constructor sin necesidades, para no romper el código que ya existía
     public SolicitudEntity(Long id, String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
             LocalDate fechaCuidado, LocalDate fechaFin, EstadoSolicitud estado, UsuarioEntity familia,
