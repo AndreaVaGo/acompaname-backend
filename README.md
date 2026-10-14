@@ -93,16 +93,16 @@ Un paquete por funcionalidad:
 
 ```
 dev.andrea.acompaname_backend
-├── auth            Login / logout
-├── generics        InterfaceGenericService (contrato CRUD común)
-├── globals         GlobalExceptionHandler
-├── pago            Pagos
-├── perfilcuidador  Perfiles de cuidador
-├── role            Roles
-├── security        SecurityConfiguration, JpaUserDetailsService
-├── solicitud       Solicitudes de servicio
-├── usuario         Usuarios
-└── valoracion      Valoraciones
+├── auth             Login / logout
+├── generics         InterfaceGenericService (contrato CRUD común)
+├── globals          GlobalExceptionHandler
+├── payment          Pagos
+├── caregiverprofile Perfiles de cuidador
+├── role             Roles
+├── security         SecurityConfiguration, JpaUserDetailsService
+├── servicerequest   Solicitudes de servicio
+├── user             Usuarios
+└── review           Valoraciones
 ```
 
 ![Arquitectura por capas](docs/diagrams/capas.png)
