@@ -3,7 +3,7 @@ package dev.andrea.acompaname_backend.payment;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
+import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

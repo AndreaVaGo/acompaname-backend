@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.solicitud.exceptions;
+package dev.andrea.acompaname_backend.servicerequest.exceptions;
 
 public class SolicitudException extends RuntimeException {
 

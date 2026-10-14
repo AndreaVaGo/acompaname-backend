@@ -1,6 +1,6 @@
 package dev.andrea.acompaname_backend.valoracion.mappers;
 
-import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
+import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.valoracion.ValoracionEntity;
 import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTORequest;
 import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTOResponse;

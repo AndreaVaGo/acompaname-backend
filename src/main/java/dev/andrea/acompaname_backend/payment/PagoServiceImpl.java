@@ -13,9 +13,9 @@ import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
 import dev.andrea.acompaname_backend.payment.mappers.PagoMapper;
-import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
-import dev.andrea.acompaname_backend.solicitud.SolicitudRepository;
-import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotFound;
+import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
+import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
 
 @Service
 public class PagoServiceImpl implements PagoService {

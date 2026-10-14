@@ -23,10 +23,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.role.RoleEntity;
-import dev.andrea.acompaname_backend.solicitud.EstadoSolicitud;
-import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
-import dev.andrea.acompaname_backend.solicitud.SolicitudRepository;
-import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotFound;
+import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
+import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
+import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTORequest;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionAccesoDenegado;

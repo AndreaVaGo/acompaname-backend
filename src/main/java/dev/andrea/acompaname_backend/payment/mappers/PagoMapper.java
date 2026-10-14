@@ -5,7 +5,7 @@ import dev.andrea.acompaname_backend.payment.EstadoPago;
 import dev.andrea.acompaname_backend.payment.PagoEntity;
 import dev.andrea.acompaname_backend.payment.dtos.PagoDTORequest;
 import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
-import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
+import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 
 public class PagoMapper {
 

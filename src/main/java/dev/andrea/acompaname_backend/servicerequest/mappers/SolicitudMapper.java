@@ -1,13 +1,13 @@
-package dev.andrea.acompaname_backend.solicitud.mappers;
+package dev.andrea.acompaname_backend.servicerequest.mappers;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
-import dev.andrea.acompaname_backend.solicitud.EstadoSolicitud;
-import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
-import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTORequest;
-import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTOResponse;
+import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
+import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
+import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTORequest;
+import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 
 public class SolicitudMapper {

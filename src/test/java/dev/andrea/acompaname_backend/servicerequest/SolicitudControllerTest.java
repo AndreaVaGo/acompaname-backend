@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.solicitud;
+package dev.andrea.acompaname_backend.servicerequest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -26,8 +26,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTORequest;
-import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTOResponse;
+import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTORequest;
+import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = SolicitudController.class)

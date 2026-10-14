@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.solicitud;
+package dev.andrea.acompaname_backend.servicerequest;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

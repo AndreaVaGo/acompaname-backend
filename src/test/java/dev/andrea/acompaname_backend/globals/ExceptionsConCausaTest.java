@@ -13,9 +13,9 @@ import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDeneg
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorException;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudException;
-import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotFound;
-import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudException;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioException;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionAccesoDenegado;

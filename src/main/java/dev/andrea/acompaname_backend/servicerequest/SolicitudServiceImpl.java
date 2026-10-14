@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.solicitud;
+package dev.andrea.acompaname_backend.servicerequest;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,12 +14,12 @@ import dev.andrea.acompaname_backend.payment.mappers.PagoMapper;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionNotFound;
-import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTORequest;
-import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTOResponse;
-import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionFechaInvalida;
-import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotFound;
-import dev.andrea.acompaname_backend.solicitud.mappers.SolicitudMapper;
+import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTORequest;
+import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionFechaInvalida;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
+import dev.andrea.acompaname_backend.servicerequest.mappers.SolicitudMapper;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;

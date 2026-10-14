@@ -1,10 +1,10 @@
-package dev.andrea.acompaname_backend.solicitud.dtos;
+package dev.andrea.acompaname_backend.servicerequest.dtos;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import dev.andrea.acompaname_backend.solicitud.EstadoSolicitud;
+import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 
 public record SolicitudDTOResponse(Long id, String tipoCuidado, String nombrePaciente, String notas,
                 Integer edadPaciente, LocalDate fechaCuidado, LocalDate fechaFin, EstadoSolicitud estado,

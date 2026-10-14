@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.solicitud;
+package dev.andrea.acompaname_backend.servicerequest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -25,8 +25,8 @@ import dev.andrea.acompaname_backend.payment.PagoRepository;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
-import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTORequest;
-import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTOResponse;
+import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTORequest;
+import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
 import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
 import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
 import org.springframework.security.core.Authentication;

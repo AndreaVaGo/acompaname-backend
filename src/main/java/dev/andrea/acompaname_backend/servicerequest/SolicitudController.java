@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.solicitud;
+package dev.andrea.acompaname_backend.servicerequest;
 
 import java.util.List;
 
@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import dev.andrea.acompaname_backend.solicitud.dtos.CambiarEstadoDTO;
-import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTORequest;
-import dev.andrea.acompaname_backend.solicitud.dtos.SolicitudDTOResponse;
+import dev.andrea.acompaname_backend.servicerequest.dtos.CambiarEstadoDTO;
+import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTORequest;
+import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
 import jakarta.validation.Valid;
 
 @RestController

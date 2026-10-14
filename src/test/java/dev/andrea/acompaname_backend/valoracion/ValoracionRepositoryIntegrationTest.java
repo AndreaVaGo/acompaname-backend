@@ -18,9 +18,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
-import dev.andrea.acompaname_backend.solicitud.EstadoSolicitud;
-import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
-import dev.andrea.acompaname_backend.solicitud.SolicitudRepository;
+import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
+import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
+import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 
 @DataJpaTest
 @Testcontainers

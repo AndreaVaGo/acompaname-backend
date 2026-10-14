@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.solicitud.dtos;
+package dev.andrea.acompaname_backend.servicerequest.dtos;
 
 import java.time.LocalDate;
 import java.util.List;
