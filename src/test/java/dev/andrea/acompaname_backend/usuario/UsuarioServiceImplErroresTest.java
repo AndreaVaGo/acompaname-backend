@@ -27,14 +27,17 @@ import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
+import dev.andrea.acompaname_backend.usuario.dtos.CambiarPasswordDTO;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionEmailDuplicado;
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
+import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionPasswordInvalida;
 
 // Tests de los casos de error y de seguridad de UsuarioServiceImpl:
-// email repetido (409), usuario que no existe (404) y datos de otra persona (403).
+// email repetido (409), usuario que no existe (404), datos de otra persona (403)
+// y errores al cambiar la contraseña (400).
 @ExtendWith(MockitoExtension.class)
 public class UsuarioServiceImplErroresTest {
     @Mock
@@ -195,6 +198,38 @@ public class UsuarioServiceImplErroresTest {
         when(repository.findById(1L)).thenReturn(Optional.of(juan()));
 
         assertThrows(UsuarioExceptionAccesoDenegado.class, () -> service.update(1L, dtoAna(1L)));
+        verify(repository, never()).save(Mockito.any(UsuarioEntity.class));
+    }
+
+    @Test
+    void testCambiarPasswordConPasswordActualIncorrectaNoGuarda() {
+        loguearComo("juan@test.com");
+        when(repository.findById(1L)).thenReturn(Optional.of(juan()));
+        when(passwordEncoder.matches("incorrecta", "1234")).thenReturn(false);
+        CambiarPasswordDTO dto = new CambiarPasswordDTO("incorrecta", "nueva12345");
+
+        assertThrows(UsuarioExceptionPasswordInvalida.class, () -> service.cambiarPassword(1L, dto));
+        verify(repository, never()).save(Mockito.any(UsuarioEntity.class));
+    }
+
+    @Test
+    void testCambiarPasswordIgualALaActualNoGuarda() {
+        loguearComo("juan@test.com");
+        when(repository.findById(1L)).thenReturn(Optional.of(juan()));
+        when(passwordEncoder.matches("actual1234", "1234")).thenReturn(true);
+        CambiarPasswordDTO dto = new CambiarPasswordDTO("actual1234", "actual1234");
+
+        assertThrows(UsuarioExceptionPasswordInvalida.class, () -> service.cambiarPassword(1L, dto));
+        verify(repository, never()).save(Mockito.any(UsuarioEntity.class));
+    }
+
+    @Test
+    void testCambiarPasswordDeOtroUsuarioDaAccesoDenegadoYNoGuarda() {
+        loguearComo("intruso@test.com");
+        when(repository.findById(1L)).thenReturn(Optional.of(juan()));
+        CambiarPasswordDTO dto = new CambiarPasswordDTO("actual1234", "nueva12345");
+
+        assertThrows(UsuarioExceptionAccesoDenegado.class, () -> service.cambiarPassword(1L, dto));
         verify(repository, never()).save(Mockito.any(UsuarioEntity.class));
     }
 }

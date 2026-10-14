@@ -26,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
+import dev.andrea.acompaname_backend.usuario.dtos.CambiarPasswordDTO;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
 
@@ -127,5 +128,24 @@ public class UsuarioServiceImplTest {
         UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "12345678", Set.of(1L));
         UsuarioDTOResponse resultado = service.update(1L, dto);
         assertThat(resultado.nombre(), is(equalTo("Ana")));
+    }
+
+    @Test
+    void testCambiarPasswordGuardaLaNuevaCifrada() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        RoleEntity rol = crearRolMock();
+        UsuarioEntity usuarioMock = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "cifradaVieja",
+                Set.of(rol));
+        when(repository.findById(1L)).thenReturn(Optional.of(usuarioMock));
+        when(passwordEncoder.matches("actual1234", "cifradaVieja")).thenReturn(true);
+        when(passwordEncoder.matches("nueva12345", "cifradaVieja")).thenReturn(false);
+        when(passwordEncoder.encode("nueva12345")).thenReturn("cifradaNueva");
+
+        service.cambiarPassword(1L, new CambiarPasswordDTO("actual1234", "nueva12345"));
+
+        assertThat(usuarioMock.getPassword(), is(equalTo("cifradaNueva")));
+        verify(repository).save(usuarioMock);
     }
 }
