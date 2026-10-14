@@ -127,6 +127,8 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
                 perfilCuidadorExistente.setSexo(dto.sexo());
             }
         }
+        // La ciudad se actualiza siempre: si no llega, se borra
+        perfilCuidadorExistente.setCiudad(dto.ciudad());
         PerfilCuidadorEntity perfilCuidadorActualizado = repository.save(perfilCuidadorExistente);
         return aDTO(perfilCuidadorActualizado);
     }

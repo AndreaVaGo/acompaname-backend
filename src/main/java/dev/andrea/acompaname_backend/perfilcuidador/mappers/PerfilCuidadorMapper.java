@@ -55,6 +55,7 @@ public class PerfilCuidadorMapper {
         perfil.setTipoCuidado(tipoCuidadoOPorDefecto(dto.tipoCuidado()));
         perfil.setServicios(serviciosATexto(dto.servicios()));
         perfil.setSexo(sexoONull(dto.sexo()));
+        perfil.setCiudad(dto.ciudad());
         perfil.setUsuario(usuario);
         return perfil;
     }
@@ -81,7 +82,8 @@ public class PerfilCuidadorMapper {
                 numValoraciones,
                 tipoCuidadoOPorDefecto(entity.getTipoCuidado()),
                 serviciosALista(entity.getServicios()),
-                entity.getSexo());
+                entity.getSexo(),
+                entity.getCiudad());
         return dtoResponse;
 
     }

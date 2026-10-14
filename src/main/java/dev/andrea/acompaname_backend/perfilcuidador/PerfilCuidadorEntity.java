@@ -55,12 +55,23 @@ public class PerfilCuidadorEntity {
     // Sexo del cuidador: "MUJER" o "HOMBRE". Es opcional: si es null, no lo ha indicado
     private String sexo;
 
-    // Constructor sin sexo: el mismo que había antes de añadir este campo
+    // Ciudad donde trabaja el cuidador (puede estar vacía)
+    private String ciudad;
+
+    // Constructor sin ciudad: el mismo que había antes de añadir este campo
+    public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
+            String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario, String foto,
+            String tipoCuidado, String servicios, String sexo) {
+        this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, foto,
+                tipoCuidado, servicios, sexo, null);
+    }
+
+    // Constructor sin sexo: el mismo que había antes de añadir ese campo
     public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
             String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario, String foto,
             String tipoCuidado, String servicios) {
         this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, foto,
-                tipoCuidado, servicios, null);
+                tipoCuidado, servicios, null, null);
     }
 
     // Constructor sin servicios: el mismo que había antes de añadir ese campo

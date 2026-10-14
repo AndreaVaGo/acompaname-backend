@@ -32,36 +32,46 @@ public record PerfilCuidadorDTORequest(
         List<String> servicios,
 
         // MUJER, HOMBRE o vacío (vacío = prefiero no indicarlo)
-        @Pattern(regexp = "MUJER|HOMBRE|", message = "El sexo debe ser MUJER o HOMBRE") String sexo
+        @Pattern(regexp = "MUJER|HOMBRE|", message = "El sexo debe ser MUJER o HOMBRE") String sexo,
+
+        @Size(max = 100, message = "La ciudad no puede superar 100 caracteres") String ciudad
 
 ) {
 
-    // Constructor sin sexo: el mismo que había antes de añadir este campo
+    // Constructor sin ciudad: el mismo que había antes de añadir este campo
+    public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
+            boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String foto, String tipoCuidado,
+            List<String> servicios, String sexo) {
+        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, foto,
+                tipoCuidado, servicios, sexo, null);
+    }
+
+    // Constructor sin sexo: el mismo que había antes de añadir ese campo
     public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
             boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String foto, String tipoCuidado,
             List<String> servicios) {
         this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, foto,
-                tipoCuidado, servicios, null);
+                tipoCuidado, servicios, null, null);
     }
 
     // Constructor sin servicios: el mismo que había antes de añadir ese campo
     public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
             boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String foto, String tipoCuidado) {
         this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, foto,
-                tipoCuidado, null, null);
+                tipoCuidado, null, null, null);
     }
 
     // Constructor sin tipo de cuidado: el mismo que había antes de añadir ese campo
     public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
             boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String foto) {
         this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, foto, null,
-                null, null);
+                null, null, null);
     }
 
     // Constructor sin foto: el mismo que había antes de añadir ese campo
     public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
             boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId) {
         this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, null, null,
-                null, null);
+                null, null, null);
     }
 }
