@@ -1,10 +1,10 @@
 
-package dev.andrea.acompaname_backend.pago.mappers;
+package dev.andrea.acompaname_backend.payment.mappers;
 
-import dev.andrea.acompaname_backend.pago.EstadoPago;
-import dev.andrea.acompaname_backend.pago.PagoEntity;
-import dev.andrea.acompaname_backend.pago.dtos.PagoDTORequest;
-import dev.andrea.acompaname_backend.pago.dtos.PagoDTOResponse;
+import dev.andrea.acompaname_backend.payment.EstadoPago;
+import dev.andrea.acompaname_backend.payment.PagoEntity;
+import dev.andrea.acompaname_backend.payment.dtos.PagoDTORequest;
+import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
 import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
 
 public class PagoMapper {

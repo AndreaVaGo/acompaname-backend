@@ -7,9 +7,9 @@ import static org.hamcrest.Matchers.sameInstance;
 
 import org.junit.jupiter.api.Test;
 
-import dev.andrea.acompaname_backend.pago.exceptions.PagoException;
-import dev.andrea.acompaname_backend.pago.exceptions.PagoExceptionNotFound;
-import dev.andrea.acompaname_backend.pago.exceptions.PagoExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.payment.exceptions.PagoException;
+import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
+import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorException;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionAccesoDenegado;

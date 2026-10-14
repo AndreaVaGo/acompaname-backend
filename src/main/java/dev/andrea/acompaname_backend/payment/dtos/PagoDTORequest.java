@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.pago.dtos;
+package dev.andrea.acompaname_backend.payment.dtos;
 
 import java.math.BigDecimal;
 

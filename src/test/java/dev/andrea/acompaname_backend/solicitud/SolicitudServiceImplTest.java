@@ -21,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import dev.andrea.acompaname_backend.pago.PagoRepository;
+import dev.andrea.acompaname_backend.payment.PagoRepository;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;

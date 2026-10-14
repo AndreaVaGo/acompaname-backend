@@ -7,8 +7,8 @@ import static org.hamcrest.Matchers.is;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
-import dev.andrea.acompaname_backend.pago.exceptions.PagoExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.pago.exceptions.PagoExceptionNotFound;
+import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionAccesoDenegado;

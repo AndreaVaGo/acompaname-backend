@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.pago;
+package dev.andrea.acompaname_backend.payment;
 
 public enum EstadoPago {
 

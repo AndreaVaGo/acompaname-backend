@@ -11,8 +11,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import dev.andrea.acompaname_backend.pago.exceptions.PagoExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.pago.exceptions.PagoExceptionNotFound;
+import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionAccesoDenegado;

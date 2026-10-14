@@ -8,9 +8,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import dev.andrea.acompaname_backend.pago.PagoRepository;
-import dev.andrea.acompaname_backend.pago.dtos.PagoDTORequest;
-import dev.andrea.acompaname_backend.pago.mappers.PagoMapper;
+import dev.andrea.acompaname_backend.payment.PagoRepository;
+import dev.andrea.acompaname_backend.payment.dtos.PagoDTORequest;
+import dev.andrea.acompaname_backend.payment.mappers.PagoMapper;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;

@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.pago;
+package dev.andrea.acompaname_backend.payment;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,11 +8,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import dev.andrea.acompaname_backend.pago.dtos.PagoDTORequest;
-import dev.andrea.acompaname_backend.pago.dtos.PagoDTOResponse;
-import dev.andrea.acompaname_backend.pago.exceptions.PagoExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.pago.exceptions.PagoExceptionNotFound;
-import dev.andrea.acompaname_backend.pago.mappers.PagoMapper;
+import dev.andrea.acompaname_backend.payment.dtos.PagoDTORequest;
+import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
+import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
+import dev.andrea.acompaname_backend.payment.mappers.PagoMapper;
 import dev.andrea.acompaname_backend.solicitud.SolicitudEntity;
 import dev.andrea.acompaname_backend.solicitud.SolicitudRepository;
 import dev.andrea.acompaname_backend.solicitud.exceptions.SolicitudExceptionNotFound;

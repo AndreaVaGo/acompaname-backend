@@ -25,8 +25,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import dev.andrea.acompaname_backend.pago.PagoEntity;
-import dev.andrea.acompaname_backend.pago.PagoRepository;
+import dev.andrea.acompaname_backend.payment.PagoEntity;
+import dev.andrea.acompaname_backend.payment.PagoRepository;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.perfilcuidador.exceptions.PerfilCuidadorExceptionNotFound;

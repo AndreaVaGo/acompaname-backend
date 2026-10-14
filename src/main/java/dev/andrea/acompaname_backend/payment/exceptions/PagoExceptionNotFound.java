@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.pago.exceptions;
+package dev.andrea.acompaname_backend.payment.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

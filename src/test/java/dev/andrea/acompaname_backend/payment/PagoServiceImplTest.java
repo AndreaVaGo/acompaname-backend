@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.pago;
+package dev.andrea.acompaname_backend.payment;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -26,9 +26,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import dev.andrea.acompaname_backend.pago.dtos.PagoDTORequest;
-import dev.andrea.acompaname_backend.pago.dtos.PagoDTOResponse;
-import dev.andrea.acompaname_backend.pago.exceptions.PagoExceptionNotFound;
+import dev.andrea.acompaname_backend.payment.dtos.PagoDTORequest;
+import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
+import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.solicitud.EstadoSolicitud;

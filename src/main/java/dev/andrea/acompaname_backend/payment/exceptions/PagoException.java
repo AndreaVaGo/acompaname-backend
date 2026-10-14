@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.pago.exceptions;
+package dev.andrea.acompaname_backend.payment.exceptions;
 
 public class PagoException extends RuntimeException {
     public PagoException(String message) {
