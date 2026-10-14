@@ -23,6 +23,7 @@ import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionConflicto;
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionNotFound;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
