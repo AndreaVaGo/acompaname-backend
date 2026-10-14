@@ -27,6 +27,7 @@ import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
+import dev.andrea.acompaname_backend.usuario.dtos.ActualizarContactoDTO;
 import dev.andrea.acompaname_backend.usuario.dtos.CambiarPasswordDTO;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
@@ -36,8 +37,8 @@ import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound
 import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionPasswordInvalida;
 
 // Tests de los casos de error y de seguridad de UsuarioServiceImpl:
-// email repetido (409), usuario que no existe (404), datos de otra persona (403)
-// y errores al cambiar la contraseña (400).
+// email repetido (409), usuario que no existe (404), datos de otra persona (403),
+// errores al cambiar la contraseña (400) y al actualizar los datos de contacto.
 @ExtendWith(MockitoExtension.class)
 public class UsuarioServiceImplErroresTest {
     @Mock
@@ -231,5 +232,50 @@ public class UsuarioServiceImplErroresTest {
 
         assertThrows(UsuarioExceptionAccesoDenegado.class, () -> service.cambiarPassword(1L, dto));
         verify(repository, never()).save(Mockito.any(UsuarioEntity.class));
+    }
+
+    @Test
+    void testActualizarContactoConEmailDeOtroUsuarioDaConflictoYNoGuarda() {
+        loguearComo("juan@test.com");
+        UsuarioEntity ana = new UsuarioEntity(2L, "Ana", "ana@test.com", "600555666", "1234",
+                Set.of(rol(1L, "FAMILIA")));
+        when(repository.findById(1L)).thenReturn(Optional.of(juan()));
+        when(repository.findByEmail("ana@test.com")).thenReturn(Optional.of(ana));
+        ActualizarContactoDTO dto = new ActualizarContactoDTO("Juan", "ana@test.com", "600111222");
+
+        assertThrows(UsuarioExceptionEmailDuplicado.class, () -> service.actualizarContacto(1L, dto));
+        verify(repository, never()).save(Mockito.any(UsuarioEntity.class));
+    }
+
+    @Test
+    void testActualizarContactoConMiPropioEmailNoDaConflicto() {
+        loguearComo("juan@test.com");
+        UsuarioEntity juan = juan();
+        when(repository.findById(1L)).thenReturn(Optional.of(juan));
+        when(repository.save(juan)).thenReturn(juan);
+        ActualizarContactoDTO dto = new ActualizarContactoDTO("Juan Nuevo", "juan@test.com", "699000111");
+
+        UsuarioDTOResponse resultado = service.actualizarContacto(1L, dto);
+
+        assertThat(resultado.nombre(), is(equalTo("Juan Nuevo")));
+        verify(repository, never()).findByEmail(Mockito.anyString());
+    }
+
+    @Test
+    void testActualizarContactoDeOtroUsuarioDaAccesoDenegadoYNoGuarda() {
+        loguearComo("intruso@test.com");
+        when(repository.findById(1L)).thenReturn(Optional.of(juan()));
+        ActualizarContactoDTO dto = new ActualizarContactoDTO("Juan", "juan@test.com", "600111222");
+
+        assertThrows(UsuarioExceptionAccesoDenegado.class, () -> service.actualizarContacto(1L, dto));
+        verify(repository, never()).save(Mockito.any(UsuarioEntity.class));
+    }
+
+    @Test
+    void testActualizarContactoDeUsuarioQueNoExisteDaNotFound() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+        ActualizarContactoDTO dto = new ActualizarContactoDTO("Juan", "juan@test.com", "600111222");
+
+        assertThrows(UsuarioExceptionNotFound.class, () -> service.actualizarContacto(99L, dto));
     }
 }

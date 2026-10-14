@@ -26,6 +26,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import dev.andrea.acompaname_backend.usuario.dtos.ActualizarContactoDTO;
 import dev.andrea.acompaname_backend.usuario.dtos.CambiarPasswordDTO;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
@@ -201,6 +202,50 @@ public class UsuarioControllerTest {
         CambiarPasswordDTO dto = new CambiarPasswordDTO("", "nueva12345");
 
         MockHttpServletResponse response = mockMvc.perform(patch("/api/v1/usuarios/1/password")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        Mockito.verifyNoInteractions(service);
+    }
+
+    @Test
+    void testActualizarContactoDevuelve200() throws Exception {
+        ActualizarContactoDTO dto = new ActualizarContactoDTO("Juan Nuevo", "nuevo@test.com", "699000111");
+        UsuarioDTOResponse dtoResponse = new UsuarioDTOResponse(1L, "Juan Nuevo", "nuevo@test.com", "699000111",
+                Set.of("FAMILIA"));
+        when(service.actualizarContacto(Mockito.eq(1L), Mockito.any(ActualizarContactoDTO.class)))
+                .thenReturn(dtoResponse);
+
+        MockHttpServletResponse response = mockMvc.perform(patch("/api/v1/usuarios/1/contacto")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(200)));
+        assertThat(response.getContentAsString(), is(equalTo(mapper.writeValueAsString(dtoResponse))));
+        assertThat(response.getContentAsString(), containsString("Juan Nuevo"));
+    }
+
+    @Test
+    void testActualizarContactoConEmailInvalidoDevuelve400() throws Exception {
+        ActualizarContactoDTO dto = new ActualizarContactoDTO("Juan", "esto-no-es-un-email", "600111222");
+
+        MockHttpServletResponse response = mockMvc.perform(patch("/api/v1/usuarios/1/contacto")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        Mockito.verifyNoInteractions(service);
+    }
+
+    @Test
+    void testActualizarContactoConNombreVacioDevuelve400() throws Exception {
+        ActualizarContactoDTO dto = new ActualizarContactoDTO("", "juan@test.com", "600111222");
+
+        MockHttpServletResponse response = mockMvc.perform(patch("/api/v1/usuarios/1/contacto")
                 .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
                 .andReturn()
                 .getResponse();

@@ -15,6 +15,7 @@ import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.perfilcuidador.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
+import dev.andrea.acompaname_backend.usuario.dtos.ActualizarContactoDTO;
 import dev.andrea.acompaname_backend.usuario.dtos.CambiarPasswordDTO;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
@@ -148,5 +149,21 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
         usuario.setPassword(passwordEncoder.encode(dto.passwordNueva()));
         repository.save(usuario);
+    }
+
+    @Transactional
+    @Override
+    public UsuarioDTOResponse actualizarContacto(Long id, ActualizarContactoDTO dto) {
+        UsuarioEntity usuario = findEntityById(id);
+        verificarPropietario(usuario);
+        boolean cambiaDeEmail = !usuario.getEmail().equals(dto.email());
+        if (cambiaDeEmail && repository.findByEmail(dto.email()).isPresent()) {
+            throw new UsuarioExceptionEmailDuplicado(
+                    "No ha sido posible completar la actualización con los datos proporcionados.");
+        }
+        usuario.setNombre(dto.nombre());
+        usuario.setEmail(dto.email());
+        usuario.setTelefono(dto.telefono());
+        return UsuarioMapper.toDTO(repository.save(usuario));
     }
 }
