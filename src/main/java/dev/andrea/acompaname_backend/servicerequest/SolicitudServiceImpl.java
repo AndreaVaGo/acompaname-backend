@@ -129,6 +129,8 @@ public class SolicitudServiceImpl implements SolicitudService {
         if (dto.necesidades() != null) {
             solicitudExistente.setNecesidades(String.join(",", dto.necesidades()));
         }
+        // La dirección se actualiza siempre: si no llega, se borra
+        solicitudExistente.setDireccion(dto.direccion());
         SolicitudEntity solicitudActualizada = repository.save(solicitudExistente);
         return SolicitudMapper.toDTO(solicitudActualizada);
     }
