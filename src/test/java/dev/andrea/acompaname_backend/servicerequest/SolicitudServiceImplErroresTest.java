@@ -36,9 +36,9 @@ import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionFechaInvalida;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
-import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
-import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
-import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
+import dev.andrea.acompaname_backend.user.UsuarioEntity;
+import dev.andrea.acompaname_backend.user.UsuarioRepository;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
 
 // Tests de los casos de error y de seguridad de SolicitudServiceImpl:
 // que no existe (404), que no es tuya (403) y que solo veo mis solicitudes.

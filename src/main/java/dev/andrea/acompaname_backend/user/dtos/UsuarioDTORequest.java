@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.usuario.dtos;
+package dev.andrea.acompaname_backend.user.dtos;
 
 import java.util.Set;
 

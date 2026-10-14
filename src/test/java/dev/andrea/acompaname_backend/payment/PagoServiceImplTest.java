@@ -35,7 +35,7 @@ import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
-import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
+import dev.andrea.acompaname_backend.user.UsuarioEntity;
 
 @ExtendWith(MockitoExtension.class)
 public class PagoServiceImplTest {

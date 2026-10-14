@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
 
 import dev.andrea.acompaname_backend.role.RoleEntity;
-import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
+import dev.andrea.acompaname_backend.user.UsuarioEntity;
 
 public class SecurityUserTest {
 

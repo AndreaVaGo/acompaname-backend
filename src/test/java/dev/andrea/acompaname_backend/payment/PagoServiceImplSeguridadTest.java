@@ -33,7 +33,7 @@ import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
-import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
+import dev.andrea.acompaname_backend.user.UsuarioEntity;
 
 // Tests de seguridad del módulo de Pago: solo la familia y el cuidador de la
 // solicitud pueden ver o tocar su pago, y solo la familia puede pagarlo (403).

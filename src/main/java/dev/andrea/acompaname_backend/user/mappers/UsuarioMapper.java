@@ -1,12 +1,12 @@
-package dev.andrea.acompaname_backend.usuario.mappers;
+package dev.andrea.acompaname_backend.user.mappers;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import dev.andrea.acompaname_backend.role.RoleEntity;
-import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
-import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
-import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
+import dev.andrea.acompaname_backend.user.UsuarioEntity;
+import dev.andrea.acompaname_backend.user.dtos.UsuarioDTORequest;
+import dev.andrea.acompaname_backend.user.dtos.UsuarioDTOResponse;
 
 public class UsuarioMapper {
 

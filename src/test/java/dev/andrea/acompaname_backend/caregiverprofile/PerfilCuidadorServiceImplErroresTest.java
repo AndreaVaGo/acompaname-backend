@@ -29,9 +29,9 @@ import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTOResp
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.role.RoleEntity;
-import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
-import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
-import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
+import dev.andrea.acompaname_backend.user.UsuarioEntity;
+import dev.andrea.acompaname_backend.user.UsuarioRepository;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
 import dev.andrea.acompaname_backend.valoracion.ValoracionRepository;
 
 // Tests de los casos de error y de seguridad de PerfilCuidadorServiceImpl:

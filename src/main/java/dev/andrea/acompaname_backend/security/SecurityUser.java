@@ -9,7 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import dev.andrea.acompaname_backend.role.RoleEntity;
-import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
+import dev.andrea.acompaname_backend.user.UsuarioEntity;
 
 public class SecurityUser implements UserDetails {
 

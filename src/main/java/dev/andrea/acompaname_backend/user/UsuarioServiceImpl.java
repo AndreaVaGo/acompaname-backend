@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.usuario;
+package dev.andrea.acompaname_backend.user;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,15 +15,15 @@ import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
-import dev.andrea.acompaname_backend.usuario.dtos.ActualizarContactoDTO;
-import dev.andrea.acompaname_backend.usuario.dtos.CambiarPasswordDTO;
-import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
-import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
-import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionEmailDuplicado;
-import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
-import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionPasswordInvalida;
-import dev.andrea.acompaname_backend.usuario.mappers.UsuarioMapper;
+import dev.andrea.acompaname_backend.user.dtos.ActualizarContactoDTO;
+import dev.andrea.acompaname_backend.user.dtos.CambiarPasswordDTO;
+import dev.andrea.acompaname_backend.user.dtos.UsuarioDTORequest;
+import dev.andrea.acompaname_backend.user.dtos.UsuarioDTOResponse;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionEmailDuplicado;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionPasswordInvalida;
+import dev.andrea.acompaname_backend.user.mappers.UsuarioMapper;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {

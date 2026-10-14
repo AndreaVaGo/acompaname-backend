@@ -20,9 +20,9 @@ import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptio
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionFechaInvalida;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.servicerequest.mappers.SolicitudMapper;
-import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
-import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
-import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
+import dev.andrea.acompaname_backend.user.UsuarioEntity;
+import dev.andrea.acompaname_backend.user.UsuarioRepository;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
 
 @Service
 public class SolicitudServiceImpl implements SolicitudService {

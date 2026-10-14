@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.usuario.dtos;
+package dev.andrea.acompaname_backend.user.dtos;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

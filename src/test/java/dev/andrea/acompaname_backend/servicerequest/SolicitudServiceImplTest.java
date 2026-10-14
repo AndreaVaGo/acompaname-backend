@@ -27,8 +27,8 @@ import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
-import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
-import dev.andrea.acompaname_backend.usuario.UsuarioRepository;
+import dev.andrea.acompaname_backend.user.UsuarioEntity;
+import dev.andrea.acompaname_backend.user.UsuarioRepository;
 import org.springframework.security.core.Authentication;
 
 @ExtendWith(MockitoExtension.class)

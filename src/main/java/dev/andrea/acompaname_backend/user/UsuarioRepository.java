@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.usuario;
+package dev.andrea.acompaname_backend.user;
 
 import java.util.Optional;
 

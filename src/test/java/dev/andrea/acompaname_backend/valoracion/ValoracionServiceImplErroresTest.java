@@ -27,7 +27,7 @@ import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
-import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
+import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.valoracion.dtos.ValoracionDTORequest;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionConflicto;

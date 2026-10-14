@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.security.SecurityUser;
-import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
+import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = AuthController.class)

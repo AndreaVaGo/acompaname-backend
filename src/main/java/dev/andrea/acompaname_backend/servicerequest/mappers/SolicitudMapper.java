@@ -8,7 +8,7 @@ import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
-import dev.andrea.acompaname_backend.usuario.UsuarioEntity;
+import dev.andrea.acompaname_backend.user.UsuarioEntity;
 
 public class SolicitudMapper {
 

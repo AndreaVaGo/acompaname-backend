@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.usuario;
+package dev.andrea.acompaname_backend.user;
 
 import java.util.List;
 
@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import dev.andrea.acompaname_backend.usuario.dtos.ActualizarContactoDTO;
-import dev.andrea.acompaname_backend.usuario.dtos.CambiarPasswordDTO;
-import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
-import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
+import dev.andrea.acompaname_backend.user.dtos.ActualizarContactoDTO;
+import dev.andrea.acompaname_backend.user.dtos.CambiarPasswordDTO;
+import dev.andrea.acompaname_backend.user.dtos.UsuarioDTORequest;
+import dev.andrea.acompaname_backend.user.dtos.UsuarioDTOResponse;
 import jakarta.validation.Valid;
 
 @RestController

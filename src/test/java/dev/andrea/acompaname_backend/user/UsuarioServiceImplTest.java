@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.usuario;
+package dev.andrea.acompaname_backend.user;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -26,10 +26,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
-import dev.andrea.acompaname_backend.usuario.dtos.ActualizarContactoDTO;
-import dev.andrea.acompaname_backend.usuario.dtos.CambiarPasswordDTO;
-import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
-import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
+import dev.andrea.acompaname_backend.user.dtos.ActualizarContactoDTO;
+import dev.andrea.acompaname_backend.user.dtos.CambiarPasswordDTO;
+import dev.andrea.acompaname_backend.user.dtos.UsuarioDTORequest;
+import dev.andrea.acompaname_backend.user.dtos.UsuarioDTOResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class UsuarioServiceImplTest {

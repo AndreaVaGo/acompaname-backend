@@ -16,10 +16,10 @@ import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorE
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudException;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioException;
-import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionNotFound;
-import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.usuario.exceptions.UsuarioExceptionEmailDuplicado;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioException;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionEmailDuplicado;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionException;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionNotFound;
 import dev.andrea.acompaname_backend.valoracion.exceptions.ValoracionExceptionAccesoDenegado;

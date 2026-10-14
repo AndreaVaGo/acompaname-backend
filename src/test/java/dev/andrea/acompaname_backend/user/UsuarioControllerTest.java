@@ -1,4 +1,4 @@
-package dev.andrea.acompaname_backend.usuario;
+package dev.andrea.acompaname_backend.user;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -26,10 +26,10 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import dev.andrea.acompaname_backend.usuario.dtos.ActualizarContactoDTO;
-import dev.andrea.acompaname_backend.usuario.dtos.CambiarPasswordDTO;
-import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTORequest;
-import dev.andrea.acompaname_backend.usuario.dtos.UsuarioDTOResponse;
+import dev.andrea.acompaname_backend.user.dtos.ActualizarContactoDTO;
+import dev.andrea.acompaname_backend.user.dtos.CambiarPasswordDTO;
+import dev.andrea.acompaname_backend.user.dtos.UsuarioDTORequest;
+import dev.andrea.acompaname_backend.user.dtos.UsuarioDTOResponse;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = UsuarioController.class)
