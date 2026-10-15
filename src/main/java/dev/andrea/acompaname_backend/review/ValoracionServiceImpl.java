@@ -1,5 +1,6 @@
 package dev.andrea.acompaname_backend.review;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,9 +48,22 @@ public class ValoracionServiceImpl implements ValoracionService {
         }
     }
 
+    // Para consultar una valoración: la familia que la hizo o el cuidador que la recibió
+    private void verificarParticipante(SolicitudEntity solicitud) {
+        String emailLogueado = emailLogueado();
+        if (!solicitud.getFamilia().getEmail().equals(emailLogueado)
+                && !solicitud.getCuidador().getUsuario().getEmail().equals(emailLogueado)) {
+            throw new ValoracionExceptionAccesoDenegado("No tiene permiso sobre esta valoración");
+        }
+    }
+
     @Override
     public List<ValoracionDTOResponse> getEntities() {
-        return repository.findAll().stream()
+        // Cada usuario solo ve sus valoraciones, no las de los demás
+        String emailLogueado = emailLogueado();
+        List<ValoracionEntity> mias = new ArrayList<>(repository.findBySolicitudFamiliaEmail(emailLogueado));
+        mias.addAll(repository.findBySolicitudCuidadorUsuarioEmail(emailLogueado));
+        return mias.stream()
                 .map(ValoracionMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -57,6 +71,7 @@ public class ValoracionServiceImpl implements ValoracionService {
     @Override
     public ValoracionDTOResponse getById(Long id) {
         ValoracionEntity valoracion = findEntityById(id);
+        verificarParticipante(valoracion.getSolicitud());
         return ValoracionMapper.toDTO(valoracion);
     }
 
