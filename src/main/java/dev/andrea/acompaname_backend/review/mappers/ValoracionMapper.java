@@ -4,6 +4,7 @@ import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.review.ValoracionEntity;
 import dev.andrea.acompaname_backend.review.dtos.ValoracionDTORequest;
 import dev.andrea.acompaname_backend.review.dtos.ValoracionDTOResponse;
+import dev.andrea.acompaname_backend.review.dtos.ValoracionPublicaDTOResponse;
 
 public class ValoracionMapper {
 
@@ -24,5 +25,12 @@ public class ValoracionMapper {
                 entity.getFecha(),
                 entity.getSolicitud().getId());
         return dtoResponse;
+    }
+
+    public static ValoracionPublicaDTOResponse toPublicaDTO(ValoracionEntity entity) {
+        return new ValoracionPublicaDTOResponse(
+                entity.getPuntuacion(),
+                entity.getComentario(),
+                entity.getFecha());
     }
 }
