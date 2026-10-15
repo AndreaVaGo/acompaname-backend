@@ -3,6 +3,7 @@ package dev.andrea.acompaname_backend.review;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +31,7 @@ import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.review.dtos.ValoracionDTORequest;
 import dev.andrea.acompaname_backend.review.dtos.ValoracionDTOResponse;
+import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionAccesoDenegado;
 
 @ExtendWith(MockitoExtension.class)
 public class ValoracionServiceImplTest {
@@ -42,6 +45,17 @@ public class ValoracionServiceImplTest {
     @BeforeEach
     void setup() {
         service = new ValoracionServiceImpl(repository, solicitudRepository);
+    }
+
+    // Limpia el usuario logueado para que un test no afecte a los siguientes
+    @AfterEach
+    void limpiarSesion() {
+        SecurityContextHolder.clearContext();
+    }
+
+    private void loguearComo(String email) {
+        Authentication auth = new UsernamePasswordAuthenticationToken(email, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     private RoleEntity rolFamilia() {
@@ -70,10 +84,11 @@ public class ValoracionServiceImplTest {
 
     @Test
     void testGetEntities() {
+        loguearComo("ana@test.com");
         SolicitudEntity solicitud = crearSolicitudMock();
         List<ValoracionEntity> valoracionesMock = List.of(
                 new ValoracionEntity(1L, "Muy buena atención", 5, LocalDate.of(2026, 9, 11), solicitud));
-        when(repository.findAll()).thenReturn(valoracionesMock);
+        when(repository.findBySolicitudFamiliaEmail("ana@test.com")).thenReturn(valoracionesMock);
 
         List<ValoracionDTOResponse> valoraciones = service.getEntities();
 
@@ -82,7 +97,33 @@ public class ValoracionServiceImplTest {
     }
 
     @Test
+    void testGetEntitiesComoCuidadorDevuelveLasRecibidas() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = crearSolicitudMock();
+        List<ValoracionEntity> valoracionesMock = List.of(
+                new ValoracionEntity(1L, "Muy buena atención", 5, LocalDate.of(2026, 9, 11), solicitud));
+        when(repository.findBySolicitudCuidadorUsuarioEmail("pepe@test.com")).thenReturn(valoracionesMock);
+
+        List<ValoracionDTOResponse> valoraciones = service.getEntities();
+
+        assertThat(valoraciones.size(), is(equalTo(1)));
+        assertThat(valoraciones.get(0).puntuacion(), is(equalTo(5)));
+    }
+
+    @Test
+    void testGetEntitiesDeUsuarioSinValoracionesDevuelveListaVacia() {
+        loguearComo("otro@test.com");
+
+        List<ValoracionDTOResponse> valoraciones = service.getEntities();
+
+        assertThat(valoraciones.size(), is(equalTo(0)));
+        // Nunca se piden todas las valoraciones de la base de datos
+        Mockito.verify(repository, Mockito.never()).findAll();
+    }
+
+    @Test
     void testGetById() {
+        loguearComo("ana@test.com");
         SolicitudEntity solicitud = crearSolicitudMock();
         ValoracionEntity valoracionMock = new ValoracionEntity(1L, "Muy buena atención", 5,
                 LocalDate.of(2026, 9, 11), solicitud);
@@ -95,9 +136,32 @@ public class ValoracionServiceImplTest {
     }
 
     @Test
+    void testGetByIdComoCuidadorDeLaSolicitud() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = crearSolicitudMock();
+        ValoracionEntity valoracionMock = new ValoracionEntity(1L, "Muy buena atención", 5,
+                LocalDate.of(2026, 9, 11), solicitud);
+        when(repository.findById(1L)).thenReturn(Optional.of(valoracionMock));
+
+        ValoracionDTOResponse valoracion = service.getById(1L);
+
+        assertThat(valoracion.puntuacion(), is(equalTo(5)));
+    }
+
+    @Test
+    void testGetByIdDeOtroUsuarioLanzaAccesoDenegado() {
+        loguearComo("otro@test.com");
+        SolicitudEntity solicitud = crearSolicitudMock();
+        ValoracionEntity valoracionMock = new ValoracionEntity(1L, "Muy buena atención", 5,
+                LocalDate.of(2026, 9, 11), solicitud);
+        when(repository.findById(1L)).thenReturn(Optional.of(valoracionMock));
+
+        assertThrows(ValoracionExceptionAccesoDenegado.class, () -> service.getById(1L));
+    }
+
+    @Test
     void testStoreEntity() {
-        Authentication auth = new UsernamePasswordAuthenticationToken("ana@test.com", null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
+        loguearComo("ana@test.com");
 
         SolicitudEntity solicitud = crearSolicitudMock();
         when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitud));
@@ -114,8 +178,7 @@ public class ValoracionServiceImplTest {
 
     @Test
     void testDeleteById() {
-        Authentication auth = new UsernamePasswordAuthenticationToken("ana@test.com", null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
+        loguearComo("ana@test.com");
 
         SolicitudEntity solicitud = crearSolicitudMock();
         ValoracionEntity valoracionMock = new ValoracionEntity(1L, "Muy buena atención", 5,
@@ -129,8 +192,7 @@ public class ValoracionServiceImplTest {
 
     @Test
     void testUpdate() {
-        Authentication auth = new UsernamePasswordAuthenticationToken("ana@test.com", null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
+        loguearComo("ana@test.com");
 
         SolicitudEntity solicitud = crearSolicitudMock();
         ValoracionEntity valoracionExistente = new ValoracionEntity(1L, "Muy buena atención", 5,
