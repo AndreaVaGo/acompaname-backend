@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import dev.andrea.acompaname_backend.review.dtos.ValoracionDTORequest;
 import dev.andrea.acompaname_backend.review.dtos.ValoracionDTOResponse;
+import dev.andrea.acompaname_backend.review.dtos.ValoracionPublicaDTOResponse;
 import jakarta.validation.Valid;
 
 @RestController
@@ -34,6 +35,11 @@ public class ValoracionController {
     @GetMapping("{id}")
     public ValoracionDTOResponse getById(@PathVariable Long id) {
         return service.getById(id);
+    }
+
+    @GetMapping("cuidador/{cuidadorId}")
+    public List<ValoracionPublicaDTOResponse> porCuidador(@PathVariable Long cuidadorId) {
+        return service.getPublicasPorCuidador(cuidadorId);
     }
 
     @PostMapping("")
