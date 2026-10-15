@@ -14,6 +14,7 @@ import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.review.dtos.ValoracionDTORequest;
 import dev.andrea.acompaname_backend.review.dtos.ValoracionDTOResponse;
+import dev.andrea.acompaname_backend.review.dtos.ValoracionPublicaDTOResponse;
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionConflicto;
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionNotFound;
@@ -57,6 +58,13 @@ public class ValoracionServiceImpl implements ValoracionService {
     public ValoracionDTOResponse getById(Long id) {
         ValoracionEntity valoracion = findEntityById(id);
         return ValoracionMapper.toDTO(valoracion);
+    }
+
+    @Override
+    public List<ValoracionPublicaDTOResponse> getPublicasPorCuidador(Long cuidadorId) {
+        return repository.findBySolicitudCuidadorIdOrderByFechaDesc(cuidadorId).stream()
+                .map(ValoracionMapper::toPublicaDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional
