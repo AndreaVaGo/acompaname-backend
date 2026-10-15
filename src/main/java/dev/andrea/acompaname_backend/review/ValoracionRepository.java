@@ -19,4 +19,9 @@ public interface ValoracionRepository extends JpaRepository<ValoracionEntity, Lo
     // Valoraciones de un cuidador, las más recientes primero
     List<ValoracionEntity> findBySolicitudCuidadorIdOrderByFechaDesc(Long cuidadorId);
 
+    // Valoraciones de las solicitudes de una familia (por su email)
+    List<ValoracionEntity> findBySolicitudFamiliaEmail(String email);
+
+    // Valoraciones recibidas por un cuidador (por el email de su usuario)
+    List<ValoracionEntity> findBySolicitudCuidadorUsuarioEmail(String email);
 }
