@@ -48,6 +48,8 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores/mi-perfil").authenticated()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores").permitAll()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores/*").permitAll()
+                        // Las valoraciones de un cuidador se ven sin iniciar sesión (solo puntuación, comentario y fecha)
+                        .requestMatchers(HttpMethod.GET, "/" + endpoint + "/valoraciones/cuidador/*").permitAll()
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/cuidadores").hasAuthority("CUIDADOR")
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/solicitudes").hasAuthority("FAMILIA")
                         .requestMatchers(HttpMethod.PUT, "/" + endpoint + "/cuidadores/**").hasAuthority("CUIDADOR")
