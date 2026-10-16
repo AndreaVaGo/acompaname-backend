@@ -373,7 +373,7 @@ El proyecto cuenta con **295 tests** que cubren la lógica de negocio, la capa d
 
 ### Cobertura
 
-La cobertura se mide con **JaCoCo**. Al ejecutar <mark>./mvnw test</mark> se genera el informe en <mark>target/site/jacoco/index.html</mark>. El resultado actual es de un **96 % de instrucciones** y un **96 % de ramas**, por encima del 70 % mínimo que se pedía.
+La cobertura se mide con **JaCoCo**. Al ejecutar <mark>./mvnw test</mark> se genera el informe en <mark>target/site/jacoco/index.html</mark>. El resultado actual es de un **95 % de instrucciones** y un **92 % de ramas**, por encima del 70 % mínimo que se pedía.
 
 ![Cobertura de los tests del backend](docs/screenshots/cobertura-backend.png)
 
