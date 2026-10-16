@@ -8,7 +8,7 @@ Este repositorio contiene la **API REST** del proyecto, desarrollada con **Sprin
 
 Proyecto final del bootcamp de Desarrollo Web Full Stack (850h) en **Factoría F5 — Digital Academy**.
 
-![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-179-success)
+![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-295-success)
 
 ---
 
@@ -194,6 +194,7 @@ La conexión a la base de datos se lee de variables de entorno. Si no existen, s
 | <mark>DB_USER</mark> | <mark>acompaname_user</mark> | Usuario |
 | <mark>DB_PASSWORD</mark> | <mark>acompaname_pass</mark> | Contraseña del usuario |
 | <mark>DB_ROOT_PASSWORD</mark> | <mark>root</mark> | Contraseña root (solo la usa Docker Compose) |
+| <mark>CORS_ORIGINS</mark> | <mark>http://localhost:5173</mark> | Dirección del frontend que puede llamar a la API |
 
 Otros ajustes:
 
@@ -202,7 +203,7 @@ Otros ajustes:
 | Contenedor | <mark>acompaname-mysql</mark> (mysql:8.0) |
 | Volumen | <mark>acompaname_data</mark> |
 | Prefijo de la API (<mark>api-endpoint</mark>) | <mark>api/v1</mark> |
-| Origen CORS permitido | <mark>http://localhost:5173</mark> (frontend) |
+| Origen CORS permitido (<mark>cors.allowed-origins</mark>) | <mark>http://localhost:5173</mark> por defecto; se cambia con la variable de entorno <mark>CORS_ORIGINS</mark> |
 
 > [!TIP]
 > Para usar otros valores, copia <mark>.env.example</mark> como <mark>.env</mark> en la raíz y cámbialos. Docker Compose lo lee solo. El archivo <mark>.env</mark> está en el <mark>.gitignore</mark>, así que no se sube a GitHub.
@@ -241,6 +242,8 @@ Todos los endpoints tienen como prefijo base: <mark>/api/v1</mark>
 | 🟢 <mark>GET</mark> | <mark>/usuarios/{id}</mark> | Obtener un usuario por id | 🔒 Autenticado (propietario) |
 | 🔵 <mark>PUT</mark> | <mark>/usuarios/{id}</mark> | Actualizar un usuario | 🔒 Autenticado (propietario) |
 | 🔴 <mark>DELETE</mark> | <mark>/usuarios/{id}</mark> | Eliminar un usuario | 🔒 Autenticado (propietario) |
+| 🟣 <mark>PATCH</mark> | <mark>/usuarios/{id}/password</mark> | Cambiar la contraseña | 🔒 Autenticado (propietario) |
+| 🟣 <mark>PATCH</mark> | <mark>/usuarios/{id}/contacto</mark> | Actualizar nombre y teléfono | 🔒 Autenticado (propietario) |
 
 ### Roles (`/roles`)
 
@@ -278,8 +281,9 @@ Los roles no se crean desde la API: se crean al arrancar la aplicación (<mark>R
 | Método | Ruta | Descripción | Acceso |
 |---|---|---|---|
 | 🟠 <mark>POST</mark> | <mark>/valoraciones</mark> | Crear una valoración | 🔒 Autenticado |
-| 🟢 <mark>GET</mark> | <mark>/valoraciones</mark> | Listar todas las valoraciones | 🔒 Autenticado |
-| 🟢 <mark>GET</mark> | <mark>/valoraciones/{id}</mark> | Obtener una valoración por id | 🔒 Autenticado |
+| 🟢 <mark>GET</mark> | <mark>/valoraciones</mark> | Listar solo las valoraciones del usuario (las que ha escrito la familia o las que ha recibido el cuidador) | 🔒 Autenticado |
+| 🟢 <mark>GET</mark> | <mark>/valoraciones/{id}</mark> | Obtener una valoración por id | 🔒 Autenticado (familia o cuidador de esa solicitud) |
+| 🟢 <mark>GET</mark> | <mark>/valoraciones/cuidador/{cuidadorId}</mark> | Valoraciones públicas de un cuidador | 🔓 Público |
 | 🔵 <mark>PUT</mark> | <mark>/valoraciones/{id}</mark> | Actualizar una valoración | 🔒 Autenticado (propietario) |
 | 🔴 <mark>DELETE</mark> | <mark>/valoraciones/{id}</mark> | Eliminar una valoración | 🔒 Autenticado (propietario) |
 
@@ -332,8 +336,9 @@ El backend implementa autenticación y autorización mediante **Spring Security*
 - 🎭 **Roles:** cada usuario tiene uno o varios roles (<mark>FAMILIA</mark>, <mark>CUIDADOR</mark>) almacenados en una tabla <mark>roles</mark> con relación <mark>@ManyToMany</mark>.
 - 🚦 **Autorización por endpoint:** <mark>POST</mark>, <mark>PUT</mark> y <mark>DELETE</mark> de <mark>/cuidadores</mark> solo para <mark>CUIDADOR</mark>; <mark>POST</mark>, <mark>PUT</mark> y <mark>DELETE</mark> de <mark>/solicitudes</mark> solo para <mark>FAMILIA</mark>.
 - 🛡️ **Protección de los datos de otros usuarios:** los servicios comprueban que el recurso pertenece al usuario que ha iniciado sesión y lanzan <mark>XExceptionAccesoDenegado</mark> (Usuario, PerfilCuidador, Solicitud y Valoración). Así nadie puede leer ni modificar datos ajenos probando ids.
-- 🌐 **CORS:** solo se permite el origen <mark>http://localhost:5173</mark>, con los métodos <mark>GET</mark>, <mark>POST</mark>, <mark>PUT</mark>, <mark>DELETE</mark> y <mark>PATCH</mark>.
-- 🔓 **Rutas públicas:** registro de usuario (<mark>POST /usuarios</mark>), listado de roles (<mark>GET /roles</mark>, lo necesita el formulario de registro), login (<mark>GET /login</mark>) y consulta de cuidadores (<mark>GET /cuidadores</mark> y <mark>GET /cuidadores/{id}</mark>, para que se puedan ver sin iniciar sesión); el resto de rutas requieren autenticación.
+- 🌐 **CORS:** solo se permite el origen que marca la propiedad <mark>cors.allowed-origins</mark> (por defecto <mark>http://localhost:5173</mark>, y se cambia con la variable de entorno <mark>CORS_ORIGINS</mark> sin tocar el código), con los métodos <mark>GET</mark>, <mark>POST</mark>, <mark>PUT</mark>, <mark>DELETE</mark> y <mark>PATCH</mark>.
+- 🔓 **Rutas públicas:** registro de usuario (<mark>POST /usuarios</mark>), listado de roles (<mark>GET /roles</mark>, lo necesita el formulario de registro), login (<mark>GET /login</mark>) y consulta de cuidadores (<mark>GET /cuidadores</mark> y <mark>GET /cuidadores/{id}</mark>) y las valoraciones públicas de un cuidador (<mark>GET /valoraciones/cuidador/{id}</mark>), para que se puedan ver sin iniciar sesión; el resto de rutas requieren autenticación.
+- 🙈 **Valoraciones privadas:** el listado <mark>GET /valoraciones</mark> filtra en el servidor y solo devuelve las valoraciones del usuario que ha iniciado sesión; ver una por id solo se permite a la familia o al cuidador de esa solicitud (si no, <mark>403</mark>).
 - 🚨 **Manejo de errores:** respuestas normalizadas y sin exposición de detalles internos (<mark>GlobalExceptionHandler</mark>).
 
 > [!NOTE]
@@ -343,19 +348,21 @@ El backend implementa autenticación y autorización mediante **Spring Security*
 
 ## 🧪 Testing
 
-El proyecto cuenta con **179 tests** que cubren la lógica de negocio, la capa de exposición HTTP, la seguridad y la integración con base de datos real:
+El proyecto cuenta con **295 tests** que cubren la lógica de negocio, la capa de exposición HTTP, la seguridad y la integración con base de datos real:
 
-| Tipo | Tests |
+| Tipo | Qué comprueba |
 |---|---|
-| 🧩 Servicios (unitarios, con Mockito) | 92 |
-| 🌐 Controladores (MockMvc) | 52 |
-| 🐳 Integración (Testcontainers + seguridad) | 13 |
-| 🛡️ Excepciones y seguridad (unitarios) | 21 |
-| 🚀 Arranque de la aplicación | 1 |
+| 🧩 Servicios (unitarios, con Mockito) | La lógica de negocio de cada módulo, incluidos los errores y la privacidad de las valoraciones |
+| 🌐 Controladores (MockMvc) | Códigos de estado y JSON de cada endpoint |
+| 🧱 Entidades (unitarios) | **41 tests nuevos:** constructores, getters y setters de las seis entidades |
+| 🐳 Integración (Testcontainers + seguridad) | Repositorios contra MySQL real y reglas de acceso con peticiones reales |
+| 🛡️ Excepciones y seguridad (unitarios) | Códigos de error y datos del usuario que inicia sesión |
+| 🚀 Arranque de la aplicación | Que el contexto de Spring carga |
 
 - 🧩 **Tests unitarios de Service** (<mark>Mockito</mark>): cada <mark>ServiceImpl</mark> está testeado de forma aislada, mockeando sus repositorios. Hay una clase para los casos normales y otra para los errores (<mark>...ErroresTest</mark>).
 - 🌐 **Tests de Controller** (<mark>MockMvc</mark> + <mark>@WebMvcTest</mark>): verifican que cada endpoint responde con el código de estado y el cuerpo JSON esperados.
-- 🐳 **Tests de integración** (<mark>Testcontainers</mark>): <mark>UsuarioRepositoryIntegrationTest</mark>, <mark>PerfilCuidadorRepositoryIntegrationTest</mark> y <mark>SecurityIntegrationTest</mark> se ejecutan contra un MySQL real que Testcontainers arranca en un contenedor de Docker solo mientras dura el test. El de perfiles guarda una foto de 100.000 caracteres para comprobar que la base de datos la guarda entera, y el de seguridad comprueba las reglas de acceso con peticiones reales.
+- 🧱 **Tests de entidad:** <mark>RoleEntityTest</mark>, <mark>UsuarioEntityTest</mark>, <mark>PerfilCuidadorEntityTest</mark>, <mark>SolicitudEntityTest</mark>, <mark>PagoEntityTest</mark> y <mark>ValoracionEntityTest</mark>. Son tests sencillos, sin Spring ni base de datos, que comprueban que cada constructor, getter y setter guarda y devuelve los datos bien (incluidos los constructores antiguos del perfil de cuidador y de la solicitud).
+- 🐳 **Tests de integración** (<mark>Testcontainers</mark>): <mark>UsuarioRepositoryIntegrationTest</mark>, <mark>PerfilCuidadorRepositoryIntegrationTest</mark>, <mark>ValoracionRepositoryIntegrationTest</mark>, <mark>SecurityIntegrationTest</mark> y <mark>SecurityValoracionesPublicasTest</mark> se ejecutan contra un MySQL real que Testcontainers arranca en un contenedor de Docker solo mientras dura el test. El de perfiles guarda una foto de 100.000 caracteres para comprobar que la base de datos la guarda entera, y el de seguridad comprueba las reglas de acceso con peticiones reales.
 - 🛡️ **Tests de excepciones y seguridad:** <mark>GlobalExceptionHandlerTest</mark> comprueba que cada error devuelve su código (<mark>403</mark>, <mark>404</mark>, <mark>409</mark> o <mark>500</mark>) y su mensaje, <mark>ExceptionsConCausaTest</mark> prueba los constructores de todas las excepciones y <mark>SecurityUserTest</mark> comprueba cómo se leen los datos y los roles del usuario que inicia sesión.
 
 ```bash
@@ -373,7 +380,7 @@ La cobertura se mide con **JaCoCo**. Al ejecutar <mark>./mvnw test</mark> se gen
 Además de los casos normales, hay tests pensados para los **casos límite y de seguridad**:
 
 - 🔎 **404:** pedir, editar o borrar algo que no existe (pagos, solicitudes, usuarios, perfiles y valoraciones).
-- 🚫 **403:** que un usuario no pueda ver, editar ni borrar las solicitudes, el perfil, los datos o las valoraciones de otra persona. Se comprueba también que en esos casos no se guarda ni se borra nada.
+- 🚫 **403:** que un usuario no pueda ver, editar ni borrar las solicitudes, el perfil, los datos o las valoraciones de otra persona (el listado de valoraciones solo devuelve las del propio usuario). Se comprueba también que en esos casos no se guarda ni se borra nada.
 - ⚔️ **409:** registrar dos veces el mismo email.
 - ⚠️ **400:** enviar un pago sin importe o sin solicitud.
 - 🔒 **401:** llamar sin iniciar sesión a rutas privadas (pagos, solicitudes, <mark>mi-perfil</mark>). El listado y el perfil público de los cuidadores sí se pueden ver sin cuenta.
@@ -454,6 +461,11 @@ Documentar el porqué de las decisiones, no solo el qué, para dejar constancia 
 | ✅ **Comprobar en el Service que el recurso es del usuario** | Un usuario autenticado solo puede tocar sus propios datos, aunque conozca el id de otro recurso. |
 | ✅ **<mark>ddl-auto=update</mark> en lugar de <mark>create-drop</mark>** | Al trabajar contra una base de datos persistente en Docker (no en memoria), se prioriza no perder datos entre reinicios de la aplicación durante el desarrollo. |
 | ✅ **Testcontainers para los tests de integración** | Prueban con un MySQL real, el mismo que usa la aplicación, en vez de una base de datos distinta en memoria. |
+| ✅ **Filtrar las valoraciones en el servidor (no en el frontend)** | Antes <mark>GET /valoraciones</mark> devolvía todas y el frontend filtraba, así que cualquiera podía ver valoraciones ajenas llamando a la API. Ahora el servicio busca solo las de la familia o el cuidador que ha iniciado sesión. Las valoraciones de un cuidador se muestran en su perfil público con un endpoint aparte y público. |
+| ✅ **Tests de entidad sencillos** | Aunque las entidades casi no tienen lógica, se comprueban sus constructores (incluidos los antiguos, que aún se usan) para que un cambio al <mark>refactorizar</mark> no rompa nada sin avisar. |
+| ✅ **Java 21 y no una versión más nueva** | Lombok no funciona bien con las versiones más nuevas de Java sin configuración extra y daba errores de compilación. Con Java 21 todo compila y los 295 tests pasan. |
+| ✅ **Origen CORS en una propiedad (<mark>CORS_ORIGINS</mark>)** | Para <mark>refactorizar</mark> el código: la dirección del frontend ya no está escrita en la clase de seguridad, así que se puede cambiar al desplegar sin tocar el código. |
+| ✅ **Carpetas (paquetes) con nombres en inglés** | Otro <mark>refactorizar</mark> hecho tras la entrega: el nombre de los paquetes sigue una sola convención (<mark>caregiverprofile</mark>, <mark>servicerequest</mark>, <mark>review</mark>...) sin cambiar el comportamiento. |
 
 ---
 
@@ -465,6 +477,7 @@ Documentar el porqué de las decisiones, no solo el qué, para dejar constancia 
 - 🔑 **Autenticación mediante Basic Auth**, no JWT. La migración a JWT está prevista como siguiente paso.
 - 🗝️ **Credenciales por defecto de desarrollo:** se pueden cambiar con variables de entorno, pero los valores por defecto siguen en <mark>application.properties</mark> y <mark>docker-compose.yml</mark>.
 - 💳 **Pagos simulados:** no hay pasarela de pago real. El pago se crea al aceptar la solicitud y se marca como pagado con <mark>PATCH /pagos/{id}/pagar</mark>.
+- 🪪 **Basic Auth envía las credenciales en cada petición:** es sencillo pero menos seguro que un token; por eso JWT es la siguiente mejora.
 - 🚧 **Sin límite de intentos de login** (falta proteger la aplicación de quien pruebe contraseñas una y otra vez).
 
 ---
