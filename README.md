@@ -8,7 +8,7 @@ Este repositorio contiene la **API REST** del proyecto, desarrollada con **Sprin
 
 Proyecto final del bootcamp de Desarrollo Web Full Stack (850h) en **Factoría F5 — Digital Academy**.
 
-![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-295-success)
+![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-298-success)
 
 ---
 
@@ -348,7 +348,7 @@ El backend implementa autenticación y autorización mediante **Spring Security*
 
 ## 🧪 Testing
 
-El proyecto cuenta con **295 tests** que cubren la lógica de negocio, la capa de exposición HTTP, la seguridad y la integración con base de datos real:
+El proyecto cuenta con **298 tests** que cubren la lógica de negocio, la capa de exposición HTTP, la seguridad y la integración con base de datos real:
 
 | Tipo | Qué comprueba |
 |---|---|
@@ -362,7 +362,7 @@ El proyecto cuenta con **295 tests** que cubren la lógica de negocio, la capa d
 - 🧩 **Tests unitarios de Service** (<mark>Mockito</mark>): cada <mark>ServiceImpl</mark> está testeado de forma aislada, mockeando sus repositorios. Hay una clase para los casos normales y otra para los errores (<mark>...ErroresTest</mark>).
 - 🌐 **Tests de Controller** (<mark>MockMvc</mark> + <mark>@WebMvcTest</mark>): verifican que cada endpoint responde con el código de estado y el cuerpo JSON esperados.
 - 🧱 **Tests de entidad:** <mark>RoleEntityTest</mark>, <mark>UsuarioEntityTest</mark>, <mark>PerfilCuidadorEntityTest</mark>, <mark>SolicitudEntityTest</mark>, <mark>PagoEntityTest</mark> y <mark>ValoracionEntityTest</mark>. Son tests sencillos, sin Spring ni base de datos, que comprueban que cada constructor, getter y setter guarda y devuelve los datos bien (incluidos los constructores antiguos del perfil de cuidador y de la solicitud).
-- 🐳 **Tests de integración** (<mark>Testcontainers</mark>): <mark>UsuarioRepositoryIntegrationTest</mark>, <mark>PerfilCuidadorRepositoryIntegrationTest</mark>, <mark>ValoracionRepositoryIntegrationTest</mark>, <mark>SecurityIntegrationTest</mark> y <mark>SecurityValoracionesPublicasTest</mark> se ejecutan contra un MySQL real que Testcontainers arranca en un contenedor de Docker solo mientras dura el test. El de perfiles guarda una foto de 100.000 caracteres para comprobar que la base de datos la guarda entera, y el de seguridad comprueba las reglas de acceso con peticiones reales.
+- 🐳 **Tests de integración** (<mark>Testcontainers</mark>): <mark>UsuarioRepositoryIntegrationTest</mark>, <mark>PerfilCuidadorRepositoryIntegrationTest</mark>, <mark>ValoracionRepositoryIntegrationTest</mark>, <mark>SecurityIntegrationTest</mark>, <mark>SecurityValoracionesPublicasTest</mark> y <mark>SecurityCorsTest</mark> (comprueba que el frontend permitido pasa la comprobación previa de CORS y que otro origen se rechaza con 403) se ejecutan contra un MySQL real que Testcontainers arranca en un contenedor de Docker solo mientras dura el test. El de perfiles guarda una foto de 100.000 caracteres para comprobar que la base de datos la guarda entera, y el de seguridad comprueba las reglas de acceso con peticiones reales.
 - 🛡️ **Tests de excepciones y seguridad:** <mark>GlobalExceptionHandlerTest</mark> comprueba que cada error devuelve su código (<mark>403</mark>, <mark>404</mark>, <mark>409</mark> o <mark>500</mark>) y su mensaje, <mark>ExceptionsConCausaTest</mark> prueba los constructores de todas las excepciones y <mark>SecurityUserTest</mark> comprueba cómo se leen los datos y los roles del usuario que inicia sesión.
 
 ```bash
@@ -463,7 +463,7 @@ Documentar el porqué de las decisiones, no solo el qué, para dejar constancia 
 | ✅ **Testcontainers para los tests de integración** | Prueban con un MySQL real, el mismo que usa la aplicación, en vez de una base de datos distinta en memoria. |
 | ✅ **Filtrar las valoraciones en el servidor (no en el frontend)** | Antes <mark>GET /valoraciones</mark> devolvía todas y el frontend filtraba, así que cualquiera podía ver valoraciones ajenas llamando a la API. Ahora el servicio busca solo las de la familia o el cuidador que ha iniciado sesión. Las valoraciones de un cuidador se muestran en su perfil público con un endpoint aparte y público. |
 | ✅ **Tests de entidad sencillos** | Aunque las entidades casi no tienen lógica, se comprueban sus constructores (incluidos los antiguos, que aún se usan) para que un cambio al <mark>refactorizar</mark> no rompa nada sin avisar. |
-| ✅ **Java 21 y no una versión más nueva** | Lombok no funciona bien con las versiones más nuevas de Java sin configuración extra y daba errores de compilación. Con Java 21 todo compila y los 295 tests pasan. |
+| ✅ **Java 21 y no una versión más nueva** | Lombok no funciona bien con las versiones más nuevas de Java sin configuración extra y daba errores de compilación. Con Java 21 todo compila y los 298 tests pasan. |
 | ✅ **Origen CORS en una propiedad (<mark>CORS_ORIGINS</mark>)** | Para <mark>refactorizar</mark> el código: la dirección del frontend ya no está escrita en la clase de seguridad, así que se puede cambiar al desplegar sin tocar el código. |
 | ✅ **Carpetas (paquetes) con nombres en inglés** | Otro <mark>refactorizar</mark> hecho tras la entrega: el nombre de los paquetes sigue una sola convención (<mark>caregiverprofile</mark>, <mark>servicerequest</mark>, <mark>review</mark>...) sin cambiar el comportamiento. |
 
