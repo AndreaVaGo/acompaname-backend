@@ -65,6 +65,20 @@ public class SolicitudServiceImpl implements SolicitudService {
         }
     }
 
+    // El cuidador solo ve la dirección cuando ha aceptado la solicitud; la familia la ve siempre
+    private SolicitudDTOResponse aDTO(SolicitudEntity solicitud) {
+        SolicitudDTOResponse dto = SolicitudMapper.toDTO(solicitud);
+        boolean esCuidador = solicitud.getCuidador().getUsuario().getEmail().equals(emailLogueado());
+        boolean aceptada = solicitud.getEstado() == EstadoSolicitud.ACEPTADA
+                || solicitud.getEstado() == EstadoSolicitud.COMPLETADA;
+        if (!esCuidador || aceptada) {
+            return dto;
+        }
+        return new SolicitudDTOResponse(dto.id(), dto.tipoCuidado(), dto.nombrePaciente(), dto.notas(),
+                dto.edadPaciente(), dto.fechaCuidado(), dto.fechaFin(), dto.estado(), dto.familiaId(),
+                dto.cuidadorId(), dto.familiaNombre(), dto.cuidadorNombre(), dto.necesidades(), null);
+    }
+
     // La fecha de fin es opcional, pero si viene no puede ser anterior a la de inicio
     private void verificarFechas(SolicitudDTORequest dto) {
         if (dto.fechaFin() != null && dto.fechaFin().isBefore(dto.fechaCuidado())) {
@@ -82,7 +96,7 @@ public class SolicitudServiceImpl implements SolicitudService {
     public SolicitudDTOResponse getById(Long id) {
         SolicitudEntity solicitud = findEntityById(id);
         verificarPropietario(solicitud);
-        return SolicitudMapper.toDTO(solicitud);
+        return aDTO(solicitud);
     }
 
     @Transactional
@@ -132,7 +146,7 @@ public class SolicitudServiceImpl implements SolicitudService {
         // La dirección se actualiza siempre: si no llega, se borra
         solicitudExistente.setDireccion(dto.direccion());
         SolicitudEntity solicitudActualizada = repository.save(solicitudExistente);
-        return SolicitudMapper.toDTO(solicitudActualizada);
+        return aDTO(solicitudActualizada);
     }
 
     @Transactional
@@ -149,7 +163,7 @@ public class SolicitudServiceImpl implements SolicitudService {
             PagoDTORequest pago = new PagoDTORequest(solicitud.getCuidador().getTarifaHora(), solicitud.getId());
             pagoRepository.save(PagoMapper.toEntity(pago, solicitud));
         }
-        return SolicitudMapper.toDTO(solicitudActualizada);
+        return aDTO(solicitudActualizada);
     }
 
     @Override
@@ -159,7 +173,7 @@ public class SolicitudServiceImpl implements SolicitudService {
         return repository.findAll().stream()
                 .filter(solicitud -> solicitud.getFamilia().getEmail().equals(emailLogueado)
                         || solicitud.getCuidador().getUsuario().getEmail().equals(emailLogueado))
-                .map(SolicitudMapper::toDTO)
+                .map(this::aDTO)
                 .collect(Collectors.toList());
     }
 }
