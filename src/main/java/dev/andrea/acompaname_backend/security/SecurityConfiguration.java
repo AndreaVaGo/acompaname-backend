@@ -44,7 +44,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/usuarios").permitAll()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/roles").permitAll()
-                        .requestMatchers("/" + endpoint + "/login").permitAll()
+                        // /login necesita credenciales: sin ellas responde 401 y no llega al controller
+                        .requestMatchers("/" + endpoint + "/login").authenticated()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores/mi-perfil").authenticated()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores").permitAll()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores/*").permitAll()
