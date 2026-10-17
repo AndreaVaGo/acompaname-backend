@@ -123,4 +123,11 @@ public class SecurityIntegrationTest {
                 .with(csrf()))
                 .andExpect(status().isMethodNotAllowed());
     }
+
+    @Test
+    @WithAnonymousUser
+    void testLoginSinCredencialesDa401() throws Exception {
+        mockMvc.perform(get("/api/v1/login"))
+                .andExpect(status().isUnauthorized());
+    }
 }
