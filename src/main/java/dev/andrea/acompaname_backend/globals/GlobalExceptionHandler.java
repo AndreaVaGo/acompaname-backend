@@ -18,6 +18,7 @@ import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorE
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionFechaInvalida;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionSolapamiento;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionEmailDuplicado;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
@@ -63,6 +64,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SolicitudExceptionFechaInvalida.class)
     public ResponseEntity<String> handleSolicitudFechaInvalidaException(SolicitudExceptionFechaInvalida exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(SolicitudExceptionSolapamiento.class)
+    public ResponseEntity<String> handleSolicitudSolapamientoException(SolicitudExceptionSolapamiento exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
     }
 
     @ExceptionHandler(ValoracionExceptionNotFound.class)
