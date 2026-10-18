@@ -36,6 +36,7 @@ import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionFechaInvalida;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionSolapamiento;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
@@ -105,6 +106,14 @@ public class SolicitudServiceImplErroresTest {
                 "Bio", false, true, marta);
         return new SolicitudEntity(2L, "Hospital", "Carmen", "Sin notas", 75, LocalDate.of(2026, 9, 12),
                 EstadoSolicitud.PENDIENTE, luis, perfilMarta);
+    }
+
+    // Otra solicitud al mismo cuidador (Pepe), de otra familia (Luis), con las fechas y el estado que yo elija
+    private SolicitudEntity otraSolicitudDePepe(LocalDate inicio, LocalDate fin, EstadoSolicitud estado) {
+        UsuarioEntity luis = usuario(3L, "Luis", "luis@test.com", rol(1L, "FAMILIA"));
+        PerfilCuidadorEntity perfilPepe = solicitudAnaPepe().getCuidador();
+        return new SolicitudEntity(5L, "Hospital", "Carmen", "Sin notas", 75, inicio, fin, estado, luis,
+                perfilPepe);
     }
 
     private SolicitudDTORequest dtoCualquiera(Long familiaId, Long cuidadorId) {
@@ -229,6 +238,102 @@ public class SolicitudServiceImplErroresTest {
         service.cambiarEstado(1L, EstadoSolicitud.RECHAZADA);
 
         verify(pagoRepository, never()).save(Mockito.any(PagoEntity.class));
+    }
+
+    @Test
+    void testAceptarEnElMismoDiaQueOtraYaAceptadaDaSolapamientoYNoGuarda() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = solicitudAnaPepe();
+        SolicitudEntity otra = otraSolicitudDePepe(LocalDate.of(2026, 9, 10), null, EstadoSolicitud.ACEPTADA);
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(repository.findAll()).thenReturn(List.of(solicitud, otra));
+
+        assertThrows(SolicitudExceptionSolapamiento.class,
+                () -> service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA));
+        verify(repository, never()).save(Mockito.any(SolicitudEntity.class));
+    }
+
+    @Test
+    void testAceptarDentroDeUnRangoYaAceptadoDaSolapamiento() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = solicitudAnaPepe();
+        SolicitudEntity otra = otraSolicitudDePepe(LocalDate.of(2026, 9, 8), LocalDate.of(2026, 9, 12),
+                EstadoSolicitud.ACEPTADA);
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(repository.findAll()).thenReturn(List.of(solicitud, otra));
+
+        assertThrows(SolicitudExceptionSolapamiento.class,
+                () -> service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA));
+    }
+
+    @Test
+    void testAceptarElDiaEnQueTerminaOtraYaAceptadaDaSolapamiento() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = solicitudAnaPepe();
+        SolicitudEntity otra = otraSolicitudDePepe(LocalDate.of(2026, 9, 5), LocalDate.of(2026, 9, 10),
+                EstadoSolicitud.ACEPTADA);
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(repository.findAll()).thenReturn(List.of(solicitud, otra));
+
+        assertThrows(SolicitudExceptionSolapamiento.class,
+                () -> service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA));
+    }
+
+    @Test
+    void testAceptarEnFechasDistintasDeLaYaAceptadaEsValido() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = solicitudAnaPepe();
+        SolicitudEntity otra = otraSolicitudDePepe(LocalDate.of(2026, 9, 11), LocalDate.of(2026, 9, 15),
+                EstadoSolicitud.ACEPTADA);
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(repository.findAll()).thenReturn(List.of(solicitud, otra));
+        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
+
+        SolicitudDTOResponse resultado = service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA);
+
+        assertThat(resultado.estado(), is(equalTo(EstadoSolicitud.ACEPTADA)));
+    }
+
+    @Test
+    void testUnaSolicitudSoloPendienteNoBloqueaAceptarOtraEnLasMismasFechas() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = solicitudAnaPepe();
+        SolicitudEntity otra = otraSolicitudDePepe(LocalDate.of(2026, 9, 10), null, EstadoSolicitud.PENDIENTE);
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(repository.findAll()).thenReturn(List.of(solicitud, otra));
+        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
+
+        SolicitudDTOResponse resultado = service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA);
+
+        assertThat(resultado.estado(), is(equalTo(EstadoSolicitud.ACEPTADA)));
+    }
+
+    @Test
+    void testUnaSolicitudAceptadaDeOtroCuidadorNoBloquea() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = solicitudAnaPepe();
+        SolicitudEntity deMarta = solicitudLuisMarta();
+        deMarta.setFechaCuidado(LocalDate.of(2026, 9, 10));
+        deMarta.setEstado(EstadoSolicitud.ACEPTADA);
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(repository.findAll()).thenReturn(List.of(solicitud, deMarta));
+        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
+
+        SolicitudDTOResponse resultado = service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA);
+
+        assertThat(resultado.estado(), is(equalTo(EstadoSolicitud.ACEPTADA)));
+    }
+
+    @Test
+    void testRechazarNoCompruebaSolapamientoAunqueHayaOtraAceptada() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = solicitudAnaPepe();
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
+
+        service.cambiarEstado(1L, EstadoSolicitud.RECHAZADA);
+
+        verify(repository, never()).findAll();
     }
 
     @Test
