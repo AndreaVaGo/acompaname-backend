@@ -8,7 +8,7 @@ Este repositorio contiene la **API REST** del proyecto, desarrollada con **Sprin
 
 Proyecto final del bootcamp de Desarrollo Web Full Stack (850h) en **Factoría F5 — Digital Academy**.
 
-![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-298-success)
+![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-305-success)
 
 ---
 
@@ -156,29 +156,29 @@ El sistema gira en torno a **seis entidades principales**:
 ### Pasos
 
 1. **Clona el repositorio**
-   ```bash
+```bash
    git clone https://github.com/AndreaVaGo/acompaname-backend.git
    cd acompaname-backend
-   ```
+```
 
 2. **Levanta la base de datos con Docker Compose**
-   ```bash
+```bash
    docker compose up -d
-   ```
+```
    Esto crea un contenedor MySQL (<mark>acompaname-mysql</mark>) con la base de datos <mark>acompaname_db</mark>, disponible en el puerto <mark>3306</mark>.
 
 3. **Arranca la aplicación**
-   ```bash
+```bash
    ./mvnw spring-boot:run
-   ```
+```
    La API quedará disponible en <mark>http://localhost:8080/api/v1</mark>
 
    Al arrancar, la aplicación crea sola los roles <mark>FAMILIA</mark> y <mark>CUIDADOR</mark> si no existen (clase <mark>RoleInitializer</mark>). Así el registro funciona desde la primera vez, con una base de datos nueva, sin insertar nada a mano.
 
 4. **Ejecuta los tests** (opcional, pero recomendado; los de integración necesitan la base de datos del paso 2 arrancada con <mark>docker compose up -d</mark>)
-   ```bash
+```bash
    ./mvnw test
-   ```
+```
 
 ---
 
@@ -339,6 +339,7 @@ El backend implementa autenticación y autorización mediante **Spring Security*
 - 🌐 **CORS:** solo se permite el origen que marca la propiedad <mark>cors.allowed-origins</mark> (por defecto <mark>http://localhost:5173</mark>, y se cambia con la variable de entorno <mark>CORS_ORIGINS</mark> sin tocar el código), con los métodos <mark>GET</mark>, <mark>POST</mark>, <mark>PUT</mark>, <mark>DELETE</mark> y <mark>PATCH</mark>.
 - 🔓 **Rutas públicas:** registro de usuario (<mark>POST /usuarios</mark>), listado de roles (<mark>GET /roles</mark>, lo necesita el formulario de registro), login (<mark>GET /login</mark>) y consulta de cuidadores (<mark>GET /cuidadores</mark> y <mark>GET /cuidadores/{id}</mark>) y las valoraciones públicas de un cuidador (<mark>GET /valoraciones/cuidador/{id}</mark>), para que se puedan ver sin iniciar sesión; el resto de rutas requieren autenticación.
 - 🙈 **Valoraciones privadas:** el listado <mark>GET /valoraciones</mark> filtra en el servidor y solo devuelve las valoraciones del usuario que ha iniciado sesión; ver una por id solo se permite a la familia o al cuidador de esa solicitud (si no, <mark>403</mark>).
+- 🏠 **Dirección protegida:** la dirección de una solicitud solo se envía al cuidador cuando ha aceptado la solicitud (estado <mark>ACEPTADA</mark> o <mark>COMPLETADA</mark>); mientras está pendiente o rechazada le llega vacía. La familia la ve siempre. Se decide en el servidor, no en el frontend.
 - 🚨 **Manejo de errores:** respuestas normalizadas y sin exposición de detalles internos (<mark>GlobalExceptionHandler</mark>).
 
 > [!NOTE]
@@ -348,11 +349,11 @@ El backend implementa autenticación y autorización mediante **Spring Security*
 
 ## 🧪 Testing
 
-El proyecto cuenta con **298 tests** que cubren la lógica de negocio, la capa de exposición HTTP, la seguridad y la integración con base de datos real:
+El proyecto cuenta con **305 tests** que cubren la lógica de negocio, la capa de exposición HTTP, la seguridad y la integración con base de datos real:
 
 | Tipo | Qué comprueba |
 |---|---|
-| 🧩 Servicios (unitarios, con Mockito) | La lógica de negocio de cada módulo, incluidos los errores y la privacidad de las valoraciones |
+| 🧩 Servicios (unitarios, con Mockito) | La lógica de negocio de cada módulo, incluidos los errores, la privacidad de las valoraciones y la de la dirección |
 | 🌐 Controladores (MockMvc) | Códigos de estado y JSON de cada endpoint |
 | 🧱 Entidades (unitarios) | **41 tests nuevos:** constructores, getters y setters de las seis entidades |
 | 🐳 Integración (Testcontainers + seguridad) | Repositorios contra MySQL real y reglas de acceso con peticiones reales |
@@ -373,7 +374,7 @@ El proyecto cuenta con **298 tests** que cubren la lógica de negocio, la capa d
 
 ### Cobertura
 
-La cobertura se mide con **JaCoCo**. Al ejecutar <mark>./mvnw test</mark> se genera el informe en <mark>target/site/jacoco/index.html</mark>. El resultado actual es de un **95 % de instrucciones** y un **92 % de ramas**, por encima del 70 % mínimo que se pedía.
+La cobertura se mide con **JaCoCo**. Al ejecutar <mark>./mvnw test</mark> se genera el informe en <mark>target/site/jacoco/index.html</mark>. El resultado actual es de un **95 % de instrucciones** y un **93 % de ramas**, por encima del 70 % mínimo que se pedía.
 
 ![Cobertura de los tests del backend](docs/screenshots/cobertura-backend.png)
 
@@ -463,7 +464,7 @@ Documentar el porqué de las decisiones, no solo el qué, para dejar constancia 
 | ✅ **Testcontainers para los tests de integración** | Prueban con un MySQL real, el mismo que usa la aplicación, en vez de una base de datos distinta en memoria. |
 | ✅ **Filtrar las valoraciones en el servidor (no en el frontend)** | Antes <mark>GET /valoraciones</mark> devolvía todas y el frontend filtraba, así que cualquiera podía ver valoraciones ajenas llamando a la API. Ahora el servicio busca solo las de la familia o el cuidador que ha iniciado sesión. Las valoraciones de un cuidador se muestran en su perfil público con un endpoint aparte y público. |
 | ✅ **Tests de entidad sencillos** | Aunque las entidades casi no tienen lógica, se comprueban sus constructores (incluidos los antiguos, que aún se usan) para que un cambio al <mark>refactorizar</mark> no rompa nada sin avisar. |
-| ✅ **Java 21 y no una versión más nueva** | Lombok no funciona bien con las versiones más nuevas de Java sin configuración extra y daba errores de compilación. Con Java 21 todo compila y los 298 tests pasan. |
+| ✅ **Java 21 y no una versión más nueva** | Lombok no funciona bien con las versiones más nuevas de Java sin configuración extra y daba errores de compilación. Con Java 21 todo compila y los 305 tests pasan. |
 | ✅ **Origen CORS en una propiedad (<mark>CORS_ORIGINS</mark>)** | Para <mark>refactorizar</mark> el código: la dirección del frontend ya no está escrita en la clase de seguridad, así que se puede cambiar al desplegar sin tocar el código. |
 | ✅ **Carpetas (paquetes) con nombres en inglés** | Otro <mark>refactorizar</mark> hecho tras la entrega: el nombre de los paquetes sigue una sola convención (<mark>caregiverprofile</mark>, <mark>servicerequest</mark>, <mark>review</mark>...) sin cambiar el comportamiento. |
 
