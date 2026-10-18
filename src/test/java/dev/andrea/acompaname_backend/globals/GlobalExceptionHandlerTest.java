@@ -14,6 +14,7 @@ import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorE
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionFechaInvalida;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionSolapamiento;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionEmailDuplicado;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
@@ -54,6 +55,14 @@ public class GlobalExceptionHandlerTest {
         ResponseEntity<String> response = handler.handleSolicitudFechaInvalidaException(new SolicitudExceptionFechaInvalida("Mensaje de prueba"));
 
         assertThat(response.getStatusCode().value(), is(400));
+        assertThat(response.getBody(), is(equalTo("Mensaje de prueba")));
+    }
+
+    @Test
+    void testSolicitudSolapamiento() {
+        ResponseEntity<String> response = handler.handleSolicitudSolapamientoException(new SolicitudExceptionSolapamiento("Mensaje de prueba"));
+
+        assertThat(response.getStatusCode().value(), is(409));
         assertThat(response.getBody(), is(equalTo("Mensaje de prueba")));
     }
 
