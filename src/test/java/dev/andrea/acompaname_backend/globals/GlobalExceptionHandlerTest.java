@@ -12,6 +12,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionConflicto;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionNotFound;
@@ -97,6 +98,14 @@ public class GlobalExceptionHandlerTest {
     @Test
     void testValoracionConflicto() {
         ResponseEntity<String> response = handler.handleValoracionConflictoException(new ValoracionExceptionConflicto("Mensaje de prueba"));
+
+        assertThat(response.getStatusCode().value(), is(409));
+        assertThat(response.getBody(), is(equalTo("Mensaje de prueba")));
+    }
+
+    @Test
+    void testPagoConflicto() {
+        ResponseEntity<String> response = handler.handlePagoConflictoException(new PagoExceptionConflicto("Mensaje de prueba"));
 
         assertThat(response.getStatusCode().value(), is(409));
         assertThat(response.getBody(), is(equalTo("Mensaje de prueba")));
