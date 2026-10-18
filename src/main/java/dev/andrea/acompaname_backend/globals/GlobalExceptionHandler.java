@@ -7,9 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
@@ -120,5 +123,25 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<String> handleMetodoNoPermitido(HttpRequestMethodNotSupportedException exception) {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body("Método no permitido");
+    }
+
+    // Un parámetro de la URL con formato incorrecto (por ejemplo, /cuidadores/abc) es un fallo del cliente
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<String> handleParametroConFormatoIncorrecto(MethodArgumentTypeMismatchException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("El parámetro '" + exception.getName() + "' no tiene un formato válido");
+    }
+
+    // Falta un parámetro obligatorio de la URL (por ejemplo, ?inicio=...)
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<String> handleParametroQueFalta(MissingServletRequestParameterException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("Falta el parámetro '" + exception.getParameterName() + "'");
+    }
+
+    // El JSON del cuerpo está mal escrito o tiene un tipo de dato que no encaja
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<String> handleCuerpoMalFormado(HttpMessageNotReadableException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El cuerpo de la petición no es válido");
     }
 }
