@@ -1,5 +1,6 @@
 package dev.andrea.acompaname_backend.servicerequest;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,7 @@ import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionFechaInvalida;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionSolapamiento;
 import dev.andrea.acompaname_backend.servicerequest.mappers.SolicitudMapper;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
@@ -83,6 +85,35 @@ public class SolicitudServiceImpl implements SolicitudService {
     private void verificarFechas(SolicitudDTORequest dto) {
         if (dto.fechaFin() != null && dto.fechaFin().isBefore(dto.fechaCuidado())) {
             throw new SolicitudExceptionFechaInvalida("La fecha de fin no puede ser anterior a la fecha de inicio");
+        }
+    }
+
+    // Si no hay fecha de fin, la solicitud cuenta como un solo día
+    private LocalDate fechaFinReal(SolicitudEntity solicitud) {
+        if (solicitud.getFechaFin() == null) {
+            return solicitud.getFechaCuidado();
+        }
+        return solicitud.getFechaFin();
+    }
+
+    // Un cuidador no puede aceptar dos solicitudes cuyas fechas se cruzan
+    private void verificarSolapamiento(SolicitudEntity solicitud) {
+        Long cuidadorId = solicitud.getCuidador().getId();
+        LocalDate inicio = solicitud.getFechaCuidado();
+        LocalDate fin = fechaFinReal(solicitud);
+
+        for (SolicitudEntity otra : repository.findAll()) {
+            boolean mismoCuidador = otra.getCuidador().getId().equals(cuidadorId);
+            boolean aceptada = otra.getEstado() == EstadoSolicitud.ACEPTADA;
+            boolean distinta = !otra.getId().equals(solicitud.getId());
+
+            if (mismoCuidador && aceptada && distinta) {
+                boolean seCruzan = !inicio.isAfter(fechaFinReal(otra))
+                        && !otra.getFechaCuidado().isAfter(fin);
+                if (seCruzan) {
+                    throw new SolicitudExceptionSolapamiento("Ya tienes otro servicio aceptado en esas fechas");
+                }
+            }
         }
     }
 
@@ -156,6 +187,9 @@ public class SolicitudServiceImpl implements SolicitudService {
         verificarCuidador(solicitud);
         boolean seAcepta = nuevoEstado == EstadoSolicitud.ACEPTADA
                 && solicitud.getEstado() != EstadoSolicitud.ACEPTADA;
+        if (seAcepta) {
+            verificarSolapamiento(solicitud);
+        }
         solicitud.setEstado(nuevoEstado);
         SolicitudEntity solicitudActualizada = repository.save(solicitud);
         if (seAcepta && !pagoRepository.existsBySolicitudId(solicitud.getId())) {
