@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionConflicto;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionNotFound;
@@ -117,6 +118,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ValoracionExceptionConflicto.class)
     public ResponseEntity<String> handleValoracionConflictoException(ValoracionExceptionConflicto exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(PagoExceptionConflicto.class)
+    public ResponseEntity<String> handlePagoConflictoException(PagoExceptionConflicto exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
     }
 
