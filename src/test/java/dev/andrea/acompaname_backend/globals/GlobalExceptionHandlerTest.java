@@ -6,6 +6,10 @@ import static org.hamcrest.Matchers.is;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.mock.http.MockHttpInputMessage;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
@@ -136,6 +140,39 @@ public class GlobalExceptionHandlerTest {
 
         assertThat(response.getStatusCode().value(), is(403));
         assertThat(response.getBody(), is(equalTo("Mensaje de prueba")));
+    }
+
+    @Test
+    void testParametroConFormatoIncorrecto() {
+        MethodArgumentTypeMismatchException excepcion = new MethodArgumentTypeMismatchException(
+                "abc", Long.class, "id", null, null);
+
+        ResponseEntity<String> response = handler.handleParametroConFormatoIncorrecto(excepcion);
+
+        assertThat(response.getStatusCode().value(), is(400));
+        assertThat(response.getBody(), is(equalTo("El parámetro 'id' no tiene un formato válido")));
+    }
+
+    @Test
+    void testParametroQueFalta() {
+        MissingServletRequestParameterException excepcion = new MissingServletRequestParameterException(
+                "inicio", "LocalDate");
+
+        ResponseEntity<String> response = handler.handleParametroQueFalta(excepcion);
+
+        assertThat(response.getStatusCode().value(), is(400));
+        assertThat(response.getBody(), is(equalTo("Falta el parámetro 'inicio'")));
+    }
+
+    @Test
+    void testCuerpoMalFormado() {
+        HttpMessageNotReadableException excepcion = new HttpMessageNotReadableException(
+                "JSON mal formado", new MockHttpInputMessage(new byte[0]));
+
+        ResponseEntity<String> response = handler.handleCuerpoMalFormado(excepcion);
+
+        assertThat(response.getStatusCode().value(), is(400));
+        assertThat(response.getBody(), is(equalTo("El cuerpo de la petición no es válido")));
     }
 
     @Test
