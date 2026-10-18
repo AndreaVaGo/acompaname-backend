@@ -1,7 +1,9 @@
 package dev.andrea.acompaname_backend.servicerequest;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.andrea.acompaname_backend.servicerequest.dtos.CambiarEstadoDTO;
@@ -41,6 +44,14 @@ public class SolicitudController {
     @GetMapping("/mis-solicitudes")
     public List<SolicitudDTOResponse> getMisSolicitudes() {
         return service.getMisSolicitudes();
+    }
+
+    // Público: solo devuelve ids de cuidadores ocupados, para filtrar la búsqueda por fechas
+    @GetMapping("/cuidadores-ocupados")
+    public List<Long> getCuidadoresOcupados(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin) {
+        return service.getCuidadoresOcupados(inicio, fin);
     }
 
     @PostMapping("")
