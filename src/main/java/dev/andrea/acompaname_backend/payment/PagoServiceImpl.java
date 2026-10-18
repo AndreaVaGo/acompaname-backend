@@ -11,8 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import dev.andrea.acompaname_backend.payment.dtos.PagoDTORequest;
 import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionConflicto;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
 import dev.andrea.acompaname_backend.payment.mappers.PagoMapper;
+import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
@@ -43,17 +45,24 @@ public class PagoServiceImpl implements PagoService {
                 || solicitud.getCuidador().getUsuario().getEmail().equals(email);
     }
 
-    // Solo la familia y el cuidador de la solicitud pueden tocar su pago
+    // Solo la familia y el cuidador de la solicitud pueden ver su pago
     private void verificarParticipante(SolicitudEntity solicitud) {
         if (!esParticipante(solicitud, emailLogueado())) {
             throw new PagoExceptionAccesoDenegado("No tiene permiso para acceder a este pago");
         }
     }
 
-    // Solo la familia es quien paga
+    // Solo la familia es quien paga: crea, cambia, borra y paga el pago
     private void verificarFamilia(SolicitudEntity solicitud) {
         if (!solicitud.getFamilia().getEmail().equals(emailLogueado())) {
-            throw new PagoExceptionAccesoDenegado("Solo la familia de la solicitud puede pagar");
+            throw new PagoExceptionAccesoDenegado("Solo la familia de la solicitud puede gestionar su pago");
+        }
+    }
+
+    // Un pago que ya no está pendiente (pagado o cancelado) no se puede tocar
+    private void verificarPendiente(PagoEntity pago) {
+        if (pago.getEstado() != EstadoPago.PENDIENTE) {
+            throw new PagoExceptionConflicto("Este pago ya no está pendiente");
         }
     }
 
@@ -79,7 +88,17 @@ public class PagoServiceImpl implements PagoService {
         SolicitudEntity solicitud = solicitudRepository.findById(dto.solicitudId())
                 .orElseThrow(() -> new SolicitudExceptionNotFound(
                         "Solicitud no encontrada. Id " + dto.solicitudId() + " no existe."));
-        verificarParticipante(solicitud);
+        verificarFamilia(solicitud);
+
+        boolean sePuedePagar = solicitud.getEstado() == EstadoSolicitud.ACEPTADA
+                || solicitud.getEstado() == EstadoSolicitud.COMPLETADA;
+        if (!sePuedePagar) {
+            throw new PagoExceptionConflicto("Solo se puede crear el pago de una solicitud aceptada o completada");
+        }
+        if (repository.existsBySolicitudId(solicitud.getId())) {
+            throw new PagoExceptionConflicto("Esta solicitud ya tiene un pago");
+        }
+
         PagoEntity pagoToSave = PagoMapper.toEntity(dto, solicitud);
         PagoEntity pagoSaved = repository.save(pagoToSave);
         return PagoMapper.toDTO(pagoSaved);
@@ -89,7 +108,8 @@ public class PagoServiceImpl implements PagoService {
     @Override
     public void deleteById(Long id) {
         PagoEntity pago = findEntityById(id);
-        verificarParticipante(pago.getSolicitud());
+        verificarFamilia(pago.getSolicitud());
+        verificarPendiente(pago);
         repository.deleteById(id);
     }
 
@@ -97,7 +117,8 @@ public class PagoServiceImpl implements PagoService {
     @Override
     public PagoDTOResponse update(Long id, PagoDTORequest dto) {
         PagoEntity pagoExistente = findEntityById(id);
-        verificarParticipante(pagoExistente.getSolicitud());
+        verificarFamilia(pagoExistente.getSolicitud());
+        verificarPendiente(pagoExistente);
         pagoExistente.setImporte(dto.importe());
         PagoEntity pagoActualizado = repository.save(pagoExistente);
         return PagoMapper.toDTO(pagoActualizado);
@@ -108,6 +129,7 @@ public class PagoServiceImpl implements PagoService {
     public PagoDTOResponse marcarComoPagado(Long id) {
         PagoEntity pago = findEntityById(id);
         verificarFamilia(pago.getSolicitud());
+        verificarPendiente(pago);
         pago.setEstado(EstadoPago.COMPLETADO);
         PagoEntity pagoActualizado = repository.save(pago);
         return PagoMapper.toDTO(pagoActualizado);
