@@ -1,6 +1,7 @@
 package dev.andrea.acompaname_backend.servicerequest;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,6 +97,11 @@ public class SolicitudServiceImpl implements SolicitudService {
         return solicitud.getFechaFin();
     }
 
+    // Dos periodos se cruzan si el inicio de cada uno no es posterior al fin del otro
+    private boolean seCruzan(LocalDate inicio, LocalDate fin, SolicitudEntity otra) {
+        return !inicio.isAfter(fechaFinReal(otra)) && !otra.getFechaCuidado().isAfter(fin);
+    }
+
     // Un cuidador no puede aceptar dos solicitudes cuyas fechas se cruzan
     private void verificarSolapamiento(SolicitudEntity solicitud) {
         Long cuidadorId = solicitud.getCuidador().getId();
@@ -107,12 +113,8 @@ public class SolicitudServiceImpl implements SolicitudService {
             boolean aceptada = otra.getEstado() == EstadoSolicitud.ACEPTADA;
             boolean distinta = !otra.getId().equals(solicitud.getId());
 
-            if (mismoCuidador && aceptada && distinta) {
-                boolean seCruzan = !inicio.isAfter(fechaFinReal(otra))
-                        && !otra.getFechaCuidado().isAfter(fin);
-                if (seCruzan) {
-                    throw new SolicitudExceptionSolapamiento("Ya tienes otro servicio aceptado en esas fechas");
-                }
+            if (mismoCuidador && aceptada && distinta && seCruzan(inicio, fin, otra)) {
+                throw new SolicitudExceptionSolapamiento("Ya tienes otro servicio aceptado en esas fechas");
             }
         }
     }
@@ -209,5 +211,29 @@ public class SolicitudServiceImpl implements SolicitudService {
                         || solicitud.getCuidador().getUsuario().getEmail().equals(emailLogueado))
                 .map(this::aDTO)
                 .collect(Collectors.toList());
+    }
+
+    // Para la búsqueda de la familia: devuelve solo ids, sin datos de las solicitudes
+    @Override
+    public List<Long> getCuidadoresOcupados(LocalDate inicio, LocalDate fin) {
+        // Sin fecha de fin se busca un solo día
+        LocalDate finReal = fin;
+        if (finReal == null) {
+            finReal = inicio;
+        }
+        if (finReal.isBefore(inicio)) {
+            throw new SolicitudExceptionFechaInvalida("La fecha de fin no puede ser anterior a la fecha de inicio");
+        }
+
+        List<Long> ocupados = new ArrayList<>();
+        for (SolicitudEntity solicitud : repository.findAll()) {
+            Long cuidadorId = solicitud.getCuidador().getId();
+            boolean aceptada = solicitud.getEstado() == EstadoSolicitud.ACEPTADA;
+
+            if (aceptada && seCruzan(inicio, finReal, solicitud) && !ocupados.contains(cuidadorId)) {
+                ocupados.add(cuidadorId);
+            }
+        }
+        return ocupados;
     }
 }
