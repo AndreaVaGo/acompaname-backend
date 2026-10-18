@@ -433,7 +433,7 @@ La planificación y el seguimiento del proyecto se han gestionado en **JIRA** (p
 
 - 🗂️ 8 épicas: Autenticación y Seguridad, Gestión de Cuidadores, Solicitudes de Servicio, Valoraciones, Pagos, Calidad y pruebas, Diseño y UX, Infraestructura y entrega
 - 📖 19 historias de usuario con criterios de aceptación en formato Gherkin
-- 🔧 43 tareas técnicas
+- 🔧 105 tareas técnicas
 - 🏃 5 sprints entre agosto y octubre de 2026
 
 🔗 Enlace al tablero de JIRA: https://saludosalamanecer-1780468848301.atlassian.net/jira/software/projects/ACOM/boards/34/timeline?rangeMode=MONTHS
