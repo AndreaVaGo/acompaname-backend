@@ -158,8 +158,8 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    void testUpdateConDatosInvalidosDevuelve400() throws Exception {
-        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "esto-no-es-un-email", "600555666", "12345678",
+    void testPutUsuariosYaNoExisteDevuelve405() throws Exception {
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "12345678",
                 Set.of(1L));
 
         MockHttpServletResponse response = mockMvc.perform(put("/api/v1/usuarios/1")
@@ -167,7 +167,7 @@ public class UsuarioControllerTest {
                 .andReturn()
                 .getResponse();
 
-        assertThat(response.getStatus(), is(equalTo(400)));
+        assertThat(response.getStatus(), is(equalTo(405)));
         Mockito.verifyNoInteractions(service);
     }
 
