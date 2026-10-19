@@ -105,7 +105,77 @@ dev.andrea.acompaname_backend
 └── review           Valoraciones
 ```
 
-![Arquitectura por capas](docs/diagrams/capas.png)
+Ejemplo del módulo de solicitudes, que sigue el mismo esquema que el resto:
+
+```mermaid
+classDiagram
+    class SolicitudController {
+        +index() List~SolicitudDTOResponse~
+        +getById(id) SolicitudDTOResponse
+        +getMisSolicitudes() List~SolicitudDTOResponse~
+        +getCuidadoresOcupados(inicio, fin) List~Long~
+        +store(dto) ResponseEntity
+        +update(id, dto) ResponseEntity
+        +cambiarEstado(id, dto) ResponseEntity
+        +delete(id) ResponseEntity
+    }
+    class SolicitudService {
+        <<interface>>
+        +cambiarEstado(id, estado) SolicitudDTOResponse
+        +getMisSolicitudes() List~SolicitudDTOResponse~
+        +getCuidadoresOcupados(inicio, fin) List~Long~
+    }
+    class InterfaceGenericService {
+        <<interface>>
+        +getEntities()
+        +getById(id)
+        +storeEntity(dto)
+        +update(id, dto)
+        +deleteById(id)
+    }
+    class SolicitudServiceImpl {
+        -SolicitudRepository repository
+        -UsuarioRepository usuarioRepository
+        -PerfilCuidadorRepository perfilCuidadorRepository
+        -PagoRepository pagoRepository
+        -verificarPropietario(solicitud)
+        -verificarCuidador(solicitud)
+        -verificarSolapamiento(solicitud)
+    }
+    class SolicitudMapper {
+        +toEntity(dto, familia, cuidador) SolicitudEntity
+        +toDTO(entity) SolicitudDTOResponse
+    }
+    class SolicitudRepository {
+        <<interface>>
+    }
+    class PagoRepository {
+        <<interface>>
+    }
+    class JpaRepository {
+        <<interface>>
+    }
+    class SolicitudEntity
+    class SolicitudDTORequest
+    class SolicitudDTOResponse
+    class CambiarEstadoDTO
+    class SolicitudExceptionNotFound
+    class SolicitudExceptionAccesoDenegado
+
+    SolicitudController --> SolicitudService
+    SolicitudController ..> SolicitudDTORequest
+    SolicitudController ..> CambiarEstadoDTO
+    SolicitudService --|> InterfaceGenericService
+    SolicitudServiceImpl ..|> SolicitudService
+    SolicitudServiceImpl --> SolicitudRepository
+    SolicitudServiceImpl --> PagoRepository
+    SolicitudServiceImpl --> SolicitudMapper
+    SolicitudServiceImpl ..> SolicitudExceptionNotFound
+    SolicitudServiceImpl ..> SolicitudExceptionAccesoDenegado
+    SolicitudMapper ..> SolicitudDTOResponse
+    SolicitudRepository --|> JpaRepository
+    SolicitudRepository --> SolicitudEntity
+```
 
 **Patrones y principios aplicados:**
 
@@ -547,21 +617,245 @@ Además de los casos normales, hay tests pensados para los **casos límite y de 
 
 ### Casos de uso
 
-| <ins>Visitante</ins> | <ins>Familia</ins> | <ins>Cuidador</ins> |
-|---|---|---|
-| ![Visitante](docs/diagrams/casos-visitante.png) | ![Familia](docs/diagrams/casos-familia.png) | ![Cuidador](docs/diagrams/casos-cuidador.png) |
+**<ins>Visitante</ins>**
+
+```mermaid
+flowchart LR
+    V([Visitante])
+    subgraph SIS[Acompáñame]
+        direction TB
+        U1([Registrarse como Familia o Cuidador])
+        U2([Iniciar sesión])
+        U3([Ver cuidadores disponibles])
+        U4([Filtrar cuidadores])
+        U5([Ver perfil de un cuidador])
+        U6([Ver reseñas del cuidador])
+        U7([Consultar aviso legal y privacidad])
+    end
+    V --- U1
+    V --- U2
+    V --- U3
+    V --- U5
+    V --- U7
+    U3 -.->|include| U4
+    U5 -.->|include| U6
+```
+
+**<ins>Familia</ins>**
+
+```mermaid
+flowchart LR
+    F([Familia])
+    subgraph SIS[Acompáñame]
+        direction TB
+        U1([Iniciar sesión])
+        U2([Cerrar sesión])
+        U3([Ver cuidadores disponibles])
+        U4([Filtrar cuidadores, también por fechas libres])
+        U5([Ver perfil de un cuidador])
+        U6([Ver reseñas del cuidador])
+        U7([Solicitar servicio])
+        U8([Ver mis solicitudes])
+        U9([Pagar solicitud aceptada])
+        U10([Ver historial])
+        U11([Valorar al cuidador])
+        U12([Editar mis datos de contacto])
+        U13([Cambiar contraseña])
+    end
+    F --- U1
+    F --- U2
+    F --- U3
+    F --- U5
+    F --- U7
+    F --- U8
+    F --- U10
+    F --- U12
+    F --- U13
+    U3 -.->|include| U4
+    U5 -.->|include| U6
+    U7 -.->|include| U5
+    U9 -.->|extend| U8
+    U11 -.->|extend| U10
+```
+
+**<ins>Cuidador</ins>**
+
+```mermaid
+flowchart LR
+    C([Cuidador])
+    subgraph SIS[Acompáñame]
+        direction TB
+        U1([Iniciar sesión])
+        U2([Cerrar sesión])
+        U3([Editar mi perfil profesional])
+        U4([Ver mi perfil público y mis reseñas])
+        U5([Ver solicitudes recibidas])
+        U6([Aceptar o rechazar solicitud])
+        U7([Ver historial])
+        U8([Editar mis datos de contacto])
+        U9([Cambiar contraseña])
+        U10([Marcar servicio como completado])
+    end
+    C --- U1
+    C --- U2
+    C --- U3
+    C --- U5
+    C --- U7
+    C --- U8
+    C --- U9
+    U3 -.->|include| U4
+    U6 -.->|extend| U5
+    U10 -.->|extend| U5
+```
 
 ### Secuencia: registro y login
 
-![Secuencia registro y login](docs/diagrams/sec1.png)
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Usuario
+    participant F as Frontend Vue
+    participant C as UsuarioController / AuthController
+    participant S as UsuarioServiceImpl
+    participant D as MySQL (Docker)
+
+    U->>F: Rellena el formulario de registro
+    F->>C: GET /api/v1/roles
+    C-->>F: Lista de roles (FAMILIA, CUIDADOR)
+    F->>C: POST /api/v1/usuarios {nombre, email, telefono, password, roles}
+    C->>S: storeEntity(dto)
+    S->>S: Cifra la contraseña (BCrypt)
+    S->>D: INSERT usuarios y roles_usuarios
+    opt El rol es CUIDADOR
+        S->>D: INSERT perfilcuidadores (perfil vacío)
+    end
+    S-->>C: UsuarioDTOResponse
+    C-->>F: 201 Created
+    U->>F: Inicia sesión
+    F->>C: GET /api/v1/login (cabecera Basic Auth)
+    C-->>F: 200 OK {id, email, rol}
+    F->>F: Pinia guarda la sesión en sessionStorage
+```
 
 ### Secuencia: solicitar un servicio
 
-![Secuencia solicitud](docs/diagrams/sec2.png)
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Fam as Familia
+    actor Cui as Cuidador
+    participant F as Frontend Vue
+    participant A as API REST (Spring Security)
+    participant S as SolicitudServiceImpl
+    participant D as MySQL
+
+    Fam->>F: Abre el perfil de un cuidador y pulsa "Solicitar servicio"
+    F->>A: GET /api/v1/cuidadores/{id}
+    A-->>F: Datos del perfil
+    Fam->>F: Rellena fechas, dirección y necesidades, y lo envía
+    F->>A: POST /api/v1/solicitudes (Basic Auth, rol FAMILIA)
+    A->>S: storeEntity(dto)
+    S->>D: INSERT solicitudes (estado PENDIENTE)
+    A-->>F: 201 Created
+
+    Cui->>F: Abre "Solicitudes recibidas"
+    F->>A: GET /api/v1/solicitudes/mis-solicitudes
+    A->>S: getMisSolicitudes()
+    S-->>F: Solo las suyas (la dirección va vacía mientras no acepte)
+
+    Cui->>F: Pulsa Aceptar
+    F->>A: PATCH /api/v1/solicitudes/{id}/estado {ACEPTADA}
+    A->>S: cambiarEstado(id, ACEPTADA)
+    S->>S: verificarCuidador() y verificarSolapamiento()
+    alt Las fechas se cruzan con otro servicio ya aceptado
+        S-->>F: 409 Conflict
+    else Sin solapamiento
+        S->>D: UPDATE estado = ACEPTADA
+        S->>D: INSERT pagos (PENDIENTE, tarifa del cuidador)
+        S-->>F: 200 OK (la dirección ya se muestra)
+    end
+
+    Fam->>F: Ve la solicitud ACEPTADA y pulsa "Pagar"
+    F->>A: PATCH /api/v1/pagos/{id}/pagar
+    A->>D: UPDATE pagos COMPLETADO (solo la familia y solo si está PENDIENTE)
+
+    Cui->>F: Tras el servicio, lo marca como completado
+    F->>A: PATCH /api/v1/solicitudes/{id}/estado {COMPLETADA}
+    A->>S: cambiarEstado(id, COMPLETADA)
+    S->>D: UPDATE estado = COMPLETADA
+
+    Fam->>F: Ya completado, deja una valoración
+    F->>A: POST /api/v1/valoraciones {puntuacion, comentario}
+    A->>D: INSERT valoraciones
+```
 
 ### Modelo Chen
 
-![Diagrama de Chen](docs/diagrams/chen.png)
+```mermaid
+flowchart TB
+    e_Pago["PAGO"]
+    a_Pago_id(["id"]) --- e_Pago
+    a_Pago_importe(["importe"]) --- e_Pago
+    a_Pago_estado(["estado"]) --- e_Pago
+    a_Pago_fecha(["fecha"]) --- e_Pago
+    e_PerfilCuidador["PERFILCUIDADOR"]
+    a_PerfilCuidador_id(["id"]) --- e_PerfilCuidador
+    a_PerfilCuidador_especialidad(["especialidad"]) --- e_PerfilCuidador
+    a_PerfilCuidador_anosExperiencia(["anosExperiencia"]) --- e_PerfilCuidador
+    a_PerfilCuidador_tarifaHora(["tarifaHora"]) --- e_PerfilCuidador
+    a_PerfilCuidador_bio(["bio"]) --- e_PerfilCuidador
+    a_PerfilCuidador_tieneVehiculo(["tieneVehiculo"]) --- e_PerfilCuidador
+    a_PerfilCuidador_disponibleAhora(["disponibleAhora"]) --- e_PerfilCuidador
+    a_PerfilCuidador_foto(["foto"]) --- e_PerfilCuidador
+    a_PerfilCuidador_tipoCuidado(["tipoCuidado"]) --- e_PerfilCuidador
+    a_PerfilCuidador_servicios(["servicios"]) --- e_PerfilCuidador
+    a_PerfilCuidador_sexo(["sexo"]) --- e_PerfilCuidador
+    a_PerfilCuidador_ciudad(["ciudad"]) --- e_PerfilCuidador
+    e_Role["ROLE"]
+    a_Role_id(["id"]) --- e_Role
+    a_Role_name(["name"]) --- e_Role
+    e_Solicitud["SOLICITUD"]
+    a_Solicitud_id(["id"]) --- e_Solicitud
+    a_Solicitud_tipoCuidado(["tipoCuidado"]) --- e_Solicitud
+    a_Solicitud_nombrePaciente(["nombrePaciente"]) --- e_Solicitud
+    a_Solicitud_notas(["notas"]) --- e_Solicitud
+    a_Solicitud_edadPaciente(["edadPaciente"]) --- e_Solicitud
+    a_Solicitud_fechaCuidado(["fechaCuidado"]) --- e_Solicitud
+    a_Solicitud_fechaFin(["fechaFin"]) --- e_Solicitud
+    a_Solicitud_estado(["estado"]) --- e_Solicitud
+    a_Solicitud_necesidades(["necesidades"]) --- e_Solicitud
+    a_Solicitud_direccion(["direccion"]) --- e_Solicitud
+    e_Usuario["USUARIO"]
+    a_Usuario_id(["id"]) --- e_Usuario
+    a_Usuario_nombre(["nombre"]) --- e_Usuario
+    a_Usuario_email(["email"]) --- e_Usuario
+    a_Usuario_telefono(["telefono"]) --- e_Usuario
+    a_Usuario_password(["password"]) --- e_Usuario
+    e_Valoracion["VALORACION"]
+    a_Valoracion_id(["id"]) --- e_Valoracion
+    a_Valoracion_comentario(["comentario"]) --- e_Valoracion
+    a_Valoracion_puntuacion(["puntuacion"]) --- e_Valoracion
+    a_Valoracion_fecha(["fecha"]) --- e_Valoracion
+
+    r_Pago_solicitud{"se paga con"}
+    e_Solicitud ---|"1"| r_Pago_solicitud
+    r_Pago_solicitud ---|"0..1"| e_Pago
+    r_PerfilCuidador_usuario{"ofrece"}
+    e_Usuario ---|"1"| r_PerfilCuidador_usuario
+    r_PerfilCuidador_usuario ---|"0..1"| e_PerfilCuidador
+    r_Solicitud_familia{"crea"}
+    e_Usuario ---|"1"| r_Solicitud_familia
+    r_Solicitud_familia ---|"N"| e_Solicitud
+    r_Solicitud_cuidador{"recibe"}
+    e_PerfilCuidador ---|"1"| r_Solicitud_cuidador
+    r_Solicitud_cuidador ---|"N"| e_Solicitud
+    r_Usuario_roles{"tiene"}
+    e_Role ---|"M"| r_Usuario_roles
+    r_Usuario_roles ---|"N"| e_Usuario
+    r_Valoracion_solicitud{"genera"}
+    e_Solicitud ---|"1"| r_Valoracion_solicitud
+    r_Valoracion_solicitud ---|"0..1"| e_Valoracion
+```
 
 ---
 
