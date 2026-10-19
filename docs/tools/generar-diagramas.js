@@ -158,7 +158,47 @@ for (const e of entidades) {
 }
 er.push("```");
 
+// ---------- Modelo de Chen (entidades = rectángulos, relaciones = rombos, atributos = óvalos) ----------
+// Mermaid no tiene notación de Chen propia, así que se imita con un diagrama de flujo.
+// Nombre de cada relación, en lenguaje del dominio: "Entidad.campo": nombre
+const nombresRelacion = {
+  "UsuarioEntity.roles": "tiene",
+  "PerfilCuidadorEntity.usuario": "ofrece",
+  "SolicitudEntity.familia": "crea",
+  "SolicitudEntity.cuidador": "recibe",
+  "ValoracionEntity.solicitud": "genera",
+  "PagoEntity.solicitud": "se paga con",
+};
+const chen = ["```mermaid", "flowchart TB"];
+for (const e of entidades) {
+  const idE = "e_" + sinEntity(e.nombre);
+  chen.push(`    ${idE}["${sinEntity(e.nombre).toUpperCase()}"]`);
+  for (const c of e.campos) {
+    const rel = relacion(c);
+    if (rel) continue;
+    const idA = `a_${sinEntity(e.nombre)}_${c.nombre}`;
+    chen.push(`    ${idA}(["${c.nombre}"]) --- ${idE}`);
+  }
+}
+chen.push("");
+for (const e of entidades) {
+  for (const c of e.campos) {
+    const rel = relacion(c);
+    const destino = tipoBase(c.tipo);
+    if (!["ManyToOne", "OneToOne", "ManyToMany"].includes(rel)) continue;
+    const idR = `r_${sinEntity(e.nombre)}_${c.nombre}`;
+    const nombre = nombresRelacion[`${e.nombre}.${c.nombre}`] || c.nombre;
+    const lado = rel === "ManyToMany" ? ["M", "N"] : rel === "ManyToOne" ? ["1", "N"] : ["1", "0..1"];
+    chen.push(`    ${idR}{"${nombre}"}`);
+    chen.push(`    e_${sinEntity(destino)} ---|"${lado[0]}"| ${idR}`);
+    chen.push(`    ${idR} ---|"${lado[1]}"| e_${sinEntity(e.nombre)}`);
+  }
+}
+chen.push("```");
+
 console.log("## Diagrama de clases\n");
 console.log(clases.join("\n"));
 console.log("\n## Diagrama entidad-relación\n");
 console.log(er.join("\n"));
+console.log("\n## Modelo de Chen\n");
+console.log(chen.join("\n"));
