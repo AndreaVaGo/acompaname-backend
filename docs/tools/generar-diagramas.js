@@ -169,7 +169,8 @@ const nombresRelacion = {
   "ValoracionEntity.solicitud": "genera",
   "PagoEntity.solicitud": "se paga con",
 };
-const chen = ["```mermaid", "flowchart TB"];
+// GitHub dibuja los diagramas de flujo grandes con otro motor (elk) y puede fallar: se fuerza dagre.
+const chen = ["```mermaid", "---", "config:", "  layout: dagre", "---", "flowchart TB"];
 for (const e of entidades) {
   const idE = "e_" + sinEntity(e.nombre);
   chen.push(`    ${idE}["${sinEntity(e.nombre).toUpperCase()}"]`);
