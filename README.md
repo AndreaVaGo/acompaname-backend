@@ -133,11 +133,157 @@ El sistema gira en torno a **seis entidades principales**:
 
 ### Diagrama Entidad-Relación
 
-![Diagrama Entidad-Relación](docs/diagrams/er.png)
+```mermaid
+erDiagram
+    SOLICITUD ||--o| PAGO : solicitud
+    USUARIO ||--o| PERFILCUIDADOR : usuario
+    USUARIO ||--o{ SOLICITUD : familia
+    PERFILCUIDADOR ||--o{ SOLICITUD : cuidador
+    USUARIO }o--o{ ROLE : roles
+    SOLICITUD ||--o| VALORACION : solicitud
+
+    PAGO {
+        Long id PK
+        BigDecimal importe
+        String estado
+        LocalDate fecha
+        Long solicitud_id FK
+    }
+    PERFILCUIDADOR {
+        Long id PK
+        String especialidad
+        Integer anosExperiencia
+        BigDecimal tarifaHora
+        String bio
+        boolean tieneVehiculo
+        boolean disponibleAhora
+        Long usuario_id FK
+        String foto
+        String tipoCuidado
+        String servicios
+        String sexo
+        String ciudad
+    }
+    ROLE {
+        Long id PK
+        String name
+    }
+    SOLICITUD {
+        Long id PK
+        String tipoCuidado
+        String nombrePaciente
+        String notas
+        Integer edadPaciente
+        LocalDate fechaCuidado
+        LocalDate fechaFin
+        String estado
+        Long familia_id FK
+        Long cuidador_id FK
+        String necesidades
+        String direccion
+    }
+    USUARIO {
+        Long id PK
+        String nombre
+        String email
+        String telefono
+        String password
+    }
+    VALORACION {
+        Long id PK
+        String comentario
+        Integer puntuacion
+        LocalDate fecha
+        Long solicitud_id FK
+    }
+```
 
 ### Diagrama de clases
 
-![Diagrama de clases](docs/diagrams/clases.png)
+```mermaid
+classDiagram
+    class PagoEntity {
+        -Long id
+        -BigDecimal importe
+        -EstadoPago estado
+        -LocalDate fecha
+        -SolicitudEntity solicitud
+    }
+    class PerfilCuidadorEntity {
+        -Long id
+        -String especialidad
+        -Integer anosExperiencia
+        -BigDecimal tarifaHora
+        -String bio
+        -boolean tieneVehiculo
+        -boolean disponibleAhora
+        -UsuarioEntity usuario
+        -String foto
+        -String tipoCuidado
+        -String servicios
+        -String sexo
+        -String ciudad
+    }
+    class RoleEntity {
+        -Long id
+        -String name
+        -Set~UsuarioEntity~ users
+    }
+    class SolicitudEntity {
+        -Long id
+        -String tipoCuidado
+        -String nombrePaciente
+        -String notas
+        -Integer edadPaciente
+        -LocalDate fechaCuidado
+        -LocalDate fechaFin
+        -EstadoSolicitud estado
+        -UsuarioEntity familia
+        -PerfilCuidadorEntity cuidador
+        -String necesidades
+        -String direccion
+    }
+    class UsuarioEntity {
+        -Long id
+        -String nombre
+        -String email
+        -String telefono
+        -String password
+        -Set~RoleEntity~ roles
+    }
+    class ValoracionEntity {
+        -Long id
+        -String comentario
+        -Integer puntuacion
+        -LocalDate fecha
+        -SolicitudEntity solicitud
+    }
+    class EstadoPago {
+        <<enumeration>>
+        PENDIENTE
+        COMPLETADO
+        CANCELADO
+    }
+    class EstadoSolicitud {
+        <<enumeration>>
+        PENDIENTE
+        ACEPTADA
+        RECHAZADA
+        COMPLETADA
+    }
+
+    PagoEntity --> EstadoPago
+    SolicitudEntity "1" -- "0..1" PagoEntity : solicitud
+    UsuarioEntity "1" -- "0..1" PerfilCuidadorEntity : usuario
+    SolicitudEntity --> EstadoSolicitud
+    UsuarioEntity "1" -- "0..*" SolicitudEntity : familia
+    PerfilCuidadorEntity "1" -- "0..*" SolicitudEntity : cuidador
+    UsuarioEntity "0..*" -- "0..*" RoleEntity : roles
+    SolicitudEntity "1" -- "0..1" ValoracionEntity : solicitud
+```
+
+> [!TIP]
+> Estos dos diagramas se generan a partir de las entidades con un script: <mark>node docs/tools/generar-diagramas.js</mark>. Así se pueden rehacer cuando cambie el modelo, sin dibujarlos a mano.
 
 ---
 
@@ -487,6 +633,7 @@ Documentar el porqué de las decisiones, no solo el qué, para dejar constancia 
 - 🪪 **Basic Auth envía las credenciales en cada petición:** es sencillo pero menos seguro que un token; por eso JWT es la siguiente mejora.
 - 🚧 **Sin límite de intentos de login** (falta proteger la aplicación de quien pruebe contraseñas una y otra vez).
 - 🐢 **Algunas consultas cargan todos los registros y filtran en Java** (<mark>findAll()</mark>), por ejemplo la de los cuidadores ocupados. Con pocos datos no se nota; con muchos habría que pasarlas a consultas del repositorio.
+- 🕘 **Las reservas son por días completos, no por horas.** Si un cuidador tiene un servicio aceptado de 9 a 12, la aplicación lo considera ocupado todo ese día. La mejora sería añadir hora de inicio y de fin a la solicitud y que el solapamiento se compruebe también por horas.
 - 🎭 **<mark>PUT /usuarios/{id}</mark> permite cambiar los roles del propio usuario.** Ninguna pantalla lo usa, pero habría que quitarlo.
 
 ---
