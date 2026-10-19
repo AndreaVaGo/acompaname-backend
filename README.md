@@ -792,6 +792,10 @@ sequenceDiagram
 ### Modelo Chen
 
 ```mermaid
+---
+config:
+  layout: dagre
+---
 flowchart TB
     e_Pago["PAGO"]
     a_Pago_id(["id"]) --- e_Pago
@@ -968,4 +972,3 @@ Proyecto desarrollado por **Andrea Vallina González** como Proyecto Final del b
 
 - 🐙 GitHub: [@AndreaVaGo](https://github.com/AndreaVaGo)
 - 💼 LinkedIn: [Andrea Vallina González](https://www.linkedin.com/in/andrea-vallina-gonzalez/)
-
