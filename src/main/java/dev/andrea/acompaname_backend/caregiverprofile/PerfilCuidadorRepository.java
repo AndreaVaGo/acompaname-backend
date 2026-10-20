@@ -10,4 +10,7 @@ public interface PerfilCuidadorRepository extends JpaRepository<PerfilCuidadorEn
 
     Optional<PerfilCuidadorEntity> findByUsuarioEmail(String email);
 
+    // Cuántos cuidadores están disponibles ahora
+    long countByDisponibleAhoraTrue();
+
 }
