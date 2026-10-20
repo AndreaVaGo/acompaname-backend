@@ -122,13 +122,33 @@ public class UsuarioServiceImplTest {
         UsuarioEntity usuarioExistente = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
                 Set.of(rol));
         when(repository.findById(1L)).thenReturn(Optional.of(usuarioExistente));
-        when(roleRepository.findById(1L)).thenReturn(Optional.of(rol));
-        when(passwordEncoder.encode("12345678")).thenReturn("encriptada123");
         when(repository.save(Mockito.any(UsuarioEntity.class))).thenReturn(usuarioExistente);
 
         UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "12345678", Set.of(1L));
         UsuarioDTOResponse resultado = service.update(1L, dto);
         assertThat(resultado.nombre(), is(equalTo("Ana")));
+    }
+
+    @Test
+    void testUpdateNoCambiaLosRolesNiLaPassword() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        RoleEntity rolFamilia = crearRolMock();
+        UsuarioEntity usuarioExistente = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "cifrada",
+                Set.of(rolFamilia));
+        when(repository.findById(1L)).thenReturn(Optional.of(usuarioExistente));
+        when(repository.save(Mockito.any(UsuarioEntity.class))).thenReturn(usuarioExistente);
+
+        // El body intenta cambiar el rol (2 = CUIDADOR) y poner otra contraseña
+        UsuarioDTORequest dto = new UsuarioDTORequest("Juan", "juan@test.com", "600111222", "otraPassword1",
+                Set.of(2L));
+        service.update(1L, dto);
+
+        assertThat(usuarioExistente.getRoles(), is(equalTo(Set.of(rolFamilia))));
+        assertThat(usuarioExistente.getPassword(), is(equalTo("cifrada")));
+        verify(roleRepository, never()).findById(Mockito.anyLong());
+        verify(passwordEncoder, never()).encode(Mockito.anyString());
     }
 
     @Test
