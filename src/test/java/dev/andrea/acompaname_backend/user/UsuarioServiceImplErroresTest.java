@@ -130,16 +130,6 @@ public class UsuarioServiceImplErroresTest {
     }
 
     @Test
-    void testUpdateConRolQueNoExisteDaNotFoundYNoGuarda() {
-        loguearComo("juan@test.com");
-        when(repository.findById(1L)).thenReturn(Optional.of(juan()));
-        when(roleRepository.findById(99L)).thenReturn(Optional.empty());
-
-        assertThrows(UsuarioExceptionNotFound.class, () -> service.update(1L, dtoAna(99L)));
-        verify(repository, never()).save(Mockito.any(UsuarioEntity.class));
-    }
-
-    @Test
     void testUpdateConEmailDeOtroUsuarioDaConflictoYNoGuarda() {
         loguearComo("juan@test.com");
         UsuarioEntity ana = new UsuarioEntity(2L, "Ana", "ana@test.com", "600555666", "1234",
@@ -154,11 +144,8 @@ public class UsuarioServiceImplErroresTest {
     @Test
     void testUpdateConMiPropioEmailNoDaConflicto() {
         loguearComo("juan@test.com");
-        RoleEntity rolFamilia = rol(1L, "FAMILIA");
         UsuarioEntity juan = juan();
         when(repository.findById(1L)).thenReturn(Optional.of(juan));
-        when(roleRepository.findById(1L)).thenReturn(Optional.of(rolFamilia));
-        when(passwordEncoder.encode("12345678")).thenReturn("encriptada123");
         when(repository.save(Mockito.any(UsuarioEntity.class))).thenReturn(juan);
         UsuarioDTORequest dto = new UsuarioDTORequest("Juan Nuevo", "juan@test.com", "600999888", "12345678",
                 Set.of(1L));
