@@ -1,6 +1,7 @@
 package dev.andrea.acompaname_backend.servicerequest;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
@@ -53,6 +54,20 @@ public class SolicitudEntity {
 
     // Dirección del domicilio o nombre del hospital (planta, habitación...) donde se hará el cuidado
     private String direccion;
+
+    // Momento en que se creó la solicitud (para las estadísticas del administrador)
+    private LocalDateTime fechaCreacion;
+
+    // Momento en que el cuidador la aceptó; es null mientras no esté aceptada
+    private LocalDateTime fechaAceptacion;
+
+    // Constructor sin las fechas de creación y aceptación, para no romper el código que ya existía
+    public SolicitudEntity(Long id, String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
+            LocalDate fechaCuidado, LocalDate fechaFin, EstadoSolicitud estado, UsuarioEntity familia,
+            PerfilCuidadorEntity cuidador, String necesidades, String direccion) {
+        this(id, tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, fechaFin, estado, familia, cuidador,
+                necesidades, direccion, null, null);
+    }
 
     // Constructor sin dirección, para no romper el código que ya existía
     public SolicitudEntity(Long id, String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
