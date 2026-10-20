@@ -24,4 +24,8 @@ public interface ValoracionRepository extends JpaRepository<ValoracionEntity, Lo
 
     // Valoraciones recibidas por un cuidador (por el email de su usuario)
     List<ValoracionEntity> findBySolicitudCuidadorUsuarioEmail(String email);
+
+    // Media de todas las puntuaciones de la plataforma (null si no hay ninguna)
+    @Query("SELECT AVG(v.puntuacion) FROM ValoracionEntity v")
+    Double mediaGeneral();
 }
