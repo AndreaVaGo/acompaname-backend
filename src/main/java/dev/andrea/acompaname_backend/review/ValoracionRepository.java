@@ -28,4 +28,7 @@ public interface ValoracionRepository extends JpaRepository<ValoracionEntity, Lo
     // Media de todas las puntuaciones de la plataforma (null si no hay ninguna)
     @Query("SELECT AVG(v.puntuacion) FROM ValoracionEntity v")
     Double mediaGeneral();
+
+    // Las cinco valoraciones más recientes (si hay empate de fecha, la de id mayor primero)
+    List<ValoracionEntity> findTop5ByOrderByFechaDescIdDesc();
 }
