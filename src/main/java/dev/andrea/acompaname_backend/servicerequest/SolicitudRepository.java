@@ -38,4 +38,10 @@ public interface SolicitudRepository extends JpaRepository<SolicitudEntity, Long
 
     // Cuántas solicitudes hay en un estado (para las estadísticas del administrador)
     long countByEstado(EstadoSolicitud estado);
+
+    // Cuántas solicitudes hay de un tipo de cuidado ("hospitalario" o "domicilio")
+    long countByTipoCuidado(String tipoCuidado);
+
+    // Solicitudes que ya tienen fecha de aceptación (para calcular el tiempo medio hasta aceptar)
+    List<SolicitudEntity> findByFechaAceptacionIsNotNull();
 }
