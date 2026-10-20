@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -109,7 +108,7 @@ public class PerfilCuidadorServiceImplErroresTest {
 
     @Test
     void testNoSePuedeCrearUnSegundoPerfilParaElMismoUsuario() {
-        when(repository.findAll()).thenReturn(List.of(perfilDePepe()));
+        when(repository.existsByUsuarioId(2L)).thenReturn(true);
 
         assertThrows(PerfilCuidadorExceptionAccesoDenegado.class, () -> service.storeEntity(dtoCualquiera(2L)));
         verify(repository, never()).save(Mockito.any(PerfilCuidadorEntity.class));
@@ -117,7 +116,6 @@ public class PerfilCuidadorServiceImplErroresTest {
 
     @Test
     void testStoreConUsuarioQueNoExiste() {
-        when(repository.findAll()).thenReturn(List.of());
         when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(UsuarioExceptionNotFound.class, () -> service.storeEntity(dtoCualquiera(99L)));
@@ -127,7 +125,6 @@ public class PerfilCuidadorServiceImplErroresTest {
     @Test
     void testNoSePuedeCrearUnPerfilParaOtroUsuario() {
         loguearComo("intruso@test.com");
-        when(repository.findAll()).thenReturn(List.of());
         when(usuarioRepository.findById(2L)).thenReturn(Optional.of(pepe()));
 
         assertThrows(PerfilCuidadorExceptionAccesoDenegado.class, () -> service.storeEntity(dtoCualquiera(2L)));
@@ -137,7 +134,7 @@ public class PerfilCuidadorServiceImplErroresTest {
     @Test
     void testMiPerfilDevuelveElMio() {
         loguearComo("pepe@test.com");
-        when(repository.findAll()).thenReturn(List.of(perfilDePepe()));
+        when(repository.findByUsuarioEmail("pepe@test.com")).thenReturn(Optional.of(perfilDePepe()));
 
         PerfilCuidadorDTOResponse perfil = service.getMiPerfil();
 
@@ -147,7 +144,7 @@ public class PerfilCuidadorServiceImplErroresTest {
     @Test
     void testMiPerfilSinPerfilCreadoDaNoEncontrado() {
         loguearComo("ana@test.com");
-        when(repository.findAll()).thenReturn(List.of(perfilDePepe()));
+        when(repository.findByUsuarioEmail("ana@test.com")).thenReturn(Optional.empty());
 
         assertThrows(PerfilCuidadorExceptionNotFound.class, () -> service.getMiPerfil());
     }
