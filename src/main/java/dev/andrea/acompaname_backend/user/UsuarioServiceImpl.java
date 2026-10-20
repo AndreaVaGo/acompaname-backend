@@ -123,15 +123,11 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new UsuarioExceptionEmailDuplicado(
                     "No ha sido posible completar la actualización con los datos proporcionados.");
         }
+        // Solo se actualizan los datos de contacto. Los roles no se tocan nunca (se eligen
+        // al registrarse) y la contraseña solo se cambia con cambiarPassword.
         usuarioExistente.setNombre(dto.nombre());
         usuarioExistente.setEmail(dto.email());
         usuarioExistente.setTelefono(dto.telefono());
-        usuarioExistente.setPassword(passwordEncoder.encode(dto.password()));
-        Set<RoleEntity> roles = dto.rolesIds().stream()
-                .map(rId -> roleRepository.findById(rId).orElseThrow(
-                        () -> new UsuarioExceptionNotFound("Rol no encontrado. Id " + rId + " no existe.")))
-                .collect(Collectors.toSet());
-        usuarioExistente.setRoles(roles);
         UsuarioEntity usuarioActualizado = repository.save(usuarioExistente);
         return UsuarioMapper.toDTO(usuarioActualizado);
     }
