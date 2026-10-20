@@ -294,7 +294,6 @@ Algunas de las decisiones principales:
 - 🚧 **Sin límite de intentos de login** (falta proteger la aplicación de quien pruebe contraseñas una y otra vez).
 - 🐢 **Algunas consultas cargan todos los registros y filtran en Java** (<mark>findAll()</mark>), por ejemplo la de los cuidadores ocupados. Con pocos datos no se nota; con muchos habría que pasarlas a consultas del repositorio.
 - 🕘 **Las reservas son por días completos, no por horas.** Si un cuidador tiene un servicio aceptado de 9 a 12, la aplicación lo considera ocupado todo ese día. La mejora sería añadir hora de inicio y de fin a la solicitud y que el solapamiento se compruebe también por horas.
-- 🎭 **<mark>PUT /usuarios/{id}</mark> permite cambiar los roles del propio usuario.** Ninguna pantalla lo usa, pero habría que quitarlo.
 
 ---
 
