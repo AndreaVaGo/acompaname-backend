@@ -84,9 +84,10 @@ public class UsuarioServiceImpl implements UsuarioService {
                         () -> new UsuarioExceptionNotFound("Rol no encontrado. Id " + id + " no existe.")))
                 .collect(Collectors.toSet());
         // El rol ADMIN no se puede pedir al registrarse: el administrador se crea al arrancar la aplicación
-        boolean pideAdmin = roles.stream().anyMatch(role -> role.getName().equals("ADMIN"));
-        if (pideAdmin) {
-            throw new UsuarioExceptionAccesoDenegado("No está permitido registrarse con el rol ADMIN");
+        for (RoleEntity rol : roles) {
+            if (rol.getName().equals("ADMIN")) {
+                throw new UsuarioExceptionAccesoDenegado("No está permitido registrarse con el rol ADMIN");
+            }
         }
         UsuarioEntity usuarioToSave = UsuarioMapper.toEntity(dto, roles);
         usuarioToSave.setPassword(passwordEncoder.encode(dto.password()));
