@@ -96,25 +96,17 @@ public class SolicitudServiceImpl implements SolicitudService {
         return solicitud.getFechaFin();
     }
 
-    // Dos periodos se cruzan si el inicio de cada uno no es posterior al fin del otro
-    private boolean seCruzan(LocalDate inicio, LocalDate fin, SolicitudEntity otra) {
-        return !inicio.isAfter(fechaFinReal(otra)) && !otra.getFechaCuidado().isAfter(fin);
-    }
-
     // Un cuidador no puede aceptar dos solicitudes cuyas fechas se cruzan
     private void verificarSolapamiento(SolicitudEntity solicitud) {
         Long cuidadorId = solicitud.getCuidador().getId();
         LocalDate inicio = solicitud.getFechaCuidado();
         LocalDate fin = fechaFinReal(solicitud);
 
-        for (SolicitudEntity otra : repository.findAll()) {
-            boolean mismoCuidador = otra.getCuidador().getId().equals(cuidadorId);
-            boolean aceptada = otra.getEstado() == EstadoSolicitud.ACEPTADA;
-            boolean distinta = !otra.getId().equals(solicitud.getId());
-
-            if (mismoCuidador && aceptada && distinta && seCruzan(inicio, fin, otra)) {
-                throw new SolicitudExceptionSolapamiento("Ya tienes otro servicio aceptado en esas fechas");
-            }
+        // La base de datos cuenta los otros servicios aceptados del cuidador cuyas fechas se cruzan
+        long solapados = repository.countSolapamientos(cuidadorId, solicitud.getId(), inicio, fin,
+                EstadoSolicitud.ACEPTADA);
+        if (solapados > 0) {
+            throw new SolicitudExceptionSolapamiento("Ya tienes otro servicio aceptado en esas fechas");
         }
     }
 
