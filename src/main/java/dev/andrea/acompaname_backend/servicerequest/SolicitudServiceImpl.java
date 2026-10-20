@@ -1,6 +1,7 @@
 package dev.andrea.acompaname_backend.servicerequest;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -182,6 +183,8 @@ public class SolicitudServiceImpl implements SolicitudService {
                 && solicitud.getEstado() != EstadoSolicitud.ACEPTADA;
         if (seAcepta) {
             verificarSolapamiento(solicitud);
+            // Se guarda cuándo se aceptó, para las estadísticas del administrador
+            solicitud.setFechaAceptacion(LocalDateTime.now());
         }
         solicitud.setEstado(nuevoEstado);
         SolicitudEntity solicitudActualizada = repository.save(solicitud);
