@@ -78,7 +78,7 @@ public class SolicitudServiceImplTest {
                                 new SolicitudEntity(1L, "Acompañamiento", "Manuel", "Sin notas", 80,
                                                 LocalDate.of(2026, 9, 10),
                                                 EstadoSolicitud.PENDIENTE, familia, cuidador));
-                when(repository.findAll()).thenReturn(solicitudesMock);
+                when(repository.findByParticipante("ana@test.com")).thenReturn(solicitudesMock);
 
                 List<SolicitudDTOResponse> solicitudes = service.getEntities();
 
