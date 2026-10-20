@@ -130,6 +130,14 @@ public class UsuarioServiceImplErroresTest {
     }
 
     @Test
+    void testRegistroConRolAdminDaAccesoDenegadoYNoGuarda() {
+        when(roleRepository.findById(3L)).thenReturn(Optional.of(rol(3L, "ADMIN")));
+
+        assertThrows(UsuarioExceptionAccesoDenegado.class, () -> service.storeEntity(dtoAna(3L)));
+        verify(repository, never()).save(Mockito.any(UsuarioEntity.class));
+    }
+
+    @Test
     void testUpdateConEmailDeOtroUsuarioDaConflictoYNoGuarda() {
         loguearComo("juan@test.com");
         UsuarioEntity ana = new UsuarioEntity(2L, "Ana", "ana@test.com", "600555666", "1234",
