@@ -150,12 +150,12 @@ public class SolicitudRepositoryIntegrationTest {
         PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
         crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 10), null, EstadoSolicitud.ACEPTADA);
 
-        List<Long> ElMismoDia = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 10),
+        List<Long> elMismoDia = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 10),
                 LocalDate.of(2026, 9, 10), EstadoSolicitud.ACEPTADA);
         List<Long> alDiaSiguiente = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 11),
                 LocalDate.of(2026, 9, 11), EstadoSolicitud.ACEPTADA);
 
-        assertThat(ElMismoDia, is(equalTo(List.of(pepe.getId()))));
+        assertThat(elMismoDia, is(equalTo(List.of(pepe.getId()))));
         assertThat(alDiaSiguiente, is(empty()));
     }
 
@@ -233,5 +233,111 @@ public class SolicitudRepositoryIntegrationTest {
                 LocalDate.of(2026, 9, 11), EstadoSolicitud.ACEPTADA);
 
         assertThat(ocupados, is(equalTo(List.of(pepe.getId()))));
+    }
+
+    @Test
+    void testOtroServicioAceptadoEnElMismoDiaSeCruza() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        LocalDate dia = LocalDate.of(2026, 9, 10);
+        crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.ACEPTADA);
+        SolicitudEntity laQueSeAcepta = crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.PENDIENTE);
+
+        long solapados = repository.countSolapamientos(pepe.getId(), laQueSeAcepta.getId(), dia, dia,
+                EstadoSolicitud.ACEPTADA);
+
+        assertThat(solapados, is(equalTo(1L)));
+    }
+
+    @Test
+    void testUnServicioAceptadoQueCubreTodoElPeriodoSeCruza() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 8), LocalDate.of(2026, 9, 12), EstadoSolicitud.ACEPTADA);
+        LocalDate dia = LocalDate.of(2026, 9, 10);
+        SolicitudEntity laQueSeAcepta = crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.PENDIENTE);
+
+        long solapados = repository.countSolapamientos(pepe.getId(), laQueSeAcepta.getId(), dia, dia,
+                EstadoSolicitud.ACEPTADA);
+
+        assertThat(solapados, is(equalTo(1L)));
+    }
+
+    @Test
+    void testElUltimoDiaDelServicioAceptadoSeCruzaPeroElSiguienteNo() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 5), LocalDate.of(2026, 9, 10), EstadoSolicitud.ACEPTADA);
+        SolicitudEntity laQueSeAcepta = crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 10),
+                LocalDate.of(2026, 9, 12), EstadoSolicitud.PENDIENTE);
+
+        long empiezaElDiaEnQueTermina = repository.countSolapamientos(pepe.getId(), laQueSeAcepta.getId(),
+                LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 12), EstadoSolicitud.ACEPTADA);
+        long empiezaAlDiaSiguiente = repository.countSolapamientos(pepe.getId(), laQueSeAcepta.getId(),
+                LocalDate.of(2026, 9, 11), LocalDate.of(2026, 9, 12), EstadoSolicitud.ACEPTADA);
+
+        assertThat(empiezaElDiaEnQueTermina, is(equalTo(1L)));
+        assertThat(empiezaAlDiaSiguiente, is(equalTo(0L)));
+    }
+
+    @Test
+    void testUnServicioAceptadoEnOtrasFechasNoSeCruza() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 11), LocalDate.of(2026, 9, 15), EstadoSolicitud.ACEPTADA);
+        LocalDate dia = LocalDate.of(2026, 9, 10);
+        SolicitudEntity laQueSeAcepta = crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.PENDIENTE);
+
+        long solapados = repository.countSolapamientos(pepe.getId(), laQueSeAcepta.getId(), dia, dia,
+                EstadoSolicitud.ACEPTADA);
+
+        assertThat(solapados, is(equalTo(0L)));
+    }
+
+    @Test
+    void testSoloLosServiciosAceptadosBloquean() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        LocalDate dia = LocalDate.of(2026, 9, 10);
+        crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.PENDIENTE);
+        crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.RECHAZADA);
+        crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.COMPLETADA);
+        SolicitudEntity laQueSeAcepta = crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.PENDIENTE);
+
+        long solapados = repository.countSolapamientos(pepe.getId(), laQueSeAcepta.getId(), dia, dia,
+                EstadoSolicitud.ACEPTADA);
+
+        assertThat(solapados, is(equalTo(0L)));
+    }
+
+    @Test
+    void testUnServicioAceptadoDeOtroCuidadorNoBloquea() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        PerfilCuidadorEntity marta = crearCuidador(crearUsuario("Marta", "marta@test.com"));
+        LocalDate dia = LocalDate.of(2026, 9, 10);
+        crearSolicitud(ana, marta, dia, null, EstadoSolicitud.ACEPTADA);
+        SolicitudEntity laQueSeAcepta = crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.PENDIENTE);
+
+        long solapados = repository.countSolapamientos(pepe.getId(), laQueSeAcepta.getId(), dia, dia,
+                EstadoSolicitud.ACEPTADA);
+
+        assertThat(solapados, is(equalTo(0L)));
+    }
+
+    @Test
+    void testLaPropiaSolicitudNoCuentaComoSolapamiento() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        LocalDate dia = LocalDate.of(2026, 9, 10);
+        SolicitudEntity aceptada = crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.ACEPTADA);
+
+        long contandoLaPropia = repository.countSolapamientos(pepe.getId(), aceptada.getId() + 1, dia, dia,
+                EstadoSolicitud.ACEPTADA);
+        long excluyendoLaPropia = repository.countSolapamientos(pepe.getId(), aceptada.getId(), dia, dia,
+                EstadoSolicitud.ACEPTADA);
+
+        assertThat(contandoLaPropia, is(equalTo(1L)));
+        assertThat(excluyendoLaPropia, is(equalTo(0L)));
     }
 }
