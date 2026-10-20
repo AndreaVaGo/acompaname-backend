@@ -8,6 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
@@ -33,6 +34,9 @@ public class AdminInitializer implements CommandLineRunner {
         this.adminPassword = adminPassword;
     }
 
+    // Transaccional: al arrancar no hay sesión de base de datos abierta, y buscar el rol y guardar
+    // el usuario tienen que ocurrir en la misma sesión (si no, falla al leer la lista de usuarios del rol)
+    @Transactional
     @Override
     public void run(String... args) {
         // Si no se han definido el email y la contraseña, no se crea ningún administrador
