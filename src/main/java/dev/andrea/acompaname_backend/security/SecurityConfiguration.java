@@ -59,6 +59,8 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.DELETE, "/" + endpoint + "/cuidadores/**").hasAuthority("CUIDADOR")
                         .requestMatchers(HttpMethod.PUT, "/" + endpoint + "/solicitudes/**").hasAuthority("FAMILIA")
                         .requestMatchers(HttpMethod.DELETE, "/" + endpoint + "/solicitudes/**").hasAuthority("FAMILIA")
+                        // Todo lo que cuelga de /admin es solo para el administrador
+                        .requestMatchers("/" + endpoint + "/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated())
                 .userDetailsService(jpaUserDetailsService)
                 .httpBasic(withDefaults())
