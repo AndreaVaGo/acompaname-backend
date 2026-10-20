@@ -1,5 +1,6 @@
 package dev.andrea.acompaname_backend.servicerequest;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,13 @@ public interface SolicitudRepository extends JpaRepository<SolicitudEntity, Long
             + "WHERE s.familia.email = :email "
             + "OR s.cuidador.usuario.email = :email")
     List<SolicitudEntity> findByParticipante(@Param("email") String email);
+
+    // Ids de los cuidadores con una solicitud en ese estado cuyas fechas se cruzan con el periodo.
+    // Si la solicitud no tiene fecha de fin, cuenta como un solo día (COALESCE).
+    @Query("SELECT DISTINCT s.cuidador.id FROM SolicitudEntity s "
+            + "WHERE s.estado = :estado "
+            + "AND s.fechaCuidado <= :fin "
+            + "AND COALESCE(s.fechaFin, s.fechaCuidado) >= :inicio")
+    List<Long> findCuidadoresOcupados(@Param("inicio") LocalDate inicio, @Param("fin") LocalDate fin,
+            @Param("estado") EstadoSolicitud estado);
 }
