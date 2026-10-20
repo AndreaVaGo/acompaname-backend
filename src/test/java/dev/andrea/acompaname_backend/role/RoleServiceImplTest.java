@@ -54,4 +54,16 @@ public class RoleServiceImplTest {
 
         assertThat(resultado, is(empty()));
     }
+
+    @Test
+    void testIndexNoDevuelveElRolAdmin() {
+        when(repository.findAll())
+                .thenReturn(List.of(rol(1L, "FAMILIA"), rol(2L, "CUIDADOR"), rol(3L, "ADMIN")));
+
+        List<RoleDTOResponse> resultado = service.index();
+
+        assertThat(resultado.size(), is(equalTo(2)));
+        assertThat(resultado.get(0), is(equalTo(new RoleDTOResponse(1L, "FAMILIA"))));
+        assertThat(resultado.get(1), is(equalTo(new RoleDTOResponse(2L, "CUIDADOR"))));
+    }
 }
