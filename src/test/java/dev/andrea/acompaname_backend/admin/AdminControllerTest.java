@@ -3,9 +3,14 @@ package dev.andrea.acompaname_backend.admin;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,14 +21,21 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import dev.andrea.acompaname_backend.admin.dtos.AdminActivoDTORequest;
+import dev.andrea.acompaname_backend.admin.dtos.AdminSolicitudDTOResponse;
+import dev.andrea.acompaname_backend.admin.dtos.AdminUsuarioDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.AdminValoracionDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.AvisosDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.CuidadorValoradoDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.EstadisticasDTOResponse;
+import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = AdminController.class)
@@ -105,5 +117,120 @@ public class AdminControllerTest {
 
         assertThat(response.getStatus(), is(equalTo(204)));
         Mockito.verify(service).borrarValoracion(1L);
+    }
+
+    @Test
+    void testUsuariosDevuelveLaLista() throws Exception {
+        List<AdminUsuarioDTOResponse> usuarios = List.of(
+                new AdminUsuarioDTOResponse(1L, "Ana", "ana@mail.com", "600000000", "FAMILIA", true),
+                new AdminUsuarioDTOResponse(2L, "Pepe", "pepe@mail.com", "611111111", "CUIDADOR", false));
+        when(service.usuarios()).thenReturn(usuarios);
+        String json = mapper.writeValueAsString(usuarios);
+
+        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/admin/usuarios"))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(200)));
+        assertThat(response.getContentAsString(), is(equalTo(json)));
+    }
+
+    @Test
+    void testBloquearUnUsuarioDevuelveElUsuarioActualizado() throws Exception {
+        AdminUsuarioDTOResponse bloqueado = new AdminUsuarioDTOResponse(1L, "Ana", "ana@mail.com", "600000000",
+                "FAMILIA", false);
+        when(service.cambiarActivo(1L, false)).thenReturn(bloqueado);
+        String json = mapper.writeValueAsString(bloqueado);
+
+        MockHttpServletResponse response = mockMvc.perform(patch("/api/v1/admin/usuarios/1/activo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(new AdminActivoDTORequest(false))))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(200)));
+        assertThat(response.getContentAsString(), is(equalTo(json)));
+    }
+
+    @Test
+    void testBloquearSinElCampoActivoDevuelve400() throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(patch("/api/v1/admin/usuarios/1/activo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        verify(service, never()).cambiarActivo(anyLong(), anyBoolean());
+    }
+
+    @Test
+    void testBloquearUnUsuarioQueNoExisteDevuelve404() throws Exception {
+        when(service.cambiarActivo(99L, false))
+                .thenThrow(new UsuarioExceptionNotFound("Usuario no encontrado. Id 99 no existe."));
+
+        MockHttpServletResponse response = mockMvc.perform(patch("/api/v1/admin/usuarios/99/activo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(new AdminActivoDTORequest(false))))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(404)));
+    }
+
+    @Test
+    void testElAdministradorBloqueandoseASiMismoDevuelve403() throws Exception {
+        when(service.cambiarActivo(5L, false))
+                .thenThrow(new UsuarioExceptionAccesoDenegado("El administrador no puede bloquearse a sí mismo"));
+
+        MockHttpServletResponse response = mockMvc.perform(patch("/api/v1/admin/usuarios/5/activo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(new AdminActivoDTORequest(false))))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(403)));
+    }
+
+    @Test
+    void testSolicitudesSinEstadoDevuelveLaLista() throws Exception {
+        List<AdminSolicitudDTOResponse> solicitudes = List.of(
+                new AdminSolicitudDTOResponse(1L, "domicilio", "Abuela Rosa", LocalDate.of(2026, 11, 20),
+                        EstadoSolicitud.PENDIENTE, "Ana", "Pepe"));
+        when(service.solicitudes(null)).thenReturn(solicitudes);
+        String json = mapper.writeValueAsString(solicitudes);
+
+        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/admin/solicitudes"))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(200)));
+        assertThat(response.getContentAsString(), is(equalTo(json)));
+    }
+
+    @Test
+    void testSolicitudesConEstadoLoPasaAlServicio() throws Exception {
+        List<AdminSolicitudDTOResponse> solicitudes = List.of(
+                new AdminSolicitudDTOResponse(2L, "hospitalario", "Abuelo Juan", LocalDate.of(2026, 11, 21),
+                        EstadoSolicitud.ACEPTADA, "Luis", "Marta"));
+        when(service.solicitudes(EstadoSolicitud.ACEPTADA)).thenReturn(solicitudes);
+        String json = mapper.writeValueAsString(solicitudes);
+
+        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/admin/solicitudes").param("estado", "ACEPTADA"))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(200)));
+        assertThat(response.getContentAsString(), is(equalTo(json)));
+        verify(service).solicitudes(EstadoSolicitud.ACEPTADA);
+    }
+
+    @Test
+    void testSolicitudesConUnEstadoInventadoDevuelve400() throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/admin/solicitudes").param("estado", "INVENTADO"))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
     }
 }
