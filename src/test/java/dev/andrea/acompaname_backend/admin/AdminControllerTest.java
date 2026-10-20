@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import dev.andrea.acompaname_backend.admin.dtos.AvisosDTOResponse;
+import dev.andrea.acompaname_backend.admin.dtos.CuidadorValoradoDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.EstadisticasDTOResponse;
 import tools.jackson.databind.ObjectMapper;
 
@@ -37,6 +40,36 @@ public class AdminControllerTest {
         String json = mapper.writeValueAsString(estadisticas);
 
         MockHttpServletResponse response = mockMvc.perform(get("/api/v1/admin/estadisticas"))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(200)));
+        assertThat(response.getContentAsString(), is(equalTo(json)));
+    }
+
+    @Test
+    void testAvisosDevuelveLosAvisosDelPanel() throws Exception {
+        AvisosDTOResponse avisos = new AvisosDTOResponse(3, 1, 2);
+        when(service.avisos()).thenReturn(avisos);
+        String json = mapper.writeValueAsString(avisos);
+
+        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/admin/avisos"))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(200)));
+        assertThat(response.getContentAsString(), is(equalTo(json)));
+    }
+
+    @Test
+    void testMejoresCuidadoresDevuelveLaLista() throws Exception {
+        List<CuidadorValoradoDTOResponse> mejores = List.of(
+                new CuidadorValoradoDTOResponse(1L, "Pepe", 4.8, 12),
+                new CuidadorValoradoDTOResponse(2L, "Marta", 4.5, 7));
+        when(service.mejoresCuidadores()).thenReturn(mejores);
+        String json = mapper.writeValueAsString(mejores);
+
+        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/admin/cuidadores/mejor-valorados"))
                 .andReturn()
                 .getResponse();
 
