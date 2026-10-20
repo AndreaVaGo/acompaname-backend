@@ -35,4 +35,7 @@ public interface SolicitudRepository extends JpaRepository<SolicitudEntity, Long
     long countSolapamientos(@Param("cuidadorId") Long cuidadorId, @Param("solicitudId") Long solicitudId,
             @Param("inicio") LocalDate inicio, @Param("fin") LocalDate fin,
             @Param("estado") EstadoSolicitud estado);
+
+    // Cuántas solicitudes hay en un estado (para las estadísticas del administrador)
+    long countByEstado(EstadoSolicitud estado);
 }
