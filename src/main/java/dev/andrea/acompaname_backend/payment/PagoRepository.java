@@ -1,6 +1,7 @@
 package dev.andrea.acompaname_backend.payment;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,5 +21,8 @@ public interface PagoRepository extends JpaRepository<PagoEntity, Long> {
     // Suma de los importes de los pagos en un estado (null si no hay ninguno)
     @Query("SELECT SUM(p.importe) FROM PagoEntity p WHERE p.estado = :estado")
     BigDecimal sumaPorEstado(@Param("estado") EstadoPago estado);
+
+    // Cuántos pagos en un estado se crearon antes de una fecha (por ejemplo, pendientes de hace más de una semana)
+    long countByEstadoAndFechaBefore(EstadoPago estado, LocalDate fecha);
 
 }
