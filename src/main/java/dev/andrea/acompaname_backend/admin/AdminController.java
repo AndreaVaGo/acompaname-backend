@@ -2,10 +2,14 @@ package dev.andrea.acompaname_backend.admin;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.andrea.acompaname_backend.admin.dtos.AdminValoracionDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.AvisosDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.CuidadorValoradoDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.EstadisticasDTOResponse;
@@ -32,5 +36,16 @@ public class AdminController {
     @GetMapping("/cuidadores/mejor-valorados")
     public List<CuidadorValoradoDTOResponse> mejoresCuidadores() {
         return service.mejoresCuidadores();
+    }
+
+    @GetMapping("/valoraciones/ultimas")
+    public List<AdminValoracionDTOResponse> ultimasValoraciones() {
+        return service.ultimasValoraciones();
+    }
+
+    @DeleteMapping("/valoraciones/{id}")
+    public ResponseEntity<Void> borrarValoracion(@PathVariable Long id) {
+        service.borrarValoracion(id);
+        return ResponseEntity.noContent().build();
     }
 }
