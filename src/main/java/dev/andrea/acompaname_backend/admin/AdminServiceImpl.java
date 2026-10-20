@@ -6,9 +6,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.andrea.acompaname_backend.admin.dtos.AdminSolicitudDTOResponse;
+import dev.andrea.acompaname_backend.admin.dtos.AdminUsuarioDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.AdminValoracionDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.AvisosDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.CuidadorValoradoDTOResponse;
@@ -20,10 +24,14 @@ import dev.andrea.acompaname_backend.payment.PagoRepository;
 import dev.andrea.acompaname_backend.review.ValoracionEntity;
 import dev.andrea.acompaname_backend.review.ValoracionRepository;
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionNotFound;
+import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
+import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -47,6 +55,11 @@ public class AdminServiceImpl implements AdminService {
     // Redondea a un decimal (por ejemplo 4.26 pasa a 4.3)
     private double redondear(double numero) {
         return Math.round(numero * 10.0) / 10.0;
+    }
+
+    private String emailLogueado() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth.getName();
     }
 
     // Si no hay pagos en ese estado la suma es null, y se cuenta como 0
@@ -84,6 +97,21 @@ public class AdminServiceImpl implements AdminService {
         }
         double horas = minutosTotales / 60.0 / cuantas;
         return redondear(horas);
+    }
+
+    // Pasa un usuario al DTO del administrador (sin contraseña); los roles van separados por comas
+    private AdminUsuarioDTOResponse aDTO(UsuarioEntity usuario) {
+        String roles = "";
+        if (usuario.getRoles() != null) {
+            for (RoleEntity rol : usuario.getRoles()) {
+                if (!roles.isEmpty()) {
+                    roles = roles + ",";
+                }
+                roles = roles + rol.getName();
+            }
+        }
+        return new AdminUsuarioDTOResponse(usuario.getId(), usuario.getNombre(), usuario.getEmail(),
+                usuario.getTelefono(), roles, usuario.isActivo());
     }
 
     @Override
@@ -167,5 +195,48 @@ public class AdminServiceImpl implements AdminService {
             throw new ValoracionExceptionNotFound("Valoración no encontrada. Id " + id + " no existe.");
         }
         valoracionRepository.deleteById(id);
+    }
+
+    @Override
+    public List<AdminUsuarioDTOResponse> usuarios() {
+        List<AdminUsuarioDTOResponse> respuesta = new ArrayList<>();
+        for (UsuarioEntity usuario : usuarioRepository.findAll()) {
+            respuesta.add(aDTO(usuario));
+        }
+        return respuesta;
+    }
+
+    @Transactional
+    @Override
+    public AdminUsuarioDTOResponse cambiarActivo(Long id, boolean activo) {
+        UsuarioEntity usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new UsuarioExceptionNotFound("Usuario no encontrado. Id " + id + " no existe."));
+
+        // El administrador no puede bloquearse a sí mismo: perdería el acceso al panel
+        if (!activo && usuario.getEmail().equals(emailLogueado())) {
+            throw new UsuarioExceptionAccesoDenegado("El administrador no puede bloquearse a sí mismo");
+        }
+
+        usuario.setActivo(activo);
+        UsuarioEntity usuarioGuardado = usuarioRepository.save(usuario);
+        return aDTO(usuarioGuardado);
+    }
+
+    @Override
+    public List<AdminSolicitudDTOResponse> solicitudes(EstadoSolicitud estado) {
+        List<SolicitudEntity> solicitudes;
+        if (estado == null) {
+            solicitudes = solicitudRepository.findAll();
+        } else {
+            solicitudes = solicitudRepository.findByEstado(estado);
+        }
+
+        List<AdminSolicitudDTOResponse> respuesta = new ArrayList<>();
+        for (SolicitudEntity solicitud : solicitudes) {
+            respuesta.add(new AdminSolicitudDTOResponse(solicitud.getId(), solicitud.getTipoCuidado(),
+                    solicitud.getNombrePaciente(), solicitud.getFechaCuidado(), solicitud.getEstado(),
+                    solicitud.getFamilia().getNombre(), solicitud.getCuidador().getUsuario().getNombre()));
+        }
+        return respuesta;
     }
 }
