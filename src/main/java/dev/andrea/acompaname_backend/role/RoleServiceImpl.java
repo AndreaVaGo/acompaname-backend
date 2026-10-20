@@ -20,7 +20,10 @@ public class RoleServiceImpl implements RoleService {
     public List<RoleDTOResponse> index() {
         List<RoleDTOResponse> respuesta = new ArrayList<>();
         for (RoleEntity rol : repository.findAll()) {
-            respuesta.add(new RoleDTOResponse(rol.getId(), rol.getName()));
+            // El rol ADMIN no se enseña: la lista es pública y sirve para registrarse
+            if (!rol.getName().equals("ADMIN")) {
+                respuesta.add(new RoleDTOResponse(rol.getId(), rol.getName()));
+            }
         }
         return respuesta;
     }
