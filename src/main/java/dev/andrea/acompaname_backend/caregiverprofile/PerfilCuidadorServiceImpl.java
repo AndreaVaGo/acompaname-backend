@@ -74,9 +74,7 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
     @Transactional
     @Override
     public PerfilCuidadorDTOResponse storeEntity(PerfilCuidadorDTORequest dto) {
-        boolean yaExiste = repository.findAll().stream()
-                .anyMatch(p -> p.getUsuario().getId().equals(dto.usuarioId()));
-        if (yaExiste) {
+        if (repository.existsByUsuarioId(dto.usuarioId())) {
             throw new PerfilCuidadorExceptionAccesoDenegado("Este usuario ya tiene un perfil cuidador creado");
         }
 
@@ -137,9 +135,7 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
     public PerfilCuidadorDTOResponse getMiPerfil() {
         String emailLogueado = emailLogueado();
 
-        PerfilCuidadorEntity perfil = repository.findAll().stream()
-                .filter(p -> p.getUsuario().getEmail().equals(emailLogueado))
-                .findFirst()
+        PerfilCuidadorEntity perfil = repository.findByUsuarioEmail(emailLogueado)
                 .orElseThrow(() -> new PerfilCuidadorExceptionNotFound("No tienes un perfil de cuidador creado."));
 
         return aDTO(perfil);
