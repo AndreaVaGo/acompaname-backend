@@ -1,6 +1,7 @@
 package dev.andrea.acompaname_backend.servicerequest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
@@ -60,10 +61,17 @@ public class SolicitudRepositoryIntegrationTest {
     }
 
     private SolicitudEntity crearSolicitud(UsuarioEntity familia, PerfilCuidadorEntity cuidador) {
+        return crearSolicitud(familia, cuidador, LocalDate.of(2026, 11, 10), null, EstadoSolicitud.PENDIENTE);
+    }
+
+    // Solicitud con las fechas y el estado que yo elija (la fecha de fin puede ser null)
+    private SolicitudEntity crearSolicitud(UsuarioEntity familia, PerfilCuidadorEntity cuidador,
+            LocalDate inicio, LocalDate fin, EstadoSolicitud estado) {
         SolicitudEntity solicitud = SolicitudEntity.builder()
                 .tipoCuidado("DOMICILIO")
-                .estado(EstadoSolicitud.PENDIENTE)
-                .fechaCuidado(LocalDate.of(2026, 11, 10))
+                .estado(estado)
+                .fechaCuidado(inicio)
+                .fechaFin(fin)
                 .familia(familia)
                 .cuidador(cuidador)
                 .build();
@@ -122,5 +130,108 @@ public class SolicitudRepositoryIntegrationTest {
         assertThat(deAna.get(0).getId(), is(equalTo(deAnaYPepe.getId())));
         assertThat(deMarta.size(), is(equalTo(1)));
         assertThat(deMarta.get(0).getId(), is(equalTo(deLuisYMarta.getId())));
+    }
+
+    @Test
+    void testUnCuidadorConServicioAceptadoEnElRangoEstaOcupado() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 8), LocalDate.of(2026, 9, 12), EstadoSolicitud.ACEPTADA);
+
+        List<Long> ocupados = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 10),
+                LocalDate.of(2026, 9, 11), EstadoSolicitud.ACEPTADA);
+
+        assertThat(ocupados, is(equalTo(List.of(pepe.getId()))));
+    }
+
+    @Test
+    void testUnServicioSinFechaFinOcupaSoloEseDia() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 10), null, EstadoSolicitud.ACEPTADA);
+
+        List<Long> ElMismoDia = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 10),
+                LocalDate.of(2026, 9, 10), EstadoSolicitud.ACEPTADA);
+        List<Long> alDiaSiguiente = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 11),
+                LocalDate.of(2026, 9, 11), EstadoSolicitud.ACEPTADA);
+
+        assertThat(ElMismoDia, is(equalTo(List.of(pepe.getId()))));
+        assertThat(alDiaSiguiente, is(empty()));
+    }
+
+    @Test
+    void testUnServicioEnOtrasFechasNoOcupaAlCuidador() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 5), EstadoSolicitud.ACEPTADA);
+
+        List<Long> ocupados = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 10),
+                LocalDate.of(2026, 9, 12), EstadoSolicitud.ACEPTADA);
+
+        assertThat(ocupados, is(empty()));
+    }
+
+    @Test
+    void testSoloLasSolicitudesAceptadasOcupanAlCuidador() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        LocalDate dia = LocalDate.of(2026, 9, 10);
+        crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.PENDIENTE);
+        crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.RECHAZADA);
+        crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.COMPLETADA);
+
+        List<Long> ocupados = repository.findCuidadoresOcupados(dia, dia, EstadoSolicitud.ACEPTADA);
+
+        assertThat(ocupados, is(empty()));
+    }
+
+    @Test
+    void testUnCuidadorConDosServiciosCruzadosApareceUnaSolaVez() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 10), null, EstadoSolicitud.ACEPTADA);
+        crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 11), null, EstadoSolicitud.ACEPTADA);
+
+        List<Long> ocupados = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 10),
+                LocalDate.of(2026, 9, 11), EstadoSolicitud.ACEPTADA);
+
+        assertThat(ocupados, is(equalTo(List.of(pepe.getId()))));
+    }
+
+    @Test
+    void testLosDiasDeInicioYFinDelServicioCuentanComoOcupados() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 5), LocalDate.of(2026, 9, 10), EstadoSolicitud.ACEPTADA);
+
+        // El servicio acaba el 10: buscar desde el 10 sigue contando como ocupado, desde el 11 ya no
+        List<Long> terminaElDiaBuscado = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 10),
+                LocalDate.of(2026, 9, 12), EstadoSolicitud.ACEPTADA);
+        List<Long> terminaAntes = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 11),
+                LocalDate.of(2026, 9, 12), EstadoSolicitud.ACEPTADA);
+        // El servicio empieza el 5: buscar hasta el 5 cuenta como ocupado, hasta el 4 ya no
+        List<Long> empiezaElDiaBuscado = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 1),
+                LocalDate.of(2026, 9, 5), EstadoSolicitud.ACEPTADA);
+        List<Long> empiezaDespues = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 1),
+                LocalDate.of(2026, 9, 4), EstadoSolicitud.ACEPTADA);
+
+        assertThat(terminaElDiaBuscado, is(equalTo(List.of(pepe.getId()))));
+        assertThat(terminaAntes, is(empty()));
+        assertThat(empiezaElDiaBuscado, is(equalTo(List.of(pepe.getId()))));
+        assertThat(empiezaDespues, is(empty()));
+    }
+
+    @Test
+    void testSoloDevuelveLosCuidadoresOcupadosYNoLosLibres() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        PerfilCuidadorEntity marta = crearCuidador(crearUsuario("Marta", "marta@test.com"));
+        crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 10), null, EstadoSolicitud.ACEPTADA);
+        crearSolicitud(ana, marta, LocalDate.of(2026, 9, 20), null, EstadoSolicitud.ACEPTADA);
+
+        List<Long> ocupados = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 10),
+                LocalDate.of(2026, 9, 11), EstadoSolicitud.ACEPTADA);
+
+        assertThat(ocupados, is(equalTo(List.of(pepe.getId()))));
     }
 }
