@@ -43,6 +43,8 @@ import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
 
 // Tests de los casos de error y de seguridad de SolicitudServiceImpl:
 // que no existe (404), que no es tuya (403) y que solo veo mis solicitudes.
+// Qué fechas se cruzan lo decide la consulta del repositorio (probada con MySQL real
+// en SolicitudRepositoryIntegrationTest); aquí se prueba qué hace el servicio con su respuesta.
 @ExtendWith(MockitoExtension.class)
 public class SolicitudServiceImplErroresTest {
     @Mock
@@ -106,14 +108,6 @@ public class SolicitudServiceImplErroresTest {
                 "Bio", false, true, marta);
         return new SolicitudEntity(2L, "Hospital", "Carmen", "Sin notas", 75, LocalDate.of(2026, 9, 12),
                 EstadoSolicitud.PENDIENTE, luis, perfilMarta);
-    }
-
-    // Otra solicitud al mismo cuidador (Pepe), de otra familia (Luis), con las fechas y el estado que yo elija
-    private SolicitudEntity otraSolicitudDePepe(LocalDate inicio, LocalDate fin, EstadoSolicitud estado) {
-        UsuarioEntity luis = usuario(3L, "Luis", "luis@test.com", rol(1L, "FAMILIA"));
-        PerfilCuidadorEntity perfilPepe = solicitudAnaPepe().getCuidador();
-        return new SolicitudEntity(5L, "Hospital", "Carmen", "Sin notas", 75, inicio, fin, estado, luis,
-                perfilPepe);
     }
 
     private SolicitudDTORequest dtoCualquiera(Long familiaId, Long cuidadorId) {
@@ -241,12 +235,13 @@ public class SolicitudServiceImplErroresTest {
     }
 
     @Test
-    void testAceptarEnElMismoDiaQueOtraYaAceptadaDaSolapamientoYNoGuarda() {
+    void testAceptarConOtroServicioAceptadoQueSeCruzaDaSolapamientoYNoGuarda() {
         loguearComo("pepe@test.com");
         SolicitudEntity solicitud = solicitudAnaPepe();
-        SolicitudEntity otra = otraSolicitudDePepe(LocalDate.of(2026, 9, 10), null, EstadoSolicitud.ACEPTADA);
         when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
-        when(repository.findAll()).thenReturn(List.of(solicitud, otra));
+        // Pregunta por el cuidador 1, excluyendo la propia solicitud 1, en un solo día (sin fecha de fin)
+        when(repository.countSolapamientos(1L, 1L, LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 10),
+                EstadoSolicitud.ACEPTADA)).thenReturn(1L);
 
         assertThrows(SolicitudExceptionSolapamiento.class,
                 () -> service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA));
@@ -254,74 +249,30 @@ public class SolicitudServiceImplErroresTest {
     }
 
     @Test
-    void testAceptarDentroDeUnRangoYaAceptadoDaSolapamiento() {
+    void testAceptarSinNingunServicioQueSeCruceEsValido() {
         loguearComo("pepe@test.com");
         SolicitudEntity solicitud = solicitudAnaPepe();
-        SolicitudEntity otra = otraSolicitudDePepe(LocalDate.of(2026, 9, 8), LocalDate.of(2026, 9, 12),
-                EstadoSolicitud.ACEPTADA);
         when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
-        when(repository.findAll()).thenReturn(List.of(solicitud, otra));
+        when(repository.countSolapamientos(1L, 1L, LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 10),
+                EstadoSolicitud.ACEPTADA)).thenReturn(0L);
+        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
+
+        SolicitudDTOResponse resultado = service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA);
+
+        assertThat(resultado.estado(), is(equalTo(EstadoSolicitud.ACEPTADA)));
+    }
+
+    @Test
+    void testSiLaSolicitudTieneFechaFinSeComprueba_TodoElPeriodo() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = solicitudAnaPepe();
+        solicitud.setFechaFin(LocalDate.of(2026, 9, 12));
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(repository.countSolapamientos(1L, 1L, LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 12),
+                EstadoSolicitud.ACEPTADA)).thenReturn(1L);
 
         assertThrows(SolicitudExceptionSolapamiento.class,
                 () -> service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA));
-    }
-
-    @Test
-    void testAceptarElDiaEnQueTerminaOtraYaAceptadaDaSolapamiento() {
-        loguearComo("pepe@test.com");
-        SolicitudEntity solicitud = solicitudAnaPepe();
-        SolicitudEntity otra = otraSolicitudDePepe(LocalDate.of(2026, 9, 5), LocalDate.of(2026, 9, 10),
-                EstadoSolicitud.ACEPTADA);
-        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
-        when(repository.findAll()).thenReturn(List.of(solicitud, otra));
-
-        assertThrows(SolicitudExceptionSolapamiento.class,
-                () -> service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA));
-    }
-
-    @Test
-    void testAceptarEnFechasDistintasDeLaYaAceptadaEsValido() {
-        loguearComo("pepe@test.com");
-        SolicitudEntity solicitud = solicitudAnaPepe();
-        SolicitudEntity otra = otraSolicitudDePepe(LocalDate.of(2026, 9, 11), LocalDate.of(2026, 9, 15),
-                EstadoSolicitud.ACEPTADA);
-        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
-        when(repository.findAll()).thenReturn(List.of(solicitud, otra));
-        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
-
-        SolicitudDTOResponse resultado = service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA);
-
-        assertThat(resultado.estado(), is(equalTo(EstadoSolicitud.ACEPTADA)));
-    }
-
-    @Test
-    void testUnaSolicitudSoloPendienteNoBloqueaAceptarOtraEnLasMismasFechas() {
-        loguearComo("pepe@test.com");
-        SolicitudEntity solicitud = solicitudAnaPepe();
-        SolicitudEntity otra = otraSolicitudDePepe(LocalDate.of(2026, 9, 10), null, EstadoSolicitud.PENDIENTE);
-        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
-        when(repository.findAll()).thenReturn(List.of(solicitud, otra));
-        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
-
-        SolicitudDTOResponse resultado = service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA);
-
-        assertThat(resultado.estado(), is(equalTo(EstadoSolicitud.ACEPTADA)));
-    }
-
-    @Test
-    void testUnaSolicitudAceptadaDeOtroCuidadorNoBloquea() {
-        loguearComo("pepe@test.com");
-        SolicitudEntity solicitud = solicitudAnaPepe();
-        SolicitudEntity deMarta = solicitudLuisMarta();
-        deMarta.setFechaCuidado(LocalDate.of(2026, 9, 10));
-        deMarta.setEstado(EstadoSolicitud.ACEPTADA);
-        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
-        when(repository.findAll()).thenReturn(List.of(solicitud, deMarta));
-        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
-
-        SolicitudDTOResponse resultado = service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA);
-
-        assertThat(resultado.estado(), is(equalTo(EstadoSolicitud.ACEPTADA)));
     }
 
     @Test
@@ -333,7 +284,8 @@ public class SolicitudServiceImplErroresTest {
 
         service.cambiarEstado(1L, EstadoSolicitud.RECHAZADA);
 
-        verify(repository, never()).findAll();
+        verify(repository, never()).countSolapamientos(Mockito.anyLong(), Mockito.anyLong(),
+                Mockito.any(LocalDate.class), Mockito.any(LocalDate.class), Mockito.any(EstadoSolicitud.class));
     }
 
     @Test
