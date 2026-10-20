@@ -44,4 +44,13 @@ public interface SolicitudRepository extends JpaRepository<SolicitudEntity, Long
 
     // Solicitudes que ya tienen fecha de aceptación (para calcular el tiempo medio hasta aceptar)
     List<SolicitudEntity> findByFechaAceptacionIsNotNull();
+
+    // Cuántas solicitudes en un estado tienen la fecha del cuidado entre dos fechas (incluidas)
+    long countByEstadoAndFechaCuidadoBetween(EstadoSolicitud estado, LocalDate desde, LocalDate hasta);
+
+    // Cuántas solicitudes en un estado tienen la fecha del cuidado anterior a una fecha
+    long countByEstadoAndFechaCuidadoBefore(EstadoSolicitud estado, LocalDate fecha);
+
+    // Cuántas solicitudes de un cuidador están en un estado (por ejemplo, los servicios completados)
+    long countByCuidadorIdAndEstado(Long cuidadorId, EstadoSolicitud estado);
 }
