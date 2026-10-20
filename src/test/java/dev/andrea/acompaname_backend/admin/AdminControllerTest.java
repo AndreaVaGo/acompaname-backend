@@ -4,12 +4,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -17,6 +20,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import dev.andrea.acompaname_backend.admin.dtos.AdminValoracionDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.AvisosDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.CuidadorValoradoDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.EstadisticasDTOResponse;
@@ -75,5 +79,31 @@ public class AdminControllerTest {
 
         assertThat(response.getStatus(), is(equalTo(200)));
         assertThat(response.getContentAsString(), is(equalTo(json)));
+    }
+
+    @Test
+    void testUltimasValoracionesDevuelveLaLista() throws Exception {
+        List<AdminValoracionDTOResponse> ultimas = List.of(
+                new AdminValoracionDTOResponse(2L, 5, "Muy bien", LocalDate.of(2026, 11, 10), "Ana", "Pepe"),
+                new AdminValoracionDTOResponse(1L, 3, "Normal", LocalDate.of(2026, 11, 9), "Luis", "Marta"));
+        when(service.ultimasValoraciones()).thenReturn(ultimas);
+        String json = mapper.writeValueAsString(ultimas);
+
+        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/admin/valoraciones/ultimas"))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(200)));
+        assertThat(response.getContentAsString(), is(equalTo(json)));
+    }
+
+    @Test
+    void testBorrarValoracionDevuelve204() throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(delete("/api/v1/admin/valoraciones/1"))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(204)));
+        Mockito.verify(service).borrarValoracion(1L);
     }
 }
