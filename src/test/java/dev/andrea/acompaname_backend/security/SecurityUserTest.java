@@ -54,4 +54,11 @@ public class SecurityUserTest {
         assertThat(securityUser.isCredentialsNonExpired(), is(true));
         assertThat(securityUser.isEnabled(), is(true));
     }
+
+    @Test
+    void testUnUsuarioBloqueadoNoEstaHabilitado() {
+        usuario.setActivo(false);
+
+        assertThat(securityUser.isEnabled(), is(false));
+    }
 }
