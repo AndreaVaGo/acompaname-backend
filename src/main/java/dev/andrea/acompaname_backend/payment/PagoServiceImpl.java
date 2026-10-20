@@ -68,9 +68,8 @@ public class PagoServiceImpl implements PagoService {
 
     @Override
     public List<PagoDTOResponse> getEntities() {
-        String email = emailLogueado();
-        return repository.findAll().stream()
-                .filter(pago -> esParticipante(pago.getSolicitud(), email))
+        // La base de datos devuelve solo los pagos del usuario logueado (como familia o como cuidador)
+        return repository.findByParticipante(emailLogueado()).stream()
                 .map(PagoMapper::toDTO)
                 .collect(Collectors.toList());
     }
