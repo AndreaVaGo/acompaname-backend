@@ -53,4 +53,7 @@ public interface SolicitudRepository extends JpaRepository<SolicitudEntity, Long
 
     // Cuántas solicitudes de un cuidador están en un estado (por ejemplo, los servicios completados)
     long countByCuidadorIdAndEstado(Long cuidadorId, EstadoSolicitud estado);
+
+    // Solicitudes en un estado (para el listado del administrador)
+    List<SolicitudEntity> findByEstado(EstadoSolicitud estado);
 }
