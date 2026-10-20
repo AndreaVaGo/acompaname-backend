@@ -57,9 +57,10 @@ public class SecurityUser implements UserDetails {
         return true;
     }
 
+    // Un usuario bloqueado por el administrador (activo = false) no puede iniciar sesión
     @Override
     public boolean isEnabled() {
-        return true;
+        return usuario.isActivo();
     }
 
 }
