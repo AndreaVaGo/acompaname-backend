@@ -1,5 +1,6 @@
 package dev.andrea.acompaname_backend.servicerequest.mappers;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +45,7 @@ public class SolicitudMapper {
         solicitud.setNecesidades(necesidadesATexto(dto.necesidades()));
         solicitud.setDireccion(dto.direccion());
         solicitud.setEstado(EstadoSolicitud.PENDIENTE);
+        solicitud.setFechaCreacion(LocalDateTime.now());
         solicitud.setFamilia(familia);
         solicitud.setCuidador(cuidador);
         return solicitud;
