@@ -85,16 +85,6 @@ public class PagoServiceImplSeguridadTest {
                 EstadoSolicitud.ACEPTADA, ana, perfilPepe);
     }
 
-    // Solicitud de Luis (familia) a Marta (cuidadora), sin relación con Ana ni Pepe
-    private SolicitudEntity solicitudLuisMarta() {
-        UsuarioEntity luis = usuario(3L, "Luis", "luis@test.com", rol(1L, "FAMILIA"));
-        UsuarioEntity marta = usuario(4L, "Marta", "marta@test.com", rol(2L, "CUIDADOR"));
-        PerfilCuidadorEntity perfilMarta = new PerfilCuidadorEntity(2L, "Enfermería", 6, new BigDecimal("20.00"),
-                "Bio", false, true, marta);
-        return new SolicitudEntity(2L, "Hospital", "Carmen", "Sin notas", 75, LocalDate.of(2026, 9, 12),
-                EstadoSolicitud.ACEPTADA, luis, perfilMarta);
-    }
-
     private PagoEntity pago(Long id, SolicitudEntity solicitud) {
         return PagoEntity.builder()
                 .id(id)
@@ -106,14 +96,16 @@ public class PagoServiceImplSeguridadTest {
     }
 
     @Test
-    void testGetEntitiesSoloDevuelveMisPagos() {
+    void testGetEntitiesPideSoloLosPagosDelUsuarioLogueado() {
         loguearComo("ana@test.com");
-        when(repository.findAll()).thenReturn(List.of(pago(1L, solicitudAnaPepe()), pago(2L, solicitudLuisMarta())));
+        when(repository.findByParticipante("ana@test.com")).thenReturn(List.of(pago(1L, solicitudAnaPepe())));
 
         List<PagoDTOResponse> mios = service.getEntities();
 
         assertThat(mios.size(), is(equalTo(1)));
         assertThat(mios.get(0).id(), is(equalTo(1L)));
+        verify(repository).findByParticipante("ana@test.com");
+        verify(repository, never()).findAll();
     }
 
     @Test
