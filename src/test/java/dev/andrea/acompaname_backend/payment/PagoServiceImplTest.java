@@ -100,7 +100,7 @@ public class PagoServiceImplTest {
 
     @Test
     void testGetEntities() {
-        when(repository.findAll()).thenReturn(List.of(crearPagoMock(EstadoPago.PENDIENTE)));
+        when(repository.findByParticipante("ana@test.com")).thenReturn(List.of(crearPagoMock(EstadoPago.PENDIENTE)));
 
         List<PagoDTOResponse> pagos = service.getEntities();
 
