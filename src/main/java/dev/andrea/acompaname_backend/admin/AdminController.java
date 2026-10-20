@@ -5,14 +5,22 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.andrea.acompaname_backend.admin.dtos.AdminActivoDTORequest;
+import dev.andrea.acompaname_backend.admin.dtos.AdminSolicitudDTOResponse;
+import dev.andrea.acompaname_backend.admin.dtos.AdminUsuarioDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.AdminValoracionDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.AvisosDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.CuidadorValoradoDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.EstadisticasDTOResponse;
+import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(path = "${api-endpoint}/admin")
@@ -47,5 +55,22 @@ public class AdminController {
     public ResponseEntity<Void> borrarValoracion(@PathVariable Long id) {
         service.borrarValoracion(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/usuarios")
+    public List<AdminUsuarioDTOResponse> usuarios() {
+        return service.usuarios();
+    }
+
+    @PatchMapping("/usuarios/{id}/activo")
+    public AdminUsuarioDTOResponse cambiarActivo(@PathVariable Long id,
+            @Valid @RequestBody AdminActivoDTORequest request) {
+        return service.cambiarActivo(id, request.activo());
+    }
+
+    // El estado es opcional: sin él salen todas las solicitudes
+    @GetMapping("/solicitudes")
+    public List<AdminSolicitudDTOResponse> solicitudes(@RequestParam(required = false) EstadoSolicitud estado) {
+        return service.solicitudes(estado);
     }
 }
