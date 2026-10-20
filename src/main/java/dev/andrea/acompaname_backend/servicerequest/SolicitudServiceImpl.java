@@ -1,7 +1,6 @@
 package dev.andrea.acompaname_backend.servicerequest;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -222,15 +221,7 @@ public class SolicitudServiceImpl implements SolicitudService {
             throw new SolicitudExceptionFechaInvalida("La fecha de fin no puede ser anterior a la fecha de inicio");
         }
 
-        List<Long> ocupados = new ArrayList<>();
-        for (SolicitudEntity solicitud : repository.findAll()) {
-            Long cuidadorId = solicitud.getCuidador().getId();
-            boolean aceptada = solicitud.getEstado() == EstadoSolicitud.ACEPTADA;
-
-            if (aceptada && seCruzan(inicio, finReal, solicitud) && !ocupados.contains(cuidadorId)) {
-                ocupados.add(cuidadorId);
-            }
-        }
-        return ocupados;
+        // Los cuidadores con un servicio aceptado que se cruza con esas fechas los busca la base de datos
+        return repository.findCuidadoresOcupados(inicio, finReal, EstadoSolicitud.ACEPTADA);
     }
 }
