@@ -1,7 +1,5 @@
 package dev.andrea.acompaname_backend.security;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,10 +41,8 @@ public class SecurityAdminTest {
 
     @Test
     @WithMockUser(authorities = "ADMIN")
-    void testElAdministradorSiPuedeEntrarEnAdmin() throws Exception {
-        // Todavía no existe el endpoint, pero la seguridad ya no lo bloquea (ni 401 ni 403)
+    void testElAdministradorVeLasEstadisticas() throws Exception {
         mockMvc.perform(get("/api/v1/admin/estadisticas"))
-                .andExpect(status().is(not(equalTo(401))))
-                .andExpect(status().is(not(equalTo(403))));
+                .andExpect(status().isOk());
     }
 }
