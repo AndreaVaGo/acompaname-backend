@@ -204,11 +204,8 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     @Override
     public List<SolicitudDTOResponse> getMisSolicitudes() {
-        String emailLogueado = emailLogueado();
-
-        return repository.findAll().stream()
-                .filter(solicitud -> solicitud.getFamilia().getEmail().equals(emailLogueado)
-                        || solicitud.getCuidador().getUsuario().getEmail().equals(emailLogueado))
+        // La base de datos devuelve solo las solicitudes del usuario logueado (como familia o como cuidador)
+        return repository.findByParticipante(emailLogueado()).stream()
                 .map(this::aDTO)
                 .collect(Collectors.toList());
     }
