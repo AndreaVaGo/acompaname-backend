@@ -2,11 +2,16 @@ package dev.andrea.acompaname_backend.admin;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import dev.andrea.acompaname_backend.admin.dtos.AvisosDTOResponse;
+import dev.andrea.acompaname_backend.admin.dtos.CuidadorValoradoDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.EstadisticasDTOResponse;
+import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.payment.EstadoPago;
 import dev.andrea.acompaname_backend.payment.PagoRepository;
@@ -93,5 +98,49 @@ public class AdminServiceImpl implements AdminService {
                 sumaDePagos(EstadoPago.PENDIENTE),
                 valoracionMedia(),
                 horasMediasHastaAceptar());
+    }
+
+    @Override
+    public AvisosDTOResponse avisos() {
+        LocalDate hoy = LocalDate.now();
+
+        // Solicitudes sin responder cuya fecha es hoy, mañana o pasado mañana
+        long proximas = solicitudRepository.countByEstadoAndFechaCuidadoBetween(EstadoSolicitud.PENDIENTE, hoy,
+                hoy.plusDays(2));
+        // Solicitudes sin responder cuya fecha ya ha pasado
+        long vencidas = solicitudRepository.countByEstadoAndFechaCuidadoBefore(EstadoSolicitud.PENDIENTE, hoy);
+        // Pagos pendientes creados hace más de una semana
+        long pagosSinCobrar = pagoRepository.countByEstadoAndFechaBefore(EstadoPago.PENDIENTE, hoy.minusDays(7));
+
+        return new AvisosDTOResponse(proximas, vencidas, pagosSinCobrar);
+    }
+
+    @Override
+    public List<CuidadorValoradoDTOResponse> mejoresCuidadores() {
+        // Primero, todos los cuidadores que tienen alguna valoración
+        List<CuidadorValoradoDTOResponse> conNota = new ArrayList<>();
+        for (PerfilCuidadorEntity perfil : perfilCuidadorRepository.findAll()) {
+            Double media = valoracionRepository.mediaPorCuidador(perfil.getId());
+            if (media != null) {
+                long completados = solicitudRepository.countByCuidadorIdAndEstado(perfil.getId(),
+                        EstadoSolicitud.COMPLETADA);
+                conNota.add(new CuidadorValoradoDTOResponse(perfil.getId(), perfil.getUsuario().getNombre(),
+                        redondear(media), completados));
+            }
+        }
+
+        // Después, se quedan los tres de mayor nota: cada vuelta busca el mejor de los que quedan
+        List<CuidadorValoradoDTOResponse> mejores = new ArrayList<>();
+        while (mejores.size() < 3 && !conNota.isEmpty()) {
+            CuidadorValoradoDTOResponse mejor = conNota.get(0);
+            for (CuidadorValoradoDTOResponse cuidador : conNota) {
+                if (cuidador.notaMedia() > mejor.notaMedia()) {
+                    mejor = cuidador;
+                }
+            }
+            mejores.add(mejor);
+            conNota.remove(mejor);
+        }
+        return mejores;
     }
 }
