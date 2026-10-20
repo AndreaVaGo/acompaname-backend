@@ -395,24 +395,26 @@ public class SolicitudServiceImplErroresTest {
     }
 
     @Test
-    void testGetEntitiesSoloDevuelveLasMias() {
+    void testGetEntitiesPideSoloLasSolicitudesDelUsuarioLogueado() {
         loguearComo("luis@test.com");
-        when(repository.findAll()).thenReturn(List.of(solicitudAnaPepe(), solicitudLuisMarta()));
+        when(repository.findByParticipante("luis@test.com")).thenReturn(List.of(solicitudLuisMarta()));
 
         List<SolicitudDTOResponse> mias = service.getEntities();
 
         assertThat(mias.size(), is(equalTo(1)));
         assertThat(mias.get(0).tipoCuidado(), is(equalTo("Hospital")));
+        verify(repository, never()).findAll();
     }
 
     @Test
-    void testMisSolicitudesSoloDevuelveLasMias() {
+    void testMisSolicitudesPideSoloLasSolicitudesDelUsuarioLogueado() {
         loguearComo("ana@test.com");
-        when(repository.findAll()).thenReturn(List.of(solicitudAnaPepe(), solicitudLuisMarta()));
+        when(repository.findByParticipante("ana@test.com")).thenReturn(List.of(solicitudAnaPepe()));
 
         List<SolicitudDTOResponse> mias = service.getMisSolicitudes();
 
         assertThat(mias.size(), is(equalTo(1)));
         assertThat(mias.get(0).tipoCuidado(), is(equalTo("Acompañamiento")));
+        verify(repository, never()).findAll();
     }
 }
