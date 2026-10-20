@@ -263,7 +263,7 @@ public class SolicitudServiceImplErroresTest {
     }
 
     @Test
-    void testSiLaSolicitudTieneFechaFinSeComprueba_TodoElPeriodo() {
+    void testSiLaSolicitudTieneFechaFinSeCompruebaTodoElPeriodo() {
         loguearComo("pepe@test.com");
         SolicitudEntity solicitud = solicitudAnaPepe();
         solicitud.setFechaFin(LocalDate.of(2026, 9, 12));
