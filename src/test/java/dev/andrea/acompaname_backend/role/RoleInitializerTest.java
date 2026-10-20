@@ -34,17 +34,18 @@ public class RoleInitializerTest {
     }
 
     @Test
-    void testRunSinRolesCreaLosDos() {
+    void testRunSinRolesCreaLosTres() {
         when(repository.findAll()).thenReturn(List.of());
 
         initializer.run();
 
-        verify(repository, times(2)).save(any(RoleEntity.class));
+        verify(repository, times(3)).save(any(RoleEntity.class));
     }
 
     @Test
     void testRunConLosRolesYaCreadosNoGuardaNada() {
-        when(repository.findAll()).thenReturn(List.of(rol(1L, "FAMILIA"), rol(2L, "CUIDADOR")));
+        when(repository.findAll())
+                .thenReturn(List.of(rol(1L, "FAMILIA"), rol(2L, "CUIDADOR"), rol(3L, "ADMIN")));
 
         initializer.run();
 
@@ -52,8 +53,17 @@ public class RoleInitializerTest {
     }
 
     @Test
-    void testRunSoloCreaElRolQueFalta() {
+    void testRunSoloCreaLosRolesQueFaltan() {
         when(repository.findAll()).thenReturn(List.of(rol(1L, "FAMILIA")));
+
+        initializer.run();
+
+        verify(repository, times(2)).save(any(RoleEntity.class));
+    }
+
+    @Test
+    void testRunSiSoloFaltaAdminSoloCreaAdmin() {
+        when(repository.findAll()).thenReturn(List.of(rol(1L, "FAMILIA"), rol(2L, "CUIDADOR")));
 
         initializer.run();
 
