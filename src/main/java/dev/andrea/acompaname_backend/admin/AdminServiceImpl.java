@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import dev.andrea.acompaname_backend.admin.dtos.AdminValoracionDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.AvisosDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.CuidadorValoradoDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.EstadisticasDTOResponse;
@@ -15,7 +17,9 @@ import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.payment.EstadoPago;
 import dev.andrea.acompaname_backend.payment.PagoRepository;
+import dev.andrea.acompaname_backend.review.ValoracionEntity;
 import dev.andrea.acompaname_backend.review.ValoracionRepository;
+import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionNotFound;
 import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
@@ -142,5 +146,26 @@ public class AdminServiceImpl implements AdminService {
             conNota.remove(mejor);
         }
         return mejores;
+    }
+
+    @Override
+    public List<AdminValoracionDTOResponse> ultimasValoraciones() {
+        List<AdminValoracionDTOResponse> respuesta = new ArrayList<>();
+        for (ValoracionEntity valoracion : valoracionRepository.findTop5ByOrderByFechaDescIdDesc()) {
+            SolicitudEntity solicitud = valoracion.getSolicitud();
+            respuesta.add(new AdminValoracionDTOResponse(valoracion.getId(), valoracion.getPuntuacion(),
+                    valoracion.getComentario(), valoracion.getFecha(), solicitud.getFamilia().getNombre(),
+                    solicitud.getCuidador().getUsuario().getNombre()));
+        }
+        return respuesta;
+    }
+
+    @Transactional
+    @Override
+    public void borrarValoracion(Long id) {
+        if (!valoracionRepository.existsById(id)) {
+            throw new ValoracionExceptionNotFound("Valoración no encontrada. Id " + id + " no existe.");
+        }
+        valoracionRepository.deleteById(id);
     }
 }
