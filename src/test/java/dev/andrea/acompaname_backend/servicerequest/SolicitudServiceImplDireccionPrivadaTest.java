@@ -138,7 +138,8 @@ public class SolicitudServiceImplDireccionPrivadaTest {
         @Test
         void testListaDelCuidadorNoIncluyeLaDireccionDeLasPendientes() {
                 iniciarSesionComo("pepe@test.com");
-                when(repository.findAll()).thenReturn(List.of(crearSolicitud(EstadoSolicitud.PENDIENTE)));
+                when(repository.findByParticipante("pepe@test.com"))
+                                .thenReturn(List.of(crearSolicitud(EstadoSolicitud.PENDIENTE)));
 
                 List<SolicitudDTOResponse> solicitudes = service.getMisSolicitudes();
 
