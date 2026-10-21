@@ -8,7 +8,7 @@ Este repositorio contiene la **API REST** del proyecto, desarrollada con **Sprin
 
 Proyecto final del bootcamp de Desarrollo Web Full Stack (850h) en **Factoría F5 — Digital Academy**.
 
-![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-337-success)
+![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-436-success)
 
 > [!TIP]
 > 📚 **Documentación completa en la [wiki del proyecto](https://github.com/AndreaVaGo/acompaname-backend/wiki).** Aquí está lo imprescindible para entender, arrancar y probar el backend; el detalle (arquitectura, modelo de datos, endpoints, seguridad, tests, diagramas y decisiones) está en la wiki.
@@ -24,6 +24,7 @@ Proyecto final del bootcamp de Desarrollo Web Full Stack (850h) en **Factoría F
 - [Arquitectura y patrones de diseño](#-arquitectura-y-patrones-de-diseño)
 - [Modelo de datos](#-modelo-de-datos)
 - [Endpoints de la API](#-endpoints-de-la-api)
+- [Panel de administración](#-panel-de-administración)
 - [Seguridad](#-seguridad)
 - [Testing](#-testing)
 - [Diagramas técnicos](#-diagramas-técnicos)
@@ -47,10 +48,15 @@ La plataforma permite a las **familias**:
 - 💳 Pagar el servicio (pago simulado)
 - ⭐ Valorar el servicio recibido una vez completado
 
-Y a los **cuidadores**:
+A los **cuidadores**:
 - 🧑‍⚕️ Registrarse y crear su perfil profesional (especialidad, experiencia, tarifa, disponibilidad y foto)
 - 📥 Consultar y gestionar las solicitudes que reciben
 - ✅ Aceptar, rechazar o marcar como completadas las solicitudes
+
+Y al **administrador**:
+- 📊 Ver un resumen de la actividad (familias, cuidadores, solicitudes, ingresos y valoración media) y los avisos que requieren atención
+- 🚫 Bloquear y desbloquear cuentas de usuario
+- 🗑️ Eliminar valoraciones inadecuadas
 
 ---
 
@@ -103,7 +109,9 @@ Y a los **cuidadores**:
 ```
    La API quedará disponible en <mark>http://localhost:8080/api/v1</mark>
 
-   Al arrancar, la aplicación crea sola los roles <mark>FAMILIA</mark> y <mark>CUIDADOR</mark> si no existen (clase <mark>RoleInitializer</mark>). Así el registro funciona desde la primera vez, con una base de datos nueva, sin insertar nada a mano.
+   Al arrancar, la aplicación crea sola los roles <mark>FAMILIA</mark>, <mark>CUIDADOR</mark> y <mark>ADMIN</mark> si no existen (clase <mark>RoleInitializer</mark>). Así el registro funciona desde la primera vez, con una base de datos nueva, sin insertar nada a mano.
+
+   Si quieres que se cree también el **usuario administrador**, define antes las variables <mark>ADMIN_EMAIL</mark> y <mark>ADMIN_PASSWORD</mark> (ver [Panel de administración](#-panel-de-administración)).
 
 4. **Ejecuta los tests** (opcional, pero recomendado; los de integración necesitan la base de datos del paso 2 arrancada con <mark>docker compose up -d</mark>)
 ```bash
@@ -127,6 +135,8 @@ La conexión a la base de datos se lee de variables de entorno. Si no existen, s
 | <mark>CORS_ORIGINS</mark> | <mark>http://localhost:5173</mark> | Dirección del frontend que puede llamar a la API |
 | <mark>JPA_DDL_AUTO</mark> | <mark>update</mark> | Cómo Hibernate gestiona las tablas (en producción se pondría <mark>validate</mark>) |
 | <mark>SHOW_SQL</mark> | <mark>false</mark> | Si Hibernate escribe en la consola el SQL que ejecuta |
+| <mark>ADMIN_EMAIL</mark> | _(vacío)_ | Email del administrador que se crea al arrancar. Si está vacío, **no se crea ningún administrador** |
+| <mark>ADMIN_PASSWORD</mark> | _(vacío)_ | Contraseña del administrador (se guarda con hash BCrypt) |
 
 Otros ajustes:
 
@@ -138,11 +148,14 @@ Otros ajustes:
 | Origen CORS permitido (<mark>cors.allowed-origins</mark>) | <mark>http://localhost:5173</mark> por defecto; se cambia con la variable de entorno <mark>CORS_ORIGINS</mark> |
 
 > [!TIP]
-> Para usar otros valores, copia <mark>.env.example</mark> como <mark>.env</mark> en la raíz y cámbialos. Docker Compose lo lee solo. El archivo <mark>.env</mark> está en el <mark>.gitignore</mark>, así que no se sube a GitHub.
+> Para usar otros valores de la base de datos, copia <mark>.env.example</mark> como <mark>.env</mark> en la raíz y cámbialos. Docker Compose lo lee solo. El archivo <mark>.env</mark> está en el <mark>.gitignore</mark>, así que no se sube a GitHub.
 
 ```bash
 cp .env.example .env
 ```
+
+> [!NOTE]
+> El archivo <mark>.env</mark> lo lee **Docker Compose**, no Spring Boot. Por eso <mark>ADMIN_EMAIL</mark> y <mark>ADMIN_PASSWORD</mark> se definen como variables de entorno en la terminal desde la que se arranca la aplicación (ver [Panel de administración](#-panel-de-administración)).
 
 > [!WARNING]
 > Los valores por defecto son **solo para desarrollo local**. En un despliegue real hay que definir otras contraseñas en el entorno.
@@ -175,7 +188,7 @@ Cliente (HTTP)
 
 ## 🗄 Modelo de datos
 
-Seis entidades: <mark>Usuario</mark>, <mark>Role</mark>, <mark>PerfilCuidador</mark>, <mark>Solicitud</mark>, <mark>Pago</mark> y <mark>Valoracion</mark>. Un usuario tiene uno o varios roles; un usuario con rol <mark>CUIDADOR</mark> tiene un perfil; una familia crea solicitudes para un cuidador; cada solicitud puede tener un pago y una valoración.
+Seis entidades: <mark>Usuario</mark>, <mark>Role</mark>, <mark>PerfilCuidador</mark>, <mark>Solicitud</mark>, <mark>Pago</mark> y <mark>Valoracion</mark>. Un usuario tiene uno o varios roles (<mark>FAMILIA</mark>, <mark>CUIDADOR</mark> o <mark>ADMIN</mark>) y un campo <mark>activo</mark> que permite bloquear su cuenta; un usuario con rol <mark>CUIDADOR</mark> tiene un perfil; una familia crea solicitudes para un cuidador; cada solicitud puede tener un pago y una valoración.
 
 👉 Diagramas entidad-relación y de clases: [Modelo de datos](https://github.com/AndreaVaGo/acompaname-backend/wiki/Modelo-de-datos).
 
@@ -194,8 +207,50 @@ Todos los endpoints tienen como prefijo base <mark>/api/v1</mark>.
 | 📋 Solicitudes | <mark>/solicitudes</mark> | Crear, editar y borrar solo la <mark>FAMILIA</mark>; cambiar estado; cuidadores ocupados (público, solo ids) |
 | ⭐ Valoraciones | <mark>/valoraciones</mark> | Crear y gestionar las propias; valoraciones públicas de un cuidador |
 | 💳 Pagos | <mark>/pagos</mark> | Solo la familia de la solicitud crea, edita, borra y paga |
+| 🛡️ Administración | <mark>/admin</mark> | Solo el rol <mark>ADMIN</mark>: estadísticas, avisos, listados, bloquear usuarios y borrar valoraciones |
 
 👉 Todos los endpoints con método, descripción y nivel de acceso, más un ejemplo de petición: [Endpoints de la API](https://github.com/AndreaVaGo/acompaname-backend/wiki/Endpoints-de-la-API).
+
+---
+
+## 🛡 Panel de administración
+
+El **administrador observa y modera**: ve estadísticas y listados de toda la plataforma, bloquea o desbloquea cuentas y elimina valoraciones inadecuadas. No edita ni borra solicitudes, pagos ni usuarios, y no puede hacerse pasar por otra cuenta.
+
+### Crear el administrador
+
+El administrador se crea al arrancar la aplicación (clase <mark>AdminInitializer</mark>) a partir de dos variables de entorno. Si no se definen, no se crea ninguno, así que el repositorio no contiene ninguna credencial de administrador.
+
+```bash
+# Git Bash / Linux / macOS
+export ADMIN_EMAIL=admin@acompaname.com
+export ADMIN_PASSWORD=elige-una-contraseña
+./mvnw spring-boot:run
+```
+
+```powershell
+# PowerShell
+$env:ADMIN_EMAIL="admin@acompaname.com"
+$env:ADMIN_PASSWORD="elige-una-contraseña"
+./mvnw spring-boot:run
+```
+
+Si el administrador ya existe, no se vuelve a crear. Después se entra con ese email y esa contraseña desde la pantalla de login del frontend, que lleva directamente al panel (<mark>/admin</mark>).
+
+### Endpoints del administrador
+
+Todos cuelgan de <mark>/api/v1/admin</mark> y exigen el rol <mark>ADMIN</mark> (cualquier otro usuario recibe <mark>403</mark>).
+
+| Método | Ruta | Qué hace |
+|---|---|---|
+| <mark>GET</mark> | <mark>/estadisticas</mark> | Totales de familias, cuidadores y solicitudes por estado y tipo, ingresos cobrados y pendientes, valoración media y tiempo medio hasta aceptar |
+| <mark>GET</mark> | <mark>/avisos</mark> | Cosas que requieren atención (por ejemplo, solicitudes pendientes) |
+| <mark>GET</mark> | <mark>/cuidadores/mejor-valorados</mark> | Cuidadores con mejor nota media |
+| <mark>GET</mark> | <mark>/valoraciones/ultimas</mark> | Últimas valoraciones de la plataforma |
+| <mark>DELETE</mark> | <mark>/valoraciones/{id}</mark> | Elimina una valoración (<mark>204</mark>) |
+| <mark>GET</mark> | <mark>/usuarios</mark> | Lista de usuarios con su rol y si están activos |
+| <mark>PATCH</mark> | <mark>/usuarios/{id}/activo</mark> | Bloquea (<mark>activo: false</mark>) o desbloquea (<mark>activo: true</mark>) una cuenta |
+| <mark>GET</mark> | <mark>/solicitudes?estado=</mark> | Lista de solicitudes, con filtro opcional por estado |
 
 ---
 
@@ -203,7 +258,8 @@ Todos los endpoints tienen como prefijo base <mark>/api/v1</mark>.
 
 - 🔑 **Autenticación:** Spring Security con HTTP Basic Auth (email + contraseña).
 - 🔐 **Contraseñas:** guardadas con hash <mark>BCrypt</mark>; nunca se guardan ni se devuelven en texto plano.
-- 🎭 **Roles:** <mark>FAMILIA</mark> y <mark>CUIDADOR</mark> controlan qué endpoints puede usar cada usuario.
+- 🎭 **Roles:** <mark>FAMILIA</mark>, <mark>CUIDADOR</mark> y <mark>ADMIN</mark> controlan qué endpoints puede usar cada usuario. Todo lo que cuelga de <mark>/admin</mark> es solo para <mark>ADMIN</mark>.
+- 🚫 **Cuentas bloqueadas:** un usuario con <mark>activo = false</mark> no puede iniciar sesión (<mark>401</mark>). Como Basic Auth comprueba las credenciales en cada petición, el bloqueo se aplica al instante. El administrador no puede bloquear su propia cuenta.
 - 🛡️ **Propietario:** los servicios comprueban que el recurso es del usuario que ha iniciado sesión y, si no, devuelven <mark>403</mark>; así nadie puede ver ni modificar datos ajenos probando ids.
 - 🌐 **CORS:** solo se permite el origen del frontend (propiedad <mark>cors.allowed-origins</mark>, variable de entorno <mark>CORS_ORIGINS</mark>).
 - 🔓 **Rutas públicas:** solo las que no exponen datos privados (registro, roles, listado y perfil de cuidadores, sus valoraciones públicas y los ids de cuidadores ocupados).
@@ -217,14 +273,15 @@ Todos los endpoints tienen como prefijo base <mark>/api/v1</mark>.
 
 ## 🧪 Testing
 
-El proyecto cuenta con **337 tests** que cubren la lógica de negocio, la capa HTTP, la seguridad y la integración con una base de datos real:
+El proyecto cuenta con **436 tests** que cubren la lógica de negocio, la capa HTTP, la seguridad y la integración con una base de datos real:
 
 | Tipo | Qué comprueba |
 |---|---|
 | 🧩 Servicios (unitarios, con Mockito) | La lógica de negocio de cada módulo, incluidos los errores, la privacidad de las valoraciones y la de la dirección |
 | 🌐 Controladores (MockMvc) | Códigos de estado y JSON de cada endpoint |
-| 🧱 Entidades (unitarios) | **41 tests nuevos:** constructores, getters y setters de las seis entidades |
+| 🧱 Entidades (unitarios) | Constructores, getters y setters de las seis entidades |
 | 🐳 Integración (Testcontainers + seguridad) | Repositorios contra MySQL real y reglas de acceso con peticiones reales |
+| 🛡️ Administración | Servicio y controlador del panel, seguridad de <mark>/admin</mark> (solo <mark>ADMIN</mark>), bloqueo de usuarios y creación del administrador al arrancar contra MySQL real |
 | 🛡️ Excepciones y seguridad (unitarios) | Códigos de error y datos del usuario que inicia sesión |
 | 🚀 Arranque de la aplicación | Que el contexto de Spring carga |
 
@@ -232,7 +289,7 @@ El proyecto cuenta con **337 tests** que cubren la lógica de negocio, la capa H
 ./mvnw test
 ```
 
-La cobertura se mide con **JaCoCo**: **95 % de instrucciones** y **93 % de ramas** (el mínimo pedido era el 70 %).
+La cobertura se mide con **JaCoCo**: **96 % de instrucciones** y **95 % de ramas** (el mínimo pedido era el 70 %).
 
 ![Resultado de los tests del backend](docs/screenshots/tests-backend.png)
 ![Cobertura de los tests del backend](docs/screenshots/cobertura-backend.png)
@@ -277,6 +334,10 @@ Algunas de las decisiones principales:
 - ✅ **Comprobar en el Service que el recurso es del usuario**, aunque conozca el id de otro.
 - ✅ **Testcontainers** para los tests de integración, con el mismo MySQL que usa la aplicación.
 - ✅ **Filtrar las valoraciones en el servidor**, no en el frontend.
+- ✅ **Administrador que observa y modera:** solo bloquea cuentas y borra valoraciones; no edita solicitudes ni pagos ni suplanta a nadie.
+- ✅ **El administrador se crea desde variables de entorno**, sin dejar ninguna credencial en el código ni en el repositorio.
+- ✅ **Cuentas bloqueadas con el mismo 401 que una contraseña mala**, para no revelar qué emails existen.
+- ✅ **Un test de integración con MySQL real para el arranque del administrador:** los tests con repositorios simulados no detectaron un fallo de sesión de Hibernate que solo aparecía al arrancar de verdad; se corrigió con <mark>@Transactional</mark> y se dejó el test que lo vigila.
 
 👉 Todas las decisiones con su motivo: [Decisiones y roadmap](https://github.com/AndreaVaGo/acompaname-backend/wiki/Decisiones-y-roadmap).
 
@@ -294,6 +355,8 @@ Algunas de las decisiones principales:
 - 🚧 **Sin límite de intentos de login** (falta proteger la aplicación de quien pruebe contraseñas una y otra vez).
 - 🐢 **Algunas consultas cargan todos los registros y filtran en Java** (<mark>findAll()</mark>), por ejemplo la de los cuidadores ocupados. Con pocos datos no se nota; con muchos habría que pasarlas a consultas del repositorio.
 - 🕘 **Las reservas son por días completos, no por horas.** Si un cuidador tiene un servicio aceptado de 9 a 12, la aplicación lo considera ocupado todo ese día. La mejora sería añadir hora de inicio y de fin a la solicitud y que el solapamiento se compruebe también por horas.
+- 🛡️ **Un único administrador**, creado desde variables de entorno: no hay pantalla para crear más administradores.
+- 🔒 **El bloqueo de una cuenta no dice el motivo:** quien está bloqueado recibe el mismo 401 que con una contraseña incorrecta. Es intencionado por privacidad, pero la persona bloqueada no sabe por qué.
 
 ---
 
