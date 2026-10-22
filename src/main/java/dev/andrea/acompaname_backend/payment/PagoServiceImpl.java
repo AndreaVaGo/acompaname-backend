@@ -89,10 +89,9 @@ public class PagoServiceImpl implements PagoService {
                         "Solicitud no encontrada. Id " + dto.solicitudId() + " no existe."));
         verificarFamilia(solicitud);
 
-        boolean sePuedePagar = solicitud.getEstado() == EstadoSolicitud.ACEPTADA
-                || solicitud.getEstado() == EstadoSolicitud.COMPLETADA;
-        if (!sePuedePagar) {
-            throw new PagoExceptionConflicto("Solo se puede crear el pago de una solicitud aceptada o completada");
+        // Solo se paga cuando el servicio ya se ha realizado (el cuidador la marca como completada)
+        if (solicitud.getEstado() != EstadoSolicitud.COMPLETADA) {
+            throw new PagoExceptionConflicto("Solo se puede crear el pago de una solicitud completada");
         }
         if (repository.existsBySolicitudId(solicitud.getId())) {
             throw new PagoExceptionConflicto("Esta solicitud ya tiene un pago");
