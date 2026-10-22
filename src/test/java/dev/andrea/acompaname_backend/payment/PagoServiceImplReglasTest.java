@@ -32,7 +32,8 @@ import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 
 // Reglas de negocio del pago: solo la familia lo crea, lo cambia o lo borra,
-// solo mientras está pendiente, y solo hay un pago por solicitud.
+// solo se crea cuando la solicitud está completada, solo mientras está pendiente,
+// y solo hay un pago por solicitud.
 @ExtendWith(MockitoExtension.class)
 public class PagoServiceImplReglasTest {
     @Mock
@@ -85,14 +86,14 @@ public class PagoServiceImplReglasTest {
                 .importe(new BigDecimal("90.00"))
                 .estado(estado)
                 .fecha(LocalDate.of(2026, 9, 11))
-                .solicitud(solicitudAnaPepe(EstadoSolicitud.ACEPTADA))
+                .solicitud(solicitudAnaPepe(EstadoSolicitud.COMPLETADA))
                 .build();
     }
 
     @Test
     void testElCuidadorNoPuedeCrearElPago() {
         loguearComo("pepe@test.com");
-        when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitudAnaPepe(EstadoSolicitud.ACEPTADA)));
+        when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitudAnaPepe(EstadoSolicitud.COMPLETADA)));
 
         assertThrows(PagoExceptionAccesoDenegado.class,
                 () -> service.storeEntity(new PagoDTORequest(new BigDecimal("90.00"), 1L)));
@@ -110,9 +111,19 @@ public class PagoServiceImplReglasTest {
     }
 
     @Test
-    void testNoSeCreaUnSegundoPagoDeLaMismaSolicitud() {
+    void testNoSeCreaElPagoDeUnaSolicitudAceptada() {
         loguearComo("ana@test.com");
         when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitudAnaPepe(EstadoSolicitud.ACEPTADA)));
+
+        assertThrows(PagoExceptionConflicto.class,
+                () -> service.storeEntity(new PagoDTORequest(new BigDecimal("90.00"), 1L)));
+        verify(repository, never()).save(Mockito.any(PagoEntity.class));
+    }
+
+    @Test
+    void testNoSeCreaUnSegundoPagoDeLaMismaSolicitud() {
+        loguearComo("ana@test.com");
+        when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitudAnaPepe(EstadoSolicitud.COMPLETADA)));
         when(repository.existsBySolicitudId(1L)).thenReturn(true);
 
         assertThrows(PagoExceptionConflicto.class,
