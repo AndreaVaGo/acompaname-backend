@@ -30,6 +30,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import dev.andrea.acompaname_backend.payment.dtos.PagoDTORequest;
 import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionConflicto;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
 import tools.jackson.databind.ObjectMapper;
 
@@ -104,6 +105,21 @@ public class PagoControllerTest {
 
         assertThat(response.getStatus(), is(equalTo(201)));
         assertThat(response.getContentAsString(), is(equalTo(json)));
+    }
+
+    @Test
+    void testStoreSolicitudNoCompletada() throws Exception {
+        PagoDTORequest dto = new PagoDTORequest(new BigDecimal("90.00"), 1L);
+        when(service.storeEntity(Mockito.any(PagoDTORequest.class)))
+                .thenThrow(new PagoExceptionConflicto("Solo se puede crear el pago de una solicitud completada"));
+
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/pagos")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(409)));
+        assertThat(response.getContentAsString(), containsString("solicitud completada"));
     }
 
     @Test
