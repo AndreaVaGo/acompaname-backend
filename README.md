@@ -273,7 +273,7 @@ Todos cuelgan de <mark>/api/v1/admin</mark> y exigen el rol <mark>ADMIN</mark> (
 
 ## 🧪 Testing
 
-El proyecto cuenta con **436 tests** que cubren la lógica de negocio, la capa HTTP, la seguridad y la integración con una base de datos real:
+El proyecto cuenta con **447 tests** que cubren la lógica de negocio, la capa HTTP, la seguridad y la integración con una base de datos real:
 
 | Tipo | Qué comprueba |
 |---|---|
@@ -350,7 +350,7 @@ Algunas de las decisiones principales:
 
 - 🔑 **Autenticación mediante Basic Auth**, no JWT. La migración a JWT está prevista como siguiente paso.
 - 🗝️ **Credenciales por defecto de desarrollo:** se pueden cambiar con variables de entorno, pero los valores por defecto siguen en <mark>application.properties</mark> y <mark>docker-compose.yml</mark>.
-- 💳 **Pagos simulados:** no hay pasarela de pago real. El pago se crea al aceptar la solicitud y se marca como pagado con <mark>PATCH /pagos/{id}/pagar</mark>.
+- 💳 **Pagos simulados:** no hay pasarela de pago real. El pago se crea cuando el cuidador marca la solicitud como completada y se marca como pagado con <mark>PATCH /pagos/{id}/pagar</mark>.
 - 🪪 **Basic Auth envía las credenciales en cada petición:** es sencillo pero menos seguro que un token; por eso JWT es la siguiente mejora.
 - 🚧 **Sin límite de intentos de login** (falta proteger la aplicación de quien pruebe contraseñas una y otra vez).
 - 🐢 **Algunas consultas cargan todos los registros y filtran en Java** (<mark>findAll()</mark>), por ejemplo la de los cuidadores ocupados. Con pocos datos no se nota; con muchos habría que pasarlas a consultas del repositorio.
