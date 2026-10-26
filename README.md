@@ -8,7 +8,7 @@ Este repositorio contiene la **API REST** del proyecto, desarrollada con **Sprin
 
 Proyecto final del bootcamp de Desarrollo Web Full Stack (850h) en **Factoría F5 — Digital Academy**.
 
-![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-436-success)
+![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-470-success)
 
 > [!TIP]
 > 📚 **Documentación completa en la [wiki del proyecto](https://github.com/AndreaVaGo/acompaname-backend/wiki).** Aquí está lo imprescindible para entender, arrancar y probar el backend; el detalle (arquitectura, modelo de datos, endpoints, seguridad, tests, diagramas y decisiones) está en la wiki.
@@ -251,6 +251,8 @@ Todos cuelgan de <mark>/api/v1/admin</mark> y exigen el rol <mark>ADMIN</mark> (
 | <mark>GET</mark> | <mark>/usuarios</mark> | Lista de usuarios con su rol y si están activos |
 | <mark>PATCH</mark> | <mark>/usuarios/{id}/activo</mark> | Bloquea (<mark>activo: false</mark>) o desbloquea (<mark>activo: true</mark>) una cuenta |
 | <mark>GET</mark> | <mark>/solicitudes?estado=</mark> | Lista de solicitudes, con filtro opcional por estado |
+| <mark>GET</mark> | <mark>/pagos/resumen</mark> | Análisis de pagos: cobrado y pendiente, número de pagos por estado, importe medio, porcentaje cobrado, pagos sin cobrar más de 7 días, importes por tipo de cuidado y por mes (últimos seis) y los cuidadores que más han cobrado |
+| <mark>GET</mark> | <mark>/pagos?estado=</mark> | Lista de pagos con familia, cuidador, tipo de cuidado, importe, fecha y días desde su creación, con filtro opcional por estado |
 
 ---
 
@@ -273,7 +275,7 @@ Todos cuelgan de <mark>/api/v1/admin</mark> y exigen el rol <mark>ADMIN</mark> (
 
 ## 🧪 Testing
 
-El proyecto cuenta con **447 tests** que cubren la lógica de negocio, la capa HTTP, la seguridad y la integración con una base de datos real:
+El proyecto cuenta con **470 tests** que cubren la lógica de negocio, la capa HTTP, la seguridad y la integración con una base de datos real:
 
 | Tipo | Qué comprueba |
 |---|---|
