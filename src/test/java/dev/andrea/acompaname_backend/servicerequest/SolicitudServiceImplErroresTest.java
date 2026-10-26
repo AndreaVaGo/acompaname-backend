@@ -197,27 +197,54 @@ public class SolicitudServiceImplErroresTest {
     }
 
     @Test
-    void testAceptarLaSolicitudGeneraSuPagoPendienteConLaTarifaDelCuidador() {
+    void testAceptarLaSolicitudNoGeneraPago() {
         loguearComo("pepe@test.com");
         SolicitudEntity solicitud = solicitudAnaPepe();
         when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
         when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
-        when(pagoRepository.existsBySolicitudId(1L)).thenReturn(false);
 
         service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA);
+
+        verify(pagoRepository, never()).save(Mockito.any(PagoEntity.class));
+    }
+
+    @Test
+    void testCompletarLaSolicitudGeneraSuPagoPendienteConLaTarifaDelCuidador() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = solicitudAnaPepe();
+        solicitud.setEstado(EstadoSolicitud.ACEPTADA);
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
+        when(pagoRepository.existsBySolicitudId(1L)).thenReturn(false);
+
+        service.cambiarEstado(1L, EstadoSolicitud.COMPLETADA);
 
         verify(pagoRepository).save(Mockito.any(PagoEntity.class));
     }
 
     @Test
-    void testAceptarUnaSolicitudQueYaTienePagoNoCreaOtro() {
+    void testCompletarUnaSolicitudQueYaTienePagoNoCreaOtro() {
         loguearComo("pepe@test.com");
         SolicitudEntity solicitud = solicitudAnaPepe();
+        solicitud.setEstado(EstadoSolicitud.ACEPTADA);
         when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
         when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
         when(pagoRepository.existsBySolicitudId(1L)).thenReturn(true);
 
-        service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA);
+        service.cambiarEstado(1L, EstadoSolicitud.COMPLETADA);
+
+        verify(pagoRepository, never()).save(Mockito.any(PagoEntity.class));
+    }
+
+    @Test
+    void testVolverAMarcarComoCompletadaUnaSolicitudYaCompletadaNoGeneraPago() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = solicitudAnaPepe();
+        solicitud.setEstado(EstadoSolicitud.COMPLETADA);
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
+
+        service.cambiarEstado(1L, EstadoSolicitud.COMPLETADA);
 
         verify(pagoRepository, never()).save(Mockito.any(PagoEntity.class));
     }
