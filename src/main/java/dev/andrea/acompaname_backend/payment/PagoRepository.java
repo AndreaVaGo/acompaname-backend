@@ -25,4 +25,10 @@ public interface PagoRepository extends JpaRepository<PagoEntity, Long> {
     // Cuántos pagos en un estado se crearon antes de una fecha (por ejemplo, pendientes de hace más de una semana)
     long countByEstadoAndFechaBefore(EstadoPago estado, LocalDate fecha);
 
+    // Todos los pagos, del más reciente al más antiguo (para la tabla del administrador)
+    List<PagoEntity> findAllByOrderByFechaDescIdDesc();
+
+    // Los pagos de un estado, del más reciente al más antiguo
+    List<PagoEntity> findByEstadoOrderByFechaDescIdDesc(EstadoPago estado);
+
 }
