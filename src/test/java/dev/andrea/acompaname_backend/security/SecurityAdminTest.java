@@ -91,4 +91,34 @@ public class SecurityAdminTest {
         mockMvc.perform(get("/api/v1/admin/solicitudes"))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    @WithAnonymousUser
+    void testSinIniciarSesionNoSePuedenVerLosPagosDelAdmin() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/pagos"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(authorities = "FAMILIA")
+    void testUnaFamiliaNoPuedeVerElResumenDePagosDelAdmin() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/pagos/resumen"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(authorities = "CUIDADOR")
+    void testUnCuidadorNoPuedeVerLosPagosDelAdmin() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/pagos"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(authorities = "ADMIN")
+    void testElAdministradorVeLosPagosYSuResumen() throws Exception {
+        mockMvc.perform(get("/api/v1/admin/pagos"))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/admin/pagos/resumen"))
+                .andExpect(status().isOk());
+    }
 }
