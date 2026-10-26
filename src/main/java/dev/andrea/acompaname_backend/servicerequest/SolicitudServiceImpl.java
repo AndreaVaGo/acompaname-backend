@@ -181,6 +181,8 @@ public class SolicitudServiceImpl implements SolicitudService {
         verificarCuidador(solicitud);
         boolean seAcepta = nuevoEstado == EstadoSolicitud.ACEPTADA
                 && solicitud.getEstado() != EstadoSolicitud.ACEPTADA;
+        boolean seCompleta = nuevoEstado == EstadoSolicitud.COMPLETADA
+                && solicitud.getEstado() != EstadoSolicitud.COMPLETADA;
         if (seAcepta) {
             verificarSolapamiento(solicitud);
             // Se guarda cuándo se aceptó, para las estadísticas del administrador
@@ -188,8 +190,9 @@ public class SolicitudServiceImpl implements SolicitudService {
         }
         solicitud.setEstado(nuevoEstado);
         SolicitudEntity solicitudActualizada = repository.save(solicitud);
-        if (seAcepta && !pagoRepository.existsBySolicitudId(solicitud.getId())) {
-            // Al aceptar la solicitud se genera su pago pendiente, con la tarifa del cuidador
+        if (seCompleta && !pagoRepository.existsBySolicitudId(solicitud.getId())) {
+            // Al completar la solicitud se genera su pago pendiente, con la tarifa del cuidador:
+            // la familia solo paga cuando el servicio ya se ha realizado
             PagoDTORequest pago = new PagoDTORequest(solicitud.getCuidador().getTarifaHora(), solicitud.getId());
             pagoRepository.save(PagoMapper.toEntity(pago, solicitud));
         }
