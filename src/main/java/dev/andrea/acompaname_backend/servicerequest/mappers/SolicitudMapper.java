@@ -44,6 +44,7 @@ public class SolicitudMapper {
         solicitud.setFechaFin(dto.fechaFin());
         solicitud.setNecesidades(necesidadesATexto(dto.necesidades()));
         solicitud.setDireccion(dto.direccion());
+        solicitud.setGrupoEdad(dto.grupoEdad());
         solicitud.setEstado(EstadoSolicitud.PENDIENTE);
         solicitud.setFechaCreacion(LocalDateTime.now());
         solicitud.setFamilia(familia);
@@ -56,7 +57,7 @@ public class SolicitudMapper {
                 entity.getNotas(), entity.getEdadPaciente(), entity.getFechaCuidado(), entity.getFechaFin(),
                 entity.getEstado(), entity.getFamilia().getId(), entity.getCuidador().getId(),
                 entity.getFamilia().getNombre(), entity.getCuidador().getUsuario().getNombre(),
-                necesidadesALista(entity.getNecesidades()), entity.getDireccion());
+                necesidadesALista(entity.getNecesidades()), entity.getDireccion(), entity.getGrupoEdad());
     }
 
 }
