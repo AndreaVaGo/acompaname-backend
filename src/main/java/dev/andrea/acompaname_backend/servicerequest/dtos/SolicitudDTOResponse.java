@@ -4,12 +4,22 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import dev.andrea.acompaname_backend.globals.GrupoEdad;
 import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 
 public record SolicitudDTOResponse(Long id, String tipoCuidado, String nombrePaciente, String notas,
                 Integer edadPaciente, LocalDate fechaCuidado, LocalDate fechaFin, EstadoSolicitud estado,
                 Long familiaId, Long cuidadorId, String familiaNombre, String cuidadorNombre,
-                List<String> necesidades, String direccion) {
+                List<String> necesidades, String direccion, GrupoEdad grupoEdad) {
+
+        // Constructor sin grupo de edad, para no romper el código que ya existía
+        public SolicitudDTOResponse(Long id, String tipoCuidado, String nombrePaciente, String notas,
+                        Integer edadPaciente, LocalDate fechaCuidado, LocalDate fechaFin, EstadoSolicitud estado,
+                        Long familiaId, Long cuidadorId, String familiaNombre, String cuidadorNombre,
+                        List<String> necesidades, String direccion) {
+                this(id, tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, fechaFin, estado, familiaId,
+                                cuidadorId, familiaNombre, cuidadorNombre, necesidades, direccion, null);
+        }
 
         // Constructor sin dirección, para no romper el código que ya existía
         public SolicitudDTOResponse(Long id, String tipoCuidado, String nombrePaciente, String notas,
