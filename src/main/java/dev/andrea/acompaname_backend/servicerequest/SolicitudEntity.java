@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
+import dev.andrea.acompaname_backend.globals.GrupoEdad;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -60,6 +61,19 @@ public class SolicitudEntity {
 
     // Momento en que el cuidador la aceptó; es null mientras no esté aceptada
     private LocalDateTime fechaAceptacion;
+
+    // Grupo de edad de la persona cuidada. Es opcional: las solicitudes antiguas no lo tienen (null)
+    @Enumerated(EnumType.STRING)
+    private GrupoEdad grupoEdad;
+
+    // Constructor sin grupo de edad, para no romper el código que ya existía
+    public SolicitudEntity(Long id, String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
+            LocalDate fechaCuidado, LocalDate fechaFin, EstadoSolicitud estado, UsuarioEntity familia,
+            PerfilCuidadorEntity cuidador, String necesidades, String direccion, LocalDateTime fechaCreacion,
+            LocalDateTime fechaAceptacion) {
+        this(id, tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, fechaFin, estado, familia, cuidador,
+                necesidades, direccion, fechaCreacion, fechaAceptacion, null);
+    }
 
     // Constructor sin las fechas de creación y aceptación, para no romper el código que ya existía
     public SolicitudEntity(Long id, String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
