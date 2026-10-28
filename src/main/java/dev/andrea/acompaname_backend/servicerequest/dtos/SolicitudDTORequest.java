@@ -3,6 +3,7 @@ package dev.andrea.acompaname_backend.servicerequest.dtos;
 import java.time.LocalDate;
 import java.util.List;
 
+import dev.andrea.acompaname_backend.globals.GrupoEdad;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -30,10 +31,21 @@ public record SolicitudDTORequest(
 
                 List<String> necesidades,
 
-                @Size(max = 200, message = "La dirección no puede superar 200 caracteres") String direccion
+                @Size(max = 200, message = "La dirección no puede superar 200 caracteres") String direccion,
+
+                // Grupo de edad de la persona cuidada (opcional). Si llega uno que no existe, Spring responde 400
+                GrupoEdad grupoEdad
 
 ) 
 {
+
+        // Constructor sin grupo de edad, para no romper el código que ya existía
+        public SolicitudDTORequest(String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
+                        LocalDate fechaCuidado, LocalDate fechaFin, Long familiaId, Long cuidadorId,
+                        List<String> necesidades, String direccion) {
+                this(tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, fechaFin, familiaId, cuidadorId,
+                                necesidades, direccion, null);
+        }
 
         // Constructor sin dirección, para no romper el código que ya existía
         public SolicitudDTORequest(String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
