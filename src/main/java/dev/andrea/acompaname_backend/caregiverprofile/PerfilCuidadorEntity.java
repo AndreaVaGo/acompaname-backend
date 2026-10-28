@@ -58,6 +58,18 @@ public class PerfilCuidadorEntity {
     // Ciudad donde trabaja el cuidador (puede estar vacía)
     private String ciudad;
 
+    // Grupos de edad a los que cuida, separados por comas (por ejemplo "BEBES,NINOS").
+    // Son los nombres del enum GrupoEdad. Si es null o está vacío, no ha marcado ninguno
+    private String gruposEdad;
+
+    // Constructor sin grupos de edad: el mismo que había antes de añadir este campo
+    public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
+            String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario, String foto,
+            String tipoCuidado, String servicios, String sexo, String ciudad) {
+        this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, foto,
+                tipoCuidado, servicios, sexo, ciudad, null);
+    }
+
     // Constructor sin ciudad: el mismo que había antes de añadir este campo
     public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
             String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario, String foto,
