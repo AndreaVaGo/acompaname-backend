@@ -4,10 +4,22 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import dev.andrea.acompaname_backend.globals.GrupoEdad;
+
 public record PerfilCuidadorDTOResponse(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
         String bio, boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String usuarioNombre,
         String foto, Double valoracionMedia, Long numValoraciones, String tipoCuidado, List<String> servicios,
-        String sexo, String ciudad) {
+        String sexo, String ciudad, List<GrupoEdad> gruposEdad) {
+
+    // Constructor sin grupos de edad: el mismo que había antes de añadir este campo
+    public PerfilCuidadorDTOResponse(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
+            String bio, boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String usuarioNombre,
+            String foto, Double valoracionMedia, Long numValoraciones, String tipoCuidado, List<String> servicios,
+            String sexo, String ciudad) {
+        this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId,
+                usuarioNombre, foto, valoracionMedia, numValoraciones, tipoCuidado, servicios, sexo, ciudad,
+                new ArrayList<>());
+    }
 
     // Constructor sin ciudad: el mismo que había antes de añadir este campo
     public PerfilCuidadorDTOResponse(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
