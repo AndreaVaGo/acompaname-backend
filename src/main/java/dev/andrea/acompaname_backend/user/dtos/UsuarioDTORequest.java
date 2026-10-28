@@ -2,10 +2,10 @@ package dev.andrea.acompaname_backend.user.dtos;
 
 import java.util.Set;
 
+import dev.andrea.acompaname_backend.user.validation.PasswordSegura;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 public record UsuarioDTORequest(
 
@@ -15,7 +15,10 @@ public record UsuarioDTORequest(
 
         @NotBlank(message = "El telefono no puede estar vacío") String telefono,
 
-        @NotBlank(message = "La password no puede estar vacía") @Size(min = 8, max = 72, message = "La contraseña debe tener entre 8 y 72 caracteres") String password,
+        // @NotBlank exige que venga la contraseña; @PasswordSegura comprueba que cumple
+        // las reglas (longitud, mayúscula, minúscula, número y carácter especial).
+        // Sustituye al @Size que había antes: la longitud ya está incluida en @PasswordSegura.
+        @NotBlank(message = "La password no puede estar vacía") @PasswordSegura String password,
 
         @NotNull(message = "Los roles no pueden ser nulos") Set<Long> rolesIds
 
