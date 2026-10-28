@@ -79,7 +79,8 @@ public class SolicitudServiceImpl implements SolicitudService {
         }
         return new SolicitudDTOResponse(dto.id(), dto.tipoCuidado(), dto.nombrePaciente(), dto.notas(),
                 dto.edadPaciente(), dto.fechaCuidado(), dto.fechaFin(), dto.estado(), dto.familiaId(),
-                dto.cuidadorId(), dto.familiaNombre(), dto.cuidadorNombre(), dto.necesidades(), null);
+                dto.cuidadorId(), dto.familiaNombre(), dto.cuidadorNombre(), dto.necesidades(), null,
+                dto.grupoEdad());
     }
 
     // La fecha de fin es opcional, pero si viene no puede ser anterior a la de inicio
@@ -170,6 +171,10 @@ public class SolicitudServiceImpl implements SolicitudService {
         }
         // La dirección se actualiza siempre: si no llega, se borra
         solicitudExistente.setDireccion(dto.direccion());
+        // Si no llega el grupo de edad, se deja el que ya tenía
+        if (dto.grupoEdad() != null) {
+            solicitudExistente.setGrupoEdad(dto.grupoEdad());
+        }
         SolicitudEntity solicitudActualizada = repository.save(solicitudExistente);
         return aDTO(solicitudActualizada);
     }
