@@ -1,13 +1,17 @@
 package dev.andrea.acompaname_backend.user.dtos;
 
+import dev.andrea.acompaname_backend.user.validation.PasswordSegura;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 public record CambiarPasswordDTO(
 
+        // La contraseña actual NO lleva @PasswordSegura a propósito: las cuentas creadas
+        // antes de esta regla pueden tener una contraseña débil, y deben poder escribirla
+        // para demostrar que son ellas y cambiarla por una segura.
         @NotBlank(message = "La contraseña actual no puede estar vacía") String passwordActual,
 
-        @NotBlank(message = "La contraseña nueva no puede estar vacía") @Size(min = 8, max = 72, message = "La contraseña debe tener entre 8 y 72 caracteres") String passwordNueva
+        // La contraseña nueva sí debe cumplir la regla, igual que en el registro.
+        @NotBlank(message = "La contraseña nueva no puede estar vacía") @PasswordSegura String passwordNueva
 
 ) {
 
