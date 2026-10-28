@@ -138,8 +138,8 @@ public class UsuarioControllerTest {
         Mockito.verifyNoInteractions(service);
     }
 
-    // Test nuevo: una contraseña de 8 caracteres o más pero débil (solo minúsculas y
-    // números, sin mayúscula ni carácter especial) también se rechaza.
+    // Una contraseña de 8 caracteres o más pero débil (solo minúsculas y números,
+    // sin mayúscula ni carácter especial) también se rechaza.
     @Test
     void testStoreConPasswordSinMayusculaNiSimboloDevuelve400() throws Exception {
         UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "contraseña123",
@@ -196,7 +196,22 @@ public class UsuarioControllerTest {
 
     @Test
     void testCambiarPasswordDevuelve204() throws Exception {
-        CambiarPasswordDTO dto = new CambiarPasswordDTO("actual1234", "nueva12345");
+        CambiarPasswordDTO dto = new CambiarPasswordDTO("actual1234", PASSWORD_VALIDA);
+
+        MockHttpServletResponse response = mockMvc.perform(patch("/api/v1/usuarios/1/password")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(204)));
+        Mockito.verify(service).cambiarPassword(Mockito.eq(1L), Mockito.any(CambiarPasswordDTO.class));
+    }
+
+    // Decisión de diseño: la contraseña ACTUAL puede ser débil (cuentas antiguas), así que
+    // no se le exige la regla. Este test deja esa decisión documentada.
+    @Test
+    void testCambiarPasswordConPasswordActualDebilDevuelve204() throws Exception {
+        CambiarPasswordDTO dto = new CambiarPasswordDTO("1234", PASSWORD_VALIDA);
 
         MockHttpServletResponse response = mockMvc.perform(patch("/api/v1/usuarios/1/password")
                 .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
@@ -220,9 +235,23 @@ public class UsuarioControllerTest {
         Mockito.verifyNoInteractions(service);
     }
 
+    // Contraseña nueva larga pero débil (sin mayúscula ni carácter especial): se rechaza.
+    @Test
+    void testCambiarPasswordConPasswordNuevaDebilDevuelve400() throws Exception {
+        CambiarPasswordDTO dto = new CambiarPasswordDTO("actual1234", "nueva12345");
+
+        MockHttpServletResponse response = mockMvc.perform(patch("/api/v1/usuarios/1/password")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        Mockito.verifyNoInteractions(service);
+    }
+
     @Test
     void testCambiarPasswordSinPasswordActualDevuelve400() throws Exception {
-        CambiarPasswordDTO dto = new CambiarPasswordDTO("", "nueva12345");
+        CambiarPasswordDTO dto = new CambiarPasswordDTO("", PASSWORD_VALIDA);
 
         MockHttpServletResponse response = mockMvc.perform(patch("/api/v1/usuarios/1/password")
                 .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
