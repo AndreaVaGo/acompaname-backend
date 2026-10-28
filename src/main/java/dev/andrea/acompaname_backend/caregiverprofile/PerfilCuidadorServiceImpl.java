@@ -127,6 +127,10 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
         }
         // La ciudad se actualiza siempre: si no llega, se borra
         perfilCuidadorExistente.setCiudad(dto.ciudad());
+        // Si no llegan grupos de edad, se dejan los que ya tenía (una lista vacía los borra todos)
+        if (dto.gruposEdad() != null) {
+            perfilCuidadorExistente.setGruposEdad(PerfilCuidadorMapper.gruposEdadATexto(dto.gruposEdad()));
+        }
         PerfilCuidadorEntity perfilCuidadorActualizado = repository.save(perfilCuidadorExistente);
         return aDTO(perfilCuidadorActualizado);
     }
