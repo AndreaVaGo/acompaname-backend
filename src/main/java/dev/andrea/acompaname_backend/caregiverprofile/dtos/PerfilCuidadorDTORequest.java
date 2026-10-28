@@ -3,6 +3,7 @@ package dev.andrea.acompaname_backend.caregiverprofile.dtos;
 import java.math.BigDecimal;
 import java.util.List;
 
+import dev.andrea.acompaname_backend.globals.GrupoEdad;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -34,9 +35,20 @@ public record PerfilCuidadorDTORequest(
         // MUJER, HOMBRE o vacío (vacío = prefiero no indicarlo)
         @Pattern(regexp = "MUJER|HOMBRE|", message = "El sexo debe ser MUJER o HOMBRE") String sexo,
 
-        @Size(max = 100, message = "La ciudad no puede superar 100 caracteres") String ciudad
+        @Size(max = 100, message = "La ciudad no puede superar 100 caracteres") String ciudad,
+
+        // Grupos de edad a los que cuida. Si llega uno que no existe en el enum, Spring responde 400
+        List<GrupoEdad> gruposEdad
 
 ) {
+
+    // Constructor sin grupos de edad: el mismo que había antes de añadir este campo
+    public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
+            boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String foto, String tipoCuidado,
+            List<String> servicios, String sexo, String ciudad) {
+        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, foto,
+                tipoCuidado, servicios, sexo, ciudad, null);
+    }
 
     // Constructor sin ciudad: el mismo que había antes de añadir este campo
     public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
