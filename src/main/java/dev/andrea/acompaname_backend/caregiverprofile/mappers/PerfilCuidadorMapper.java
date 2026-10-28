@@ -6,6 +6,8 @@ import java.util.List;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTORequest;
 import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTOResponse;
+import dev.andrea.acompaname_backend.globals.GrupoEdad;
+import dev.andrea.acompaname_backend.globals.ListaDeTexto;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 
 public class PerfilCuidadorMapper {
@@ -43,6 +45,21 @@ public class PerfilCuidadorMapper {
         return lista;
     }
 
+    // Pasa los grupos de edad a un texto con comas ("BEBES,NINOS") sin repetir ninguno.
+    // Es público porque el servicio también lo necesita al actualizar el perfil
+    public static String gruposEdadATexto(List<GrupoEdad> grupos) {
+        if (grupos == null) {
+            return null;
+        }
+        List<String> nombres = grupos.stream().map(GrupoEdad::name).distinct().toList();
+        return ListaDeTexto.aTexto(nombres);
+    }
+
+    // Pasa el texto de la base de datos a una lista de grupos (si no hay nada, lista vacía)
+    private static List<GrupoEdad> gruposEdadALista(String texto) {
+        return ListaDeTexto.aLista(texto).stream().map(GrupoEdad::valueOf).toList();
+    }
+
     public static PerfilCuidadorEntity toEntity(PerfilCuidadorDTORequest dto, UsuarioEntity usuario) {
         PerfilCuidadorEntity perfil = new PerfilCuidadorEntity();
         perfil.setEspecialidad(dto.especialidad());
@@ -56,6 +73,7 @@ public class PerfilCuidadorMapper {
         perfil.setServicios(serviciosATexto(dto.servicios()));
         perfil.setSexo(sexoONull(dto.sexo()));
         perfil.setCiudad(dto.ciudad());
+        perfil.setGruposEdad(gruposEdadATexto(dto.gruposEdad()));
         perfil.setUsuario(usuario);
         return perfil;
     }
@@ -83,7 +101,8 @@ public class PerfilCuidadorMapper {
                 tipoCuidadoOPorDefecto(entity.getTipoCuidado()),
                 serviciosALista(entity.getServicios()),
                 entity.getSexo(),
-                entity.getCiudad());
+                entity.getCiudad(),
+                gruposEdadALista(entity.getGruposEdad()));
         return dtoResponse;
 
     }
