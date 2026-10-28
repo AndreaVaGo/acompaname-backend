@@ -35,6 +35,12 @@ import tools.jackson.databind.ObjectMapper;
 @WebMvcTest(controllers = UsuarioController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class UsuarioControllerTest {
+
+    // Contraseña que cumple la regla @PasswordSegura. Los tests que esperan un 400 por
+    // otro motivo (email, nombre, teléfono...) la usan para que el único fallo posible
+    // sea el que están comprobando.
+    private static final String PASSWORD_VALIDA = "Segura123!";
+
     @Autowired
     private MockMvc mockMvc;
     @MockitoBean
@@ -80,7 +86,8 @@ public class UsuarioControllerTest {
 
     @Test
     void testStore() throws Exception {
-        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "12345678", Set.of(1L));
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", PASSWORD_VALIDA,
+                Set.of(1L));
         UsuarioDTOResponse dtoResponse = new UsuarioDTOResponse(1L, "Ana", "ana@test.com", "600555666",
                 Set.of("FAMILIA"));
         String json = mapper.writeValueAsString(dtoResponse);
@@ -106,7 +113,7 @@ public class UsuarioControllerTest {
 
     @Test
     void testStoreConEmailInvalidoDevuelve400() throws Exception {
-        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "esto-no-es-un-email", "600555666", "12345678",
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "esto-no-es-un-email", "600555666", PASSWORD_VALIDA,
                 Set.of(1L));
 
         MockHttpServletResponse response = mockMvc.perform(post("/api/v1/usuarios")
@@ -131,9 +138,25 @@ public class UsuarioControllerTest {
         Mockito.verifyNoInteractions(service);
     }
 
+    // Test nuevo: una contraseña de 8 caracteres o más pero débil (solo minúsculas y
+    // números, sin mayúscula ni carácter especial) también se rechaza.
+    @Test
+    void testStoreConPasswordSinMayusculaNiSimboloDevuelve400() throws Exception {
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "contraseña123",
+                Set.of(1L));
+
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/usuarios")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        Mockito.verifyNoInteractions(service);
+    }
+
     @Test
     void testStoreConNombreVacioDevuelve400() throws Exception {
-        UsuarioDTORequest dto = new UsuarioDTORequest("", "ana@test.com", "600555666", "12345678", Set.of(1L));
+        UsuarioDTORequest dto = new UsuarioDTORequest("", "ana@test.com", "600555666", PASSWORD_VALIDA, Set.of(1L));
 
         MockHttpServletResponse response = mockMvc.perform(post("/api/v1/usuarios")
                 .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
@@ -146,7 +169,7 @@ public class UsuarioControllerTest {
 
     @Test
     void testStoreSinTelefonoDevuelve400() throws Exception {
-        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "", "12345678", Set.of(1L));
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "", PASSWORD_VALIDA, Set.of(1L));
 
         MockHttpServletResponse response = mockMvc.perform(post("/api/v1/usuarios")
                 .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
@@ -159,7 +182,7 @@ public class UsuarioControllerTest {
 
     @Test
     void testPutUsuariosYaNoExisteDevuelve405() throws Exception {
-        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", "12345678",
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", PASSWORD_VALIDA,
                 Set.of(1L));
 
         MockHttpServletResponse response = mockMvc.perform(put("/api/v1/usuarios/1")
