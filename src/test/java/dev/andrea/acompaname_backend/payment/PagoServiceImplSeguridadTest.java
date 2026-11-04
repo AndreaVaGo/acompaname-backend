@@ -25,24 +25,20 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import dev.andrea.acompaname_backend.payment.dtos.PagoDTORequest;
 import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
-import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 
 // Tests de seguridad del módulo de Pago: solo la familia y el cuidador de la
-// solicitud pueden ver o tocar su pago, y solo la familia puede pagarlo (403).
+// solicitud pueden ver su pago, y solo la familia puede pagarlo (403).
 @ExtendWith(MockitoExtension.class)
 public class PagoServiceImplSeguridadTest {
     @Mock
     private PagoRepository repository;
-    @Mock
-    private SolicitudRepository solicitudRepository;
 
     private PagoServiceImpl service;
     private SecurityContext contextoOriginal;
@@ -51,7 +47,7 @@ public class PagoServiceImplSeguridadTest {
     void setup() {
         contextoOriginal = SecurityContextHolder.getContext();
         SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
-        service = new PagoServiceImpl(repository, solicitudRepository);
+        service = new PagoServiceImpl(repository);
     }
 
     @AfterEach
@@ -124,35 +120,6 @@ public class PagoServiceImplSeguridadTest {
         PagoDTOResponse resultado = service.getById(1L);
 
         assertThat(resultado.id(), is(equalTo(1L)));
-    }
-
-    @Test
-    void testStoreEnSolicitudAjenaDaAccesoDenegadoYNoGuarda() {
-        loguearComo("intruso@test.com");
-        when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitudAnaPepe()));
-
-        assertThrows(PagoExceptionAccesoDenegado.class,
-                () -> service.storeEntity(new PagoDTORequest(new BigDecimal("90.00"), 1L)));
-        verify(repository, never()).save(Mockito.any(PagoEntity.class));
-    }
-
-    @Test
-    void testUpdateDeOtraPersonaDaAccesoDenegadoYNoGuarda() {
-        loguearComo("intruso@test.com");
-        when(repository.findById(1L)).thenReturn(Optional.of(pago(1L, solicitudAnaPepe())));
-
-        assertThrows(PagoExceptionAccesoDenegado.class,
-                () -> service.update(1L, new PagoDTORequest(new BigDecimal("1.00"), 1L)));
-        verify(repository, never()).save(Mockito.any(PagoEntity.class));
-    }
-
-    @Test
-    void testDeleteDeOtraPersonaDaAccesoDenegadoYNoBorra() {
-        loguearComo("intruso@test.com");
-        when(repository.findById(1L)).thenReturn(Optional.of(pago(1L, solicitudAnaPepe())));
-
-        assertThrows(PagoExceptionAccesoDenegado.class, () -> service.deleteById(1L));
-        verify(repository, never()).deleteById(Mockito.anyLong());
     }
 
     @Test
