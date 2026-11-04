@@ -34,6 +34,7 @@ import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionEstadoInvalido;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionFechaInvalida;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionSolapamiento;
@@ -237,15 +238,15 @@ public class SolicitudServiceImplErroresTest {
     }
 
     @Test
-    void testVolverAMarcarComoCompletadaUnaSolicitudYaCompletadaNoGeneraPago() {
+    void testNoSePuedeCompletarUnaSolicitudYaCompletadaYNoGeneraOtroPago() {
         loguearComo("pepe@test.com");
         SolicitudEntity solicitud = solicitudAnaPepe();
         solicitud.setEstado(EstadoSolicitud.COMPLETADA);
         when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
-        when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
 
-        service.cambiarEstado(1L, EstadoSolicitud.COMPLETADA);
-
+        assertThrows(SolicitudExceptionEstadoInvalido.class,
+                () -> service.cambiarEstado(1L, EstadoSolicitud.COMPLETADA));
+        verify(repository, never()).save(Mockito.any(SolicitudEntity.class));
         verify(pagoRepository, never()).save(Mockito.any(PagoEntity.class));
     }
 
