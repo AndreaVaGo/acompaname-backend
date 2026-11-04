@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import dev.andrea.acompaname_backend.payment.PagoRepository;
-import dev.andrea.acompaname_backend.payment.dtos.PagoDTORequest;
 import dev.andrea.acompaname_backend.payment.mappers.PagoMapper;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
@@ -214,8 +213,7 @@ public class SolicitudServiceImpl implements SolicitudService {
         if (seCompleta && !pagoRepository.existsBySolicitudId(solicitud.getId())) {
             // Al completar la solicitud se genera su pago pendiente, con la tarifa del cuidador:
             // la familia solo paga cuando el servicio ya se ha realizado
-            PagoDTORequest pago = new PagoDTORequest(solicitud.getCuidador().getTarifaHora(), solicitud.getId());
-            pagoRepository.save(PagoMapper.toEntity(pago, solicitud));
+            pagoRepository.save(PagoMapper.toEntity(solicitud.getCuidador().getTarifaHora(), solicitud));
         }
         return aDTO(solicitudActualizada);
     }
