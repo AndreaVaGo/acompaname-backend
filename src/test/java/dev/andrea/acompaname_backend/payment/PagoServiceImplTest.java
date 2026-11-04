@@ -26,15 +26,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import dev.andrea.acompaname_backend.payment.dtos.PagoDTORequest;
 import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
-import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
-import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,8 +40,6 @@ public class PagoServiceImplTest {
     private PagoServiceImpl service;
     @Mock
     private PagoRepository repository;
-    @Mock
-    private SolicitudRepository solicitudRepository;
 
     private SecurityContext contextoOriginal;
 
@@ -56,7 +51,7 @@ public class PagoServiceImplTest {
         SecurityContext contexto = SecurityContextHolder.createEmptyContext();
         contexto.setAuthentication(new UsernamePasswordAuthenticationToken("ana@test.com", null));
         SecurityContextHolder.setContext(contexto);
-        service = new PagoServiceImpl(repository, solicitudRepository);
+        service = new PagoServiceImpl(repository);
     }
 
     @AfterEach
@@ -127,65 +122,6 @@ public class PagoServiceImplTest {
     }
 
     @Test
-    void testStoreEntityCreaElPagoComoPendiente() {
-        SolicitudEntity solicitud = crearSolicitudMock();
-        when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitud));
-        when(repository.save(Mockito.any(PagoEntity.class))).thenReturn(crearPagoMock(EstadoPago.PENDIENTE));
-
-        PagoDTOResponse pago = service.storeEntity(new PagoDTORequest(new BigDecimal("90.00"), 1L));
-
-        assertThat(pago.estado(), is(equalTo(EstadoPago.PENDIENTE)));
-        assertThat(pago.importe(), is(equalTo(new BigDecimal("90.00"))));
-        assertThat(pago.solicitudId(), is(equalTo(1L)));
-        verify(repository).save(Mockito.any(PagoEntity.class));
-    }
-
-    @Test
-    void testStoreEntitySolicitudNoExiste() {
-        when(solicitudRepository.findById(99L)).thenReturn(Optional.empty());
-
-        assertThrows(SolicitudExceptionNotFound.class,
-                () -> service.storeEntity(new PagoDTORequest(new BigDecimal("90.00"), 99L)));
-        verify(repository, never()).save(Mockito.any(PagoEntity.class));
-    }
-
-    @Test
-    void testDeleteById() {
-        when(repository.findById(1L)).thenReturn(Optional.of(crearPagoMock(EstadoPago.PENDIENTE)));
-
-        service.deleteById(1L);
-
-        verify(repository).deleteById(1L);
-    }
-
-    @Test
-    void testDeleteByIdNoExiste() {
-        when(repository.findById(99L)).thenReturn(Optional.empty());
-
-        assertThrows(PagoExceptionNotFound.class, () -> service.deleteById(99L));
-        verify(repository, never()).deleteById(99L);
-    }
-
-    @Test
-    void testUpdate() {
-        PagoEntity pagoExistente = crearPagoMock(EstadoPago.PENDIENTE);
-        when(repository.findById(1L)).thenReturn(Optional.of(pagoExistente));
-        when(repository.save(Mockito.any(PagoEntity.class))).thenReturn(pagoExistente);
-
-        PagoDTOResponse resultado = service.update(1L, new PagoDTORequest(new BigDecimal("120.00"), 1L));
-
-        assertThat(resultado.importe(), is(equalTo(new BigDecimal("120.00"))));
-    }
-
-    @Test
-    void testUpdateNoExiste() {
-        when(repository.findById(99L)).thenReturn(Optional.empty());
-
-        assertThrows(PagoExceptionNotFound.class,
-                () -> service.update(99L, new PagoDTORequest(new BigDecimal("120.00"), 1L)));
-    }
-
-    @Test
     void testMarcarComoPagado() {
         PagoEntity pagoPendiente = crearPagoMock(EstadoPago.PENDIENTE);
         when(repository.findById(1L)).thenReturn(Optional.of(pagoPendiente));
@@ -194,6 +130,17 @@ public class PagoServiceImplTest {
         PagoDTOResponse resultado = service.marcarComoPagado(1L);
 
         assertThat(resultado.estado(), is(equalTo(EstadoPago.COMPLETADO)));
+    }
+
+    @Test
+    void testMarcarComoPagadoNoCambiaElImporte() {
+        PagoEntity pagoPendiente = crearPagoMock(EstadoPago.PENDIENTE);
+        when(repository.findById(1L)).thenReturn(Optional.of(pagoPendiente));
+        when(repository.save(Mockito.any(PagoEntity.class))).thenReturn(pagoPendiente);
+
+        PagoDTOResponse resultado = service.marcarComoPagado(1L);
+
+        assertThat(resultado.importe(), is(equalTo(new BigDecimal("90.00"))));
     }
 
     @Test
