@@ -8,26 +8,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import dev.andrea.acompaname_backend.payment.dtos.PagoDTORequest;
 import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionConflicto;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
 import dev.andrea.acompaname_backend.payment.mappers.PagoMapper;
-import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
-import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
-import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
 
 @Service
 public class PagoServiceImpl implements PagoService {
 
     private final PagoRepository repository;
-    private final SolicitudRepository solicitudRepository;
 
-    public PagoServiceImpl(PagoRepository repository, SolicitudRepository solicitudRepository) {
+    public PagoServiceImpl(PagoRepository repository) {
         this.repository = repository;
-        this.solicitudRepository = solicitudRepository;
     }
 
     private PagoEntity findEntityById(Long id) {
@@ -52,7 +46,7 @@ public class PagoServiceImpl implements PagoService {
         }
     }
 
-    // Solo la familia es quien paga: crea, cambia, borra y paga el pago
+    // Solo la familia es quien paga
     private void verificarFamilia(SolicitudEntity solicitud) {
         if (!solicitud.getFamilia().getEmail().equals(emailLogueado())) {
             throw new PagoExceptionAccesoDenegado("Solo la familia de la solicitud puede gestionar su pago");
@@ -79,47 +73,6 @@ public class PagoServiceImpl implements PagoService {
         PagoEntity pago = findEntityById(id);
         verificarParticipante(pago.getSolicitud());
         return PagoMapper.toDTO(pago);
-    }
-
-    @Transactional
-    @Override
-    public PagoDTOResponse storeEntity(PagoDTORequest dto) {
-        SolicitudEntity solicitud = solicitudRepository.findById(dto.solicitudId())
-                .orElseThrow(() -> new SolicitudExceptionNotFound(
-                        "Solicitud no encontrada. Id " + dto.solicitudId() + " no existe."));
-        verificarFamilia(solicitud);
-
-        // Solo se paga cuando el servicio ya se ha realizado (el cuidador la marca como completada)
-        if (solicitud.getEstado() != EstadoSolicitud.COMPLETADA) {
-            throw new PagoExceptionConflicto("Solo se puede crear el pago de una solicitud completada");
-        }
-        if (repository.existsBySolicitudId(solicitud.getId())) {
-            throw new PagoExceptionConflicto("Esta solicitud ya tiene un pago");
-        }
-
-        PagoEntity pagoToSave = PagoMapper.toEntity(dto, solicitud);
-        PagoEntity pagoSaved = repository.save(pagoToSave);
-        return PagoMapper.toDTO(pagoSaved);
-    }
-
-    @Transactional
-    @Override
-    public void deleteById(Long id) {
-        PagoEntity pago = findEntityById(id);
-        verificarFamilia(pago.getSolicitud());
-        verificarPendiente(pago);
-        repository.deleteById(id);
-    }
-
-    @Transactional
-    @Override
-    public PagoDTOResponse update(Long id, PagoDTORequest dto) {
-        PagoEntity pagoExistente = findEntityById(id);
-        verificarFamilia(pagoExistente.getSolicitud());
-        verificarPendiente(pagoExistente);
-        pagoExistente.setImporte(dto.importe());
-        PagoEntity pagoActualizado = repository.save(pagoExistente);
-        return PagoMapper.toDTO(pagoActualizado);
     }
 
     @Transactional
