@@ -1,11 +1,15 @@
 package dev.andrea.acompaname_backend.payment;
 
-import dev.andrea.acompaname_backend.generics.InterfaceGenericService;
-import dev.andrea.acompaname_backend.payment.dtos.PagoDTORequest;
+import java.util.List;
+
 import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
 
-public interface PagoService
-        extends InterfaceGenericService<PagoEntity, PagoDTORequest, PagoDTOResponse> {
+// Los pagos solo se consultan y se pagan: se crean solos al completar la solicitud
+public interface PagoService {
+
+    List<PagoDTOResponse> getEntities();
+
+    PagoDTOResponse getById(Long id);
 
     PagoDTOResponse marcarComoPagado(Long id);
 }
