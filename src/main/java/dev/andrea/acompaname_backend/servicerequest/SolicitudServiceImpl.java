@@ -19,6 +19,7 @@ import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorE
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionEstadoInvalido;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionFechaInvalida;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionSolapamiento;
@@ -65,6 +66,21 @@ public class SolicitudServiceImpl implements SolicitudService {
     private void verificarCuidador(SolicitudEntity solicitud) {
         if (!solicitud.getCuidador().getUsuario().getEmail().equals(emailLogueado())) {
             throw new SolicitudExceptionAccesoDenegado("Solo el cuidador de la solicitud puede cambiar su estado");
+        }
+    }
+
+    // Una solicitud solo puede pasar a los estados que permite EstadoSolicitud (las reglas están allí)
+    private void verificarCambioDeEstado(SolicitudEntity solicitud, EstadoSolicitud nuevoEstado) {
+        if (!solicitud.getEstado().puedePasarA(nuevoEstado)) {
+            throw new SolicitudExceptionEstadoInvalido(
+                    "No se puede pasar una solicitud de " + solicitud.getEstado() + " a " + nuevoEstado);
+        }
+    }
+
+    // Los datos de una solicitud (fechas, tipo, notas...) solo se pueden cambiar mientras está pendiente
+    private void verificarEditable(SolicitudEntity solicitud) {
+        if (!solicitud.getEstado().admiteCambios()) {
+            throw new SolicitudExceptionEstadoInvalido("Solo se puede modificar una solicitud pendiente");
         }
     }
 
@@ -159,6 +175,7 @@ public class SolicitudServiceImpl implements SolicitudService {
         verificarFechas(dto);
         SolicitudEntity solicitudExistente = findEntityById(id);
         verificarPropietario(solicitudExistente);
+        verificarEditable(solicitudExistente);
         solicitudExistente.setTipoCuidado(dto.tipoCuidado());
         solicitudExistente.setNombrePaciente(dto.nombrePaciente());
         solicitudExistente.setNotas(dto.notas());
@@ -184,10 +201,9 @@ public class SolicitudServiceImpl implements SolicitudService {
     public SolicitudDTOResponse cambiarEstado(Long id, EstadoSolicitud nuevoEstado) {
         SolicitudEntity solicitud = findEntityById(id);
         verificarCuidador(solicitud);
-        boolean seAcepta = nuevoEstado == EstadoSolicitud.ACEPTADA
-                && solicitud.getEstado() != EstadoSolicitud.ACEPTADA;
-        boolean seCompleta = nuevoEstado == EstadoSolicitud.COMPLETADA
-                && solicitud.getEstado() != EstadoSolicitud.COMPLETADA;
+        verificarCambioDeEstado(solicitud, nuevoEstado);
+        boolean seAcepta = nuevoEstado == EstadoSolicitud.ACEPTADA;
+        boolean seCompleta = nuevoEstado == EstadoSolicitud.COMPLETADA;
         if (seAcepta) {
             verificarSolapamiento(solicitud);
             // Se guarda cuándo se aceptó, para las estadísticas del administrador
