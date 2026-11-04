@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -21,8 +22,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
-import dev.andrea.acompaname_backend.payment.dtos.PagoDTORequest;
 import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
+import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionConflicto;
 import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
@@ -30,8 +31,9 @@ import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
 
-// Prueba la regla "solo se paga una solicitud completada" con el servicio de verdad
-// y un MySQL real (Testcontainers), sin mocks.
+// Prueba el pago con el servicio de verdad y un MySQL real (Testcontainers), sin mocks.
+// El pago no se crea desde el servicio de pagos: lo crea el servicio de solicitudes al completarla
+// (se prueba en SolicitudServiceImplPagoIntegrationTest). Aquí se comprueba que pagar no cambia el importe.
 @DataJpaTest
 @Testcontainers
 @Import(PagoServiceImpl.class)
@@ -83,49 +85,61 @@ public class PagoServiceImplIntegrationTest {
         return perfilCuidadorRepository.saveAndFlush(perfil);
     }
 
-    // Crea la solicitud de Ana (familia) a Pepe (cuidador) con el estado que se pida
-    private SolicitudEntity crearSolicitud(EstadoSolicitud estado) {
+    // Guarda un pago pendiente de 18,00 € de una solicitud completada de Ana (familia) a Pepe (cuidador)
+    private PagoEntity crearPagoPendiente() {
         UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
         UsuarioEntity pepe = crearUsuario("Pepe", "pepe@test.com");
-        SolicitudEntity solicitud = SolicitudEntity.builder()
+        SolicitudEntity solicitud = solicitudRepository.saveAndFlush(SolicitudEntity.builder()
                 .tipoCuidado("DOMICILIO")
-                .estado(estado)
+                .estado(EstadoSolicitud.COMPLETADA)
                 .familia(ana)
                 .cuidador(crearCuidador(pepe))
-                .build();
-        return solicitudRepository.saveAndFlush(solicitud);
+                .build());
+        return pagoRepository.saveAndFlush(PagoEntity.builder()
+                .importe(new BigDecimal("18.00"))
+                .estado(EstadoPago.PENDIENTE)
+                .fecha(LocalDate.of(2026, 11, 10))
+                .solicitud(solicitud)
+                .build());
     }
 
     @Test
-    void testNoSeCreaElPagoDeUnaSolicitudAceptada() {
-        SolicitudEntity solicitud = crearSolicitud(EstadoSolicitud.ACEPTADA);
+    void testLaFamiliaPuedePagarUnPagoPendiente() {
+        PagoEntity pago = crearPagoPendiente();
         loguearComo("ana@test.com");
 
-        assertThrows(PagoExceptionConflicto.class,
-                () -> service.storeEntity(new PagoDTORequest(new BigDecimal("90.00"), solicitud.getId())));
-
-        assertThat(pagoRepository.existsBySolicitudId(solicitud.getId()), is(equalTo(false)));
-    }
-
-    @Test
-    void testSeCreaElPagoDeUnaSolicitudCompletada() {
-        SolicitudEntity solicitud = crearSolicitud(EstadoSolicitud.COMPLETADA);
-        loguearComo("ana@test.com");
-
-        PagoDTOResponse pago = service.storeEntity(new PagoDTORequest(new BigDecimal("90.00"), solicitud.getId()));
-
-        assertThat(pago.estado(), is(equalTo(EstadoPago.PENDIENTE)));
-        assertThat(pagoRepository.existsBySolicitudId(solicitud.getId()), is(equalTo(true)));
-    }
-
-    @Test
-    void testElPagoDeUnaSolicitudCompletadaSePuedePagar() {
-        SolicitudEntity solicitud = crearSolicitud(EstadoSolicitud.COMPLETADA);
-        loguearComo("ana@test.com");
-        PagoDTOResponse pago = service.storeEntity(new PagoDTORequest(new BigDecimal("90.00"), solicitud.getId()));
-
-        PagoDTOResponse pagado = service.marcarComoPagado(pago.id());
+        PagoDTOResponse pagado = service.marcarComoPagado(pago.getId());
 
         assertThat(pagado.estado(), is(equalTo(EstadoPago.COMPLETADO)));
+        assertThat(pagoRepository.findById(pago.getId()).get().getEstado(), is(equalTo(EstadoPago.COMPLETADO)));
+    }
+
+    @Test
+    void testPagarNoCambiaElImporte() {
+        PagoEntity pago = crearPagoPendiente();
+        loguearComo("ana@test.com");
+
+        PagoDTOResponse pagado = service.marcarComoPagado(pago.getId());
+
+        assertThat(pagado.importe().compareTo(new BigDecimal("18.00")), is(equalTo(0)));
+    }
+
+    @Test
+    void testNoSePuedePagarDosVeces() {
+        PagoEntity pago = crearPagoPendiente();
+        loguearComo("ana@test.com");
+        service.marcarComoPagado(pago.getId());
+
+        assertThrows(PagoExceptionConflicto.class, () -> service.marcarComoPagado(pago.getId()));
+    }
+
+    @Test
+    void testElCuidadorNoPuedePagarElPagoYQuedaPendiente() {
+        PagoEntity pago = crearPagoPendiente();
+        loguearComo("pepe@test.com");
+
+        assertThrows(PagoExceptionAccesoDenegado.class, () -> service.marcarComoPagado(pago.getId()));
+
+        assertThat(pagoRepository.findById(pago.getId()).get().getEstado(), is(equalTo(EstadoPago.PENDIENTE)));
     }
 }
