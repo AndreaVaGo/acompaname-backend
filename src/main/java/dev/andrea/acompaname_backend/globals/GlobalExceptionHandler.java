@@ -20,6 +20,7 @@ import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionEstadoInvalido;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionFechaInvalida;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionSolapamiento;
@@ -72,6 +73,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(SolicitudExceptionSolapamiento.class)
     public ResponseEntity<String> handleSolicitudSolapamientoException(SolicitudExceptionSolapamiento exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(SolicitudExceptionEstadoInvalido.class)
+    public ResponseEntity<String> handleSolicitudEstadoInvalidoException(SolicitudExceptionEstadoInvalido exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
     }
 
