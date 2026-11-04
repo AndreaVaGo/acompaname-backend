@@ -27,10 +27,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import dev.andrea.acompaname_backend.payment.dtos.PagoDTORequest;
 import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDenegado;
-import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionConflicto;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
 import tools.jackson.databind.ObjectMapper;
 
@@ -91,114 +89,39 @@ public class PagoControllerTest {
         assertThat(response.getStatus(), is(equalTo(404)));
     }
 
+    // El pago se crea solo al completar la solicitud: la familia no puede crearlo a mano
     @Test
-    void testStore() throws Exception {
-        PagoDTORequest dto = new PagoDTORequest(new BigDecimal("90.00"), 1L);
-        PagoDTOResponse dtoResponse = crearPagoResponse(EstadoPago.PENDIENTE);
-        String json = mapper.writeValueAsString(dtoResponse);
-        when(service.storeEntity(Mockito.any(PagoDTORequest.class))).thenReturn(dtoResponse);
-
+    void testNoSePuedeCrearUnPagoDesdeLaApi() throws Exception {
         MockHttpServletResponse response = mockMvc.perform(post("/api/v1/pagos")
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .contentType(MediaType.APPLICATION_JSON).content("{\"importe\":0.01,\"solicitudId\":1}"))
                 .andReturn()
                 .getResponse();
 
-        assertThat(response.getStatus(), is(equalTo(201)));
-        assertThat(response.getContentAsString(), is(equalTo(json)));
+        assertThat(response.getStatus(), is(equalTo(405)));
+        Mockito.verifyNoInteractions(service);
     }
 
+    // El importe sale de la tarifa del cuidador: la familia no puede cambiarlo
     @Test
-    void testStoreSolicitudNoCompletada() throws Exception {
-        PagoDTORequest dto = new PagoDTORequest(new BigDecimal("90.00"), 1L);
-        when(service.storeEntity(Mockito.any(PagoDTORequest.class)))
-                .thenThrow(new PagoExceptionConflicto("Solo se puede crear el pago de una solicitud completada"));
-
-        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/pagos")
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
-                .andReturn()
-                .getResponse();
-
-        assertThat(response.getStatus(), is(equalTo(409)));
-        assertThat(response.getContentAsString(), containsString("solicitud completada"));
-    }
-
-    @Test
-    void testStoreSinImporte() throws Exception {
-        PagoDTORequest dto = new PagoDTORequest(null, 1L);
-
-        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/pagos")
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
-                .andReturn()
-                .getResponse();
-
-        assertThat(response.getStatus(), is(equalTo(400)));
-        assertThat(response.getContentAsString(), containsString("El importe no puede ser nulo"));
-    }
-
-    @Test
-    void testStoreSinSolicitud() throws Exception {
-        PagoDTORequest dto = new PagoDTORequest(new BigDecimal("90.00"), null);
-
-        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/pagos")
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
-                .andReturn()
-                .getResponse();
-
-        assertThat(response.getStatus(), is(equalTo(400)));
-        assertThat(response.getContentAsString(), containsString("La solicitud no puede ser nula"));
-    }
-
-    @Test
-    void testStoreImporteCero() throws Exception {
-        PagoDTORequest dto = new PagoDTORequest(BigDecimal.ZERO, 1L);
-
-        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/pagos")
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
-                .andReturn()
-                .getResponse();
-
-        assertThat(response.getStatus(), is(equalTo(400)));
-        assertThat(response.getContentAsString(), containsString("El importe debe ser mayor que 0"));
-    }
-
-    @Test
-    void testStoreImporteNegativo() throws Exception {
-        PagoDTORequest dto = new PagoDTORequest(new BigDecimal("-50.00"), 1L);
-
-        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/pagos")
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
-                .andReturn()
-                .getResponse();
-
-        assertThat(response.getStatus(), is(equalTo(400)));
-        assertThat(response.getContentAsString(), containsString("El importe debe ser mayor que 0"));
-    }
-
-    @Test
-    void testUpdate() throws Exception {
-        PagoDTORequest dto = new PagoDTORequest(new BigDecimal("120.00"), 1L);
-        PagoDTOResponse dtoResponse = new PagoDTOResponse(1L, new BigDecimal("120.00"), EstadoPago.PENDIENTE,
-                LocalDate.of(2026, 9, 11), 1L);
-        String json = mapper.writeValueAsString(dtoResponse);
-        when(service.update(Mockito.eq(1L), Mockito.any(PagoDTORequest.class))).thenReturn(dtoResponse);
-
+    void testNoSePuedeCambiarElImporteDeUnPagoDesdeLaApi() throws Exception {
         MockHttpServletResponse response = mockMvc.perform(put("/api/v1/pagos/1")
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .contentType(MediaType.APPLICATION_JSON).content("{\"importe\":0.01,\"solicitudId\":1}"))
                 .andReturn()
                 .getResponse();
 
-        assertThat(response.getStatus(), is(equalTo(200)));
-        assertThat(response.getContentAsString(), is(equalTo(json)));
+        assertThat(response.getStatus(), is(equalTo(405)));
+        Mockito.verifyNoInteractions(service);
     }
 
+    // Si la familia pudiera borrar su pago pendiente, se libraría de pagar un servicio ya hecho
     @Test
-    void testDelete() throws Exception {
+    void testNoSePuedeBorrarUnPagoDesdeLaApi() throws Exception {
         MockHttpServletResponse response = mockMvc.perform(delete("/api/v1/pagos/1"))
                 .andReturn()
                 .getResponse();
 
-        assertThat(response.getStatus(), is(equalTo(204)));
-        Mockito.verify(service).deleteById(1L);
+        assertThat(response.getStatus(), is(equalTo(405)));
+        Mockito.verifyNoInteractions(service);
     }
 
     @Test
