@@ -3,6 +3,7 @@ package dev.andrea.acompaname_backend.servicerequest;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.payment.EstadoPago;
 import dev.andrea.acompaname_backend.payment.PagoEntity;
 import dev.andrea.acompaname_backend.payment.PagoRepository;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionEstadoInvalido;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
 
@@ -129,12 +131,13 @@ public class SolicitudServiceImplPagoIntegrationTest {
     }
 
     @Test
-    void testCompletarDosVecesLaSolicitudNoDuplicaElPago() {
+    void testCompletarDosVecesLaSolicitudDaErrorYNoDuplicaElPago() {
         SolicitudEntity solicitud = crearSolicitudYEntrarComoCuidador();
         service.cambiarEstado(solicitud.getId(), EstadoSolicitud.ACEPTADA);
+        service.cambiarEstado(solicitud.getId(), EstadoSolicitud.COMPLETADA);
 
-        service.cambiarEstado(solicitud.getId(), EstadoSolicitud.COMPLETADA);
-        service.cambiarEstado(solicitud.getId(), EstadoSolicitud.COMPLETADA);
+        assertThrows(SolicitudExceptionEstadoInvalido.class,
+                () -> service.cambiarEstado(solicitud.getId(), EstadoSolicitud.COMPLETADA));
 
         assertThat(pagoRepository.count(), is(equalTo(1L)));
     }
