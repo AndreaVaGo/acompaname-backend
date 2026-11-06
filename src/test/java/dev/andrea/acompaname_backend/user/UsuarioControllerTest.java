@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -26,6 +27,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import dev.andrea.acompaname_backend.security.DemasiadasPeticionesException;
+import dev.andrea.acompaname_backend.security.LimitadorDePeticiones;
 import dev.andrea.acompaname_backend.user.dtos.ActualizarContactoDTO;
 import dev.andrea.acompaname_backend.user.dtos.CambiarPasswordDTO;
 import dev.andrea.acompaname_backend.user.dtos.UsuarioDTORequest;
@@ -45,6 +48,8 @@ public class UsuarioControllerTest {
     private MockMvc mockMvc;
     @MockitoBean
     private UsuarioService service;
+    @MockitoBean
+    private LimitadorDePeticiones limitador;
     @Autowired
     ObjectMapper mapper;
 
@@ -304,5 +309,54 @@ public class UsuarioControllerTest {
 
         assertThat(response.getStatus(), is(equalTo(400)));
         Mockito.verifyNoInteractions(service);
+    }
+
+    // ---------- Límite de registros ----------
+
+    @Test
+    void testElRegistroPreguntaAlLimitadorConLaDireccionIP() throws Exception {
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", PASSWORD_VALIDA,
+                Set.of(1L));
+        UsuarioDTOResponse dtoResponse = new UsuarioDTOResponse(1L, "Ana", "ana@test.com", "600555666",
+                Set.of("FAMILIA"));
+        when(service.storeEntity(Mockito.any(UsuarioDTORequest.class))).thenReturn(dtoResponse);
+
+        mockMvc.perform(post("/api/v1/usuarios")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        // MockMvc hace las peticiones desde 127.0.0.1
+        Mockito.verify(limitador).comprobar("registro:127.0.0.1");
+    }
+
+    @Test
+    void testSiHayDemasiadosRegistrosDa429YNoSeCreaLaCuenta() throws Exception {
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", PASSWORD_VALIDA,
+                Set.of(1L));
+        Mockito.doThrow(new DemasiadasPeticionesException(
+                "Demasiados intentos. Espera un minuto y vuelve a intentarlo."))
+                .when(limitador).comprobar(ArgumentMatchers.anyString());
+
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/usuarios")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(429)));
+        assertThat(response.getContentAsString(), containsString("Demasiados intentos"));
+        Mockito.verifyNoInteractions(service);
+    }
+
+    @Test
+    void testUnRegistroMalEscritoNoCuentaParaElLimite() throws Exception {
+        UsuarioDTORequest dto = new UsuarioDTORequest("", "ana@test.com", "600555666", PASSWORD_VALIDA, Set.of(1L));
+
+        mockMvc.perform(post("/api/v1/usuarios")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn()
+                .getResponse();
+
+        Mockito.verifyNoInteractions(limitador);
     }
 }
