@@ -1,13 +1,13 @@
 package dev.andrea.acompaname_backend.security;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -29,14 +29,9 @@ public class SecurityConfiguration {
     @Value("${cors.allowed-origins}")
     String[] origenesPermitidos;
 
-    private JpaUserDetailsService jpaUserDetailsService;
-
-    public SecurityConfiguration(JpaUserDetailsService jpaUserDetailsService) {
-        this.jpaUserDetailsService = jpaUserDetailsService;
-    }
-
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtUsuarioConverter jwtUsuarioConverter)
+            throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
@@ -44,8 +39,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/usuarios").permitAll()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/roles").permitAll()
-                        // /login necesita credenciales: sin ellas responde 401 y no llega al controller
-                        .requestMatchers("/" + endpoint + "/login").authenticated()
+                        // El login es público: aquí es donde la persona consigue su token
+                        .requestMatchers(HttpMethod.POST, "/" + endpoint + "/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores/mi-perfil").authenticated()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores").permitAll()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores/*").permitAll()
@@ -62,14 +57,22 @@ public class SecurityConfiguration {
                         // Todo lo que cuelga de /admin es solo para el administrador
                         .requestMatchers("/" + endpoint + "/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated())
-                .userDetailsService(jpaUserDetailsService)
-                .httpBasic(withDefaults())
+                // Lee el token de la cabecera "Authorization: Bearer ..." y carga a la persona de la base de datos
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtUsuarioConverter)))
+                // Sin sesiones: cada petición lleva su token
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.headers(header -> header.frameOptions(frame -> frame.sameOrigin()));
 
         return http.build();
+    }
+
+    // Lo usa el login para comprobar el email y la contraseña
+    @Bean
+    AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 
     @Bean
