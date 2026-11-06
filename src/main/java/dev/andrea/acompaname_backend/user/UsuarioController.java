@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.andrea.acompaname_backend.security.LimitadorDePeticiones;
 import dev.andrea.acompaname_backend.user.dtos.ActualizarContactoDTO;
 import dev.andrea.acompaname_backend.user.dtos.CambiarPasswordDTO;
 import dev.andrea.acompaname_backend.user.dtos.UsuarioDTORequest;
 import dev.andrea.acompaname_backend.user.dtos.UsuarioDTOResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -23,9 +25,11 @@ import jakarta.validation.Valid;
 public class UsuarioController {
 
     private final UsuarioService service;
+    private final LimitadorDePeticiones limitador;
 
-    public UsuarioController(UsuarioService service) {
+    public UsuarioController(UsuarioService service, LimitadorDePeticiones limitador) {
         this.service = service;
+        this.limitador = limitador;
     }
 
     @GetMapping("")
@@ -39,7 +43,10 @@ public class UsuarioController {
     }
 
     @PostMapping("")
-    public ResponseEntity<UsuarioDTOResponse> store(@Valid @RequestBody UsuarioDTORequest dto) {
+    public ResponseEntity<UsuarioDTOResponse> store(@Valid @RequestBody UsuarioDTORequest dto,
+            HttpServletRequest peticion) {
+        // Primero se mira el límite de registros desde esta IP; si se pasa, da 429
+        limitador.comprobar("registro:" + peticion.getRemoteAddr());
         UsuarioDTOResponse dtoResponse = service.storeEntity(dto);
         return ResponseEntity.status(201).body(dtoResponse);
     }
