@@ -18,35 +18,33 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 
 // Configura cómo se firman (JwtEncoder) y se comprueban (JwtDecoder) los tokens del login.
-// Los dos usan la misma clave secreta (HS256).
+// Los dos usan la misma clave secreta.
 @Configuration
 public class JwtConfiguration {
-
-    // Una clave HS256 necesita al menos 32 bytes (256 bits)
-    static final int LONGITUD_MINIMA_CLAVE = 32;
 
     private final SecretKey clave;
 
     public JwtConfiguration(@Value("${jwt.secret}") String secreto) {
         byte[] bytes = secreto.getBytes(StandardCharsets.UTF_8);
-        if (bytes.length < LONGITUD_MINIMA_CLAVE) {
-            throw new IllegalStateException(
-                    "jwt.secret (JWT_SECRET) debe tener al menos " + LONGITUD_MINIMA_CLAVE + " caracteres");
+        // La clave tiene que ser larga (32 caracteres como mínimo). Si no, la aplicación no arranca
+        if (bytes.length < 32) {
+            throw new IllegalStateException("jwt.secret (JWT_SECRET) debe tener al menos 32 caracteres");
         }
         this.clave = new SecretKeySpec(bytes, "HmacSHA256");
     }
 
+    // Firma los tokens al hacer login
     @Bean
     JwtEncoder jwtEncoder() {
         return new NimbusJwtEncoder(new ImmutableSecret<>(clave));
     }
 
+    // Comprueba los tokens que llegan en cada petición: firma, caducidad y emisor
     @Bean
     JwtDecoder jwtDecoder() {
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(clave)
                 .macAlgorithm(MacAlgorithm.HS256)
                 .build();
-        // Además de la firma y la caducidad, el token tiene que venir de esta aplicación
         decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(JwtService.EMISOR));
         return decoder;
     }
