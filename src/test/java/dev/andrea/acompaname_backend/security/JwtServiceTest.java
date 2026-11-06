@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Set;
 
@@ -30,6 +29,7 @@ public class JwtServiceTest {
 
     private final JwtConfiguration configuracion = new JwtConfiguration(CLAVE);
     private final JwtDecoder decoder = configuracion.jwtDecoder();
+    // Los tokens de este servicio duran 120 minutos
     private final JwtService service = new JwtService(configuracion.jwtEncoder(), 120);
 
     private UsuarioEntity ana() {
@@ -70,7 +70,10 @@ public class JwtServiceTest {
     void testElTokenCaducaALosMinutosConfigurados() {
         Jwt jwt = decoder.decode(service.crearToken(ana()));
 
-        assertThat(Duration.between(jwt.getIssuedAt(), jwt.getExpiresAt()).toMinutes(), is(equalTo(120L)));
+        long segundos = jwt.getExpiresAt().getEpochSecond() - jwt.getIssuedAt().getEpochSecond();
+
+        // 120 minutos son 7200 segundos
+        assertThat(segundos, is(equalTo(7200L)));
     }
 
     // Los datos de la persona y sus roles se leen de la base de datos en cada petición, no del token
