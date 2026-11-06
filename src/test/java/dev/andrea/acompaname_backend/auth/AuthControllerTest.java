@@ -26,7 +26,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import dev.andrea.acompaname_backend.role.RoleEntity;
+import dev.andrea.acompaname_backend.security.DemasiadasPeticionesException;
 import dev.andrea.acompaname_backend.security.JwtService;
+import dev.andrea.acompaname_backend.security.LimitadorDePeticiones;
 import dev.andrea.acompaname_backend.security.SecurityUser;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import tools.jackson.databind.ObjectMapper;
@@ -43,6 +45,8 @@ public class AuthControllerTest {
     private AuthenticationManager authenticationManager;
     @MockitoBean
     private JwtService jwtService;
+    @MockitoBean
+    private LimitadorDePeticiones limitador;
 
     // Hace que el AuthenticationManager acepte el login y devuelva a esa persona
     private void simularLoginCorrecto(Long id, String email, String nombreRol) {
@@ -136,5 +140,38 @@ public class AuthControllerTest {
                 .getResponse();
 
         assertThat(response.getStatus(), is(equalTo(405)));
+    }
+
+    // ---------- Límite de peticiones ----------
+
+    @Test
+    void testElLoginPreguntaAlLimitadorConLaDireccionIP() throws Exception {
+        simularLoginCorrecto(5L, "ana@test.com", "FAMILIA");
+
+        hacerLogin("ana@test.com", "1234");
+
+        // MockMvc hace las peticiones desde 127.0.0.1
+        Mockito.verify(limitador).comprobar("login:127.0.0.1");
+    }
+
+    @Test
+    void testSiHayDemasiadosIntentosDa429YNoSeComprueba() throws Exception {
+        Mockito.doThrow(new DemasiadasPeticionesException(
+                "Demasiados intentos. Espera un minuto y vuelve a intentarlo."))
+                .when(limitador).comprobar(ArgumentMatchers.anyString());
+
+        MockHttpServletResponse response = hacerLogin("ana@test.com", "1234");
+
+        assertThat(response.getStatus(), is(equalTo(429)));
+        assertThat(response.getContentAsString(), containsString("Demasiados intentos"));
+        Mockito.verifyNoInteractions(authenticationManager);
+        Mockito.verifyNoInteractions(jwtService);
+    }
+
+    @Test
+    void testUnaPeticionMalEscritaNoCuentaParaElLimite() throws Exception {
+        hacerLogin("", "1234");
+
+        Mockito.verifyNoInteractions(limitador);
     }
 }
