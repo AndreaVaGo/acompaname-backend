@@ -18,6 +18,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import dev.andrea.acompaname_backend.user.UsuarioRepository;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
@@ -30,7 +32,7 @@ public class SecurityConfiguration {
     String[] origenesPermitidos;
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtUsuarioConverter jwtUsuarioConverter)
+    SecurityFilterChain securityFilterChain(HttpSecurity http, UsuarioRepository usuarioRepository)
             throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -59,7 +61,7 @@ public class SecurityConfiguration {
                         .anyRequest().authenticated())
                 // Lee el token de la cabecera "Authorization: Bearer ..." y carga a la persona de la base de datos
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtUsuarioConverter)))
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(new JwtUsuarioConverter(usuarioRepository))))
                 // Sin sesiones: cada petición lleva su token
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
