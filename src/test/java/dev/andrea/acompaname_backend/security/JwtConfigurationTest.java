@@ -12,7 +12,8 @@ public class JwtConfigurationTest {
 
     @Test
     void testUnaClaveDeMenosDe32CaracteresHaceQueNoArranque() {
-        String clave = "a".repeat(31);
+        // 31 caracteres: 26 letras y 5 números
+        String clave = "abcdefghijklmnopqrstuvwxyz12345";
 
         IllegalStateException error = assertThrows(IllegalStateException.class,
                 () -> new JwtConfiguration(clave));
@@ -27,6 +28,9 @@ public class JwtConfigurationTest {
 
     @Test
     void testUnaClaveDeExactamente32CaracteresEsValida() {
-        assertDoesNotThrow(() -> new JwtConfiguration("a".repeat(32)));
+        // 32 caracteres: 26 letras y 6 números
+        String clave = "abcdefghijklmnopqrstuvwxyz123456";
+
+        assertDoesNotThrow(() -> new JwtConfiguration(clave));
     }
 }
