@@ -39,6 +39,19 @@ public class JwtServiceTest {
         return new UsuarioEntity(7L, "Ana", "ana@test.com", "600111222", "1234", Set.of(rol));
     }
 
+    // Crea un token a mano (firmado con la clave buena) para probar emisores y fechas que el servicio no crea
+    private String crearTokenAMano(String emisor, Instant emitido, Instant caduca) {
+        JwtClaimsSet datos = JwtClaimsSet.builder()
+                .issuer(emisor)
+                .issuedAt(emitido)
+                .expiresAt(caduca)
+                .subject("7")
+                .build();
+        return configuracion.jwtEncoder()
+                .encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), datos))
+                .getTokenValue();
+    }
+
     @Test
     void testElTokenLlevaElIdDeLaPersonaComoSujeto() {
         Jwt jwt = decoder.decode(service.crearToken(ana()));
@@ -50,7 +63,7 @@ public class JwtServiceTest {
     void testElTokenLlevaElEmisorDeLaAplicacion() {
         Jwt jwt = decoder.decode(service.crearToken(ana()));
 
-        assertThat(jwt.getIssuer().toString(), is(equalTo("acompaname")));
+        assertThat(jwt.getClaimAsString("iss"), is(equalTo("acompaname")));
     }
 
     @Test
@@ -73,10 +86,11 @@ public class JwtServiceTest {
 
     @Test
     void testUnTokenCaducadoSeRechaza() {
-        // Spring admite 60 segundos de margen, por eso caduca hace 5 minutos
-        JwtService caducado = new JwtService(configuracion.jwtEncoder(), -5);
+        // Spring admite 60 segundos de margen, por eso caducó hace 5 minutos
+        Instant ahora = Instant.now();
+        String caducado = crearTokenAMano("acompaname", ahora.minusSeconds(600), ahora.minusSeconds(300));
 
-        assertThrows(JwtException.class, () -> decoder.decode(caducado.crearToken(ana())));
+        assertThrows(JwtException.class, () -> decoder.decode(caducado));
     }
 
     @Test
@@ -90,15 +104,7 @@ public class JwtServiceTest {
     @Test
     void testUnTokenDeOtroEmisorSeRechaza() {
         Instant ahora = Instant.now();
-        JwtClaimsSet datos = JwtClaimsSet.builder()
-                .issuer("otra-aplicacion")
-                .issuedAt(ahora)
-                .expiresAt(ahora.plusSeconds(3600))
-                .subject("7")
-                .build();
-        String tokenDeOtroEmisor = configuracion.jwtEncoder()
-                .encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), datos))
-                .getTokenValue();
+        String tokenDeOtroEmisor = crearTokenAMano("otra-aplicacion", ahora, ahora.plusSeconds(3600));
 
         assertThrows(JwtException.class, () -> decoder.decode(tokenDeOtroEmisor));
     }
