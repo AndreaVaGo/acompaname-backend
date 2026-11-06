@@ -88,7 +88,7 @@ public class SecurityConfiguration {
         configuration.setAllowedOrigins(Arrays.asList(origenesPermitidos));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true);
+        // No hace falta allowCredentials: el token va en la cabecera Authorization, no en cookies
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
