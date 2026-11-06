@@ -1,7 +1,6 @@
 package dev.andrea.acompaname_backend.security;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -16,7 +15,7 @@ import dev.andrea.acompaname_backend.user.UsuarioEntity;
 @Service
 public class JwtService {
 
-    // Quién emite los tokens; el JwtDecoder rechaza los de otro emisor
+    // Quién emite los tokens; al comprobar un token se rechazan los de otro emisor
     static final String EMISOR = "acompaname";
 
     private final JwtEncoder encoder;
@@ -27,16 +26,20 @@ public class JwtService {
         this.minutosDeValidez = minutosDeValidez;
     }
 
-    // El token solo guarda el id de la persona: sus datos y roles se leen de la base de datos en cada petición
+    // Crea el token de una persona. Solo guarda su id: el email y los roles se leen
+    // de la base de datos en cada petición, así que si cambian se nota al momento
     public String crearToken(UsuarioEntity usuario) {
         Instant ahora = Instant.now();
+        Instant caduca = ahora.plusSeconds(minutosDeValidez * 60);
+
         JwtClaimsSet datos = JwtClaimsSet.builder()
                 .issuer(EMISOR)
                 .issuedAt(ahora)
-                .expiresAt(ahora.plus(minutosDeValidez, ChronoUnit.MINUTES))
+                .expiresAt(caduca)
                 .subject(String.valueOf(usuario.getId()))
                 .build();
         JwsHeader cabecera = JwsHeader.with(MacAlgorithm.HS256).build();
+
         return encoder.encode(JwtEncoderParameters.from(cabecera, datos)).getTokenValue();
     }
 }
