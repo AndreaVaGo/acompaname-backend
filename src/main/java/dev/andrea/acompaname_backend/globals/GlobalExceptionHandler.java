@@ -18,6 +18,7 @@ import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionAccesoDeneg
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionConflicto;
 import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionFotoInvalida;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.security.DemasiadasPeticionesException;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
@@ -69,6 +70,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(SolicitudExceptionFechaInvalida.class)
     public ResponseEntity<String> handleSolicitudFechaInvalidaException(SolicitudExceptionFechaInvalida exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    }
+
+    // La foto del perfil no es JPG, PNG o WebP, no es una imagen de verdad o es demasiado grande
+    @ExceptionHandler(PerfilCuidadorExceptionFotoInvalida.class)
+    public ResponseEntity<String> handlePerfilCuidadorFotoInvalidaException(
+            PerfilCuidadorExceptionFotoInvalida exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
 
