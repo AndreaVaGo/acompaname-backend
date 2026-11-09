@@ -41,7 +41,9 @@ import tools.jackson.databind.ObjectMapper;
 
 // La aplicación completa con un MySQL de verdad (Testcontainers): login, token y qué pasa
 // cuando el token está caducado, manipulado, o la persona cambia de rol o la bloquean.
-@SpringBootTest
+// El límite de peticiones se sube a 1000 para que los logins de estos tests no lo alcancen
+// (el límite real se prueba en SecurityLimiteIntegrationTest).
+@SpringBootTest(properties = "rate-limit.max-requests=1000")
 @AutoConfigureMockMvc
 @Testcontainers
 public class SecurityJwtIntegrationTest {
