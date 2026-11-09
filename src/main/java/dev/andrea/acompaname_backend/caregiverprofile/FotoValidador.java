@@ -44,9 +44,9 @@ public class FotoValidador {
         }
         String datos = foto.substring(cabecera.length());
 
-        // 2. Tamaño aproximado antes de decodificar (cada 4 caracteres del texto son 3 bytes),
-        // para no decodificar un texto enorme
-        if (datos.length() / 4 * 3 > maximoDeBytes) {
+        // 2. Si el texto ya es más del doble que el máximo, se rechaza sin decodificarlo
+        // (el Base64 ocupa un tercio más que la imagen, así que esto nunca rechaza una foto buena)
+        if (datos.length() > maximoDeBytes * 2) {
             throw fotoDemasiadoGrande();
         }
 
