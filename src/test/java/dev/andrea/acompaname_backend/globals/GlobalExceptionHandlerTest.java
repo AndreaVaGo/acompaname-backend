@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mock.http.MockHttpInputMessage;
@@ -182,6 +183,15 @@ public class GlobalExceptionHandlerTest {
 
         assertThat(response.getStatusCode().value(), is(400));
         assertThat(response.getBody(), is(equalTo("El cuerpo de la petición no es válido")));
+    }
+
+    @Test
+    void testDatosRelacionados() {
+        ResponseEntity<String> response = handler
+                .handleDatosRelacionados(new DataIntegrityViolationException("clave foránea"));
+
+        assertThat(response.getStatusCode().value(), is(409));
+        assertThat(response.getBody(), is(equalTo("No se puede completar la operación porque hay datos relacionados")));
     }
 
     @Test
