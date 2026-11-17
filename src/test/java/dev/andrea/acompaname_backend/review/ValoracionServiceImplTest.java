@@ -166,9 +166,9 @@ public class ValoracionServiceImplTest {
         SolicitudEntity solicitud = crearSolicitudMock();
         when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitud));
 
-        ValoracionDTORequest dto = new ValoracionDTORequest("Excelente trato", 5, LocalDate.of(2026, 9, 12), 1L);
+        ValoracionDTORequest dto = new ValoracionDTORequest("Excelente trato", 5, 1L);
         when(repository.save(Mockito.any(ValoracionEntity.class))).thenReturn(
-                new ValoracionEntity(1L, dto.comentario(), dto.puntuacion(), dto.fecha(), solicitud));
+                new ValoracionEntity(1L, dto.comentario(), dto.puntuacion(), LocalDate.of(2026, 9, 12), solicitud));
 
         ValoracionDTOResponse entity = service.storeEntity(dto);
 
@@ -200,10 +200,12 @@ public class ValoracionServiceImplTest {
         when(repository.findById(1L)).thenReturn(Optional.of(valoracionExistente));
         when(repository.save(Mockito.any(ValoracionEntity.class))).thenReturn(valoracionExistente);
 
-        ValoracionDTORequest dto = new ValoracionDTORequest("Comentario actualizado", 4, LocalDate.of(2026, 9, 13), 1L);
+        ValoracionDTORequest dto = new ValoracionDTORequest("Comentario actualizado", 4, 1L);
         ValoracionDTOResponse resultado = service.update(1L, dto);
 
         assertThat(resultado.comentario(), is(equalTo("Comentario actualizado")));
         assertThat(resultado.puntuacion(), is(equalTo(4)));
+        // Al editar no se cambia la fecha de la valoración
+        assertThat(resultado.fecha(), is(equalTo(LocalDate.of(2026, 9, 11))));
     }
 }
