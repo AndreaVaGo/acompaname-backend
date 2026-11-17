@@ -43,7 +43,7 @@ public class PerfilCuidadorServiceImplGruposEdadTest {
 
     @BeforeEach
     void setup() {
-        service = new PerfilCuidadorServiceImpl(repository, usuarioRepository, valoracionRepository);
+        service = new PerfilCuidadorServiceImpl(repository, usuarioRepository, valoracionRepository, Mockito.mock(FotoValidador.class));
     }
 
     // Limpiamos el usuario logueado para no afectar a otros tests
