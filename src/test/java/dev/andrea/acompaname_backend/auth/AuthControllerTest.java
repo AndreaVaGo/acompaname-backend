@@ -4,15 +4,19 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -33,6 +37,7 @@ import dev.andrea.acompaname_backend.security.SecurityUser;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import tools.jackson.databind.ObjectMapper;
 
+@ExtendWith(OutputCaptureExtension.class)
 @WebMvcTest(controllers = AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class AuthControllerTest {
@@ -103,6 +108,28 @@ public class AuthControllerTest {
 
         assertThat(response.getStatus(), is(equalTo(401)));
         Mockito.verifyNoInteractions(jwtService);
+    }
+
+    @Test
+    void testUnLoginFallidoDejaUnAvisoConLaIPYSinDatosPersonales(CapturedOutput salida) throws Exception {
+        Mockito.when(authenticationManager.authenticate(ArgumentMatchers.any(Authentication.class)))
+                .thenThrow(new BadCredentialsException("Credenciales incorrectas"));
+
+        hacerLogin("ana@test.com", "clave-secreta");
+
+        // MockMvc hace las peticiones desde 127.0.0.1
+        assertThat(salida.getOut(), containsString("Intento de login fallido desde la IP 127.0.0.1"));
+        assertThat(salida.getOut(), not(containsString("ana@test.com")));
+        assertThat(salida.getOut(), not(containsString("clave-secreta")));
+    }
+
+    @Test
+    void testUnLoginCorrectoNoDejaAvisoDeFallo(CapturedOutput salida) throws Exception {
+        simularLoginCorrecto(5L, "ana@test.com", "FAMILIA");
+
+        hacerLogin("ana@test.com", "1234");
+
+        assertThat(salida.getOut(), not(containsString("Intento de login fallido")));
     }
 
     @Test
