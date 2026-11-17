@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -141,5 +142,17 @@ public class PagoServiceImplIntegrationTest {
         assertThrows(PagoExceptionAccesoDenegado.class, () -> service.marcarComoPagado(pago.getId()));
 
         assertThat(pagoRepository.findById(pago.getId()).get().getEstado(), is(equalTo(EstadoPago.PENDIENTE)));
+    }
+
+    @Test
+    void testLaListaDePagosIncluyeElNombreDelCuidadorYElTipoDeCuidado() {
+        crearPagoPendiente();
+        loguearComo("ana@test.com");
+
+        List<PagoDTOResponse> pagos = service.getEntities();
+
+        assertThat(pagos.size(), is(equalTo(1)));
+        assertThat(pagos.get(0).cuidadorNombre(), is(equalTo("Pepe")));
+        assertThat(pagos.get(0).tipoCuidado(), is(equalTo("DOMICILIO")));
     }
 }
