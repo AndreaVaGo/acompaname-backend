@@ -162,6 +162,10 @@ public class SolicitudServiceImpl implements SolicitudService {
         if (!familia.getEmail().equals(emailLogueado())) {
             throw new SolicitudExceptionAccesoDenegado("No puede crear solicitudes en nombre de otra familia");
         }
+        // Una persona con los dos roles no puede contratarse a sí misma
+        if (cuidador.getUsuario().getEmail().equals(familia.getEmail())) {
+            throw new SolicitudExceptionAccesoDenegado("No puede solicitarse un servicio a sí misma");
+        }
 
         SolicitudEntity solicitudToSave = SolicitudMapper.toEntity(dto, familia, cuidador);
         SolicitudEntity solicitudSave = repository.save(solicitudToSave);
