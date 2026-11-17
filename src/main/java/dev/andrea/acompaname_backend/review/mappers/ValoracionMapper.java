@@ -1,5 +1,7 @@
 package dev.andrea.acompaname_backend.review.mappers;
 
+import java.time.LocalDate;
+
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.review.ValoracionEntity;
 import dev.andrea.acompaname_backend.review.dtos.ValoracionDTORequest;
@@ -12,7 +14,8 @@ public class ValoracionMapper {
         ValoracionEntity valoracion = new ValoracionEntity();
         valoracion.setComentario(dto.comentario());
         valoracion.setPuntuacion(dto.puntuacion());
-        valoracion.setFecha(dto.fecha());
+        // La fecha la pone el servidor (hoy), no la persona que valora
+        valoracion.setFecha(LocalDate.now());
         valoracion.setSolicitud(solicitud);
         return valoracion;
     }
