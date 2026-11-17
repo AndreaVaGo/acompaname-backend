@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -21,6 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTORequest;
 import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTOResponse;
+import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionFotoInvalida;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
@@ -39,10 +42,12 @@ public class PerfilCuidadorServiceImplTest {
     private UsuarioRepository usuarioRepository;
     @Mock
     private ValoracionRepository valoracionRepository;
+    @Mock
+    private FotoValidador fotoValidador;
 
     @BeforeEach
     void setup() {
-        service = new PerfilCuidadorServiceImpl(repository, usuarioRepository, valoracionRepository);
+        service = new PerfilCuidadorServiceImpl(repository, usuarioRepository, valoracionRepository, fotoValidador);
     }
 
     private RoleEntity crearRolMock() {
@@ -489,5 +494,100 @@ public class PerfilCuidadorServiceImplTest {
         PerfilCuidadorDTOResponse resultado = service.update(1L, dto);
 
         assertThat(resultado.ciudad(), is(nullValue()));
+    }
+
+    // ---------- Validación de la foto ----------
+
+    @Test
+    void testStoreCompruebaLaFoto() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
+                Set.of(crearRolMock()));
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", 4, new BigDecimal("18.00"),
+                "Cuidadora con experiencia en geriatría", true, true, 1L, "data:image/jpeg;base64,AAAA");
+        when(repository.save(Mockito.any(PerfilCuidadorEntity.class))).thenReturn(
+                new PerfilCuidadorEntity(1L, dto.especialidad(), dto.anosExperiencia(), dto.tarifaHora(), dto.bio(),
+                        dto.tieneVehiculo(), dto.disponibleAhora(), usuario));
+
+        service.storeEntity(dto);
+
+        Mockito.verify(fotoValidador).comprobar("data:image/jpeg;base64,AAAA");
+    }
+
+    @Test
+    void testStoreConFotoNoValidaNoGuardaNada() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
+                Set.of(crearRolMock()));
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        Mockito.doThrow(new PerfilCuidadorExceptionFotoInvalida("La foto debe ser JPG, PNG o WebP."))
+                .when(fotoValidador).comprobar("foto-mala");
+        PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", 4, new BigDecimal("18.00"),
+                "Cuidadora con experiencia en geriatría", true, true, 1L, "foto-mala");
+
+        assertThrows(PerfilCuidadorExceptionFotoInvalida.class, () -> service.storeEntity(dto));
+
+        Mockito.verify(repository, Mockito.never()).save(Mockito.any(PerfilCuidadorEntity.class));
+    }
+
+    @Test
+    void testUpdateCompruebaLaFoto() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
+                Set.of(crearRolMock()));
+        PerfilCuidadorEntity perfilExistente = new PerfilCuidadorEntity(1L, "Enfermeria", 3, new BigDecimal("20.00"),
+                "Bio de prueba", true, false, usuario);
+        when(repository.findById(1L)).thenReturn(Optional.of(perfilExistente));
+        when(repository.save(Mockito.any(PerfilCuidadorEntity.class))).thenReturn(perfilExistente);
+        PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Pediatría", 6, new BigDecimal("22.00"),
+                "Nueva bio actualizada", false, false, 1L, "data:image/png;base64,AAAA");
+
+        service.update(1L, dto);
+
+        Mockito.verify(fotoValidador).comprobar("data:image/png;base64,AAAA");
+    }
+
+    @Test
+    void testUpdateConFotoNoValidaNoCambiaNada() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
+                Set.of(crearRolMock()));
+        PerfilCuidadorEntity perfilExistente = new PerfilCuidadorEntity(1L, "Enfermeria", 3, new BigDecimal("20.00"),
+                "Bio de prueba", true, false, usuario);
+        perfilExistente.setFoto("foto-de-antes");
+        when(repository.findById(1L)).thenReturn(Optional.of(perfilExistente));
+        Mockito.doThrow(new PerfilCuidadorExceptionFotoInvalida("La foto es demasiado grande."))
+                .when(fotoValidador).comprobar("foto-mala");
+        PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Pediatría", 6, new BigDecimal("22.00"),
+                "Nueva bio actualizada", false, false, 1L, "foto-mala");
+
+        assertThrows(PerfilCuidadorExceptionFotoInvalida.class, () -> service.update(1L, dto));
+
+        Mockito.verify(repository, Mockito.never()).save(Mockito.any(PerfilCuidadorEntity.class));
+        assertThat(perfilExistente.getFoto(), is(equalTo("foto-de-antes")));
+        assertThat(perfilExistente.getEspecialidad(), is(equalTo("Enfermeria")));
+    }
+
+    @Test
+    void testUpdateDeOtraPersonaDa403SinComprobarLaFoto() {
+        // Quien está logueada no es la dueña del perfil
+        Authentication auth = new UsernamePasswordAuthenticationToken("otra@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "1234",
+                Set.of(crearRolMock()));
+        PerfilCuidadorEntity perfilExistente = new PerfilCuidadorEntity(1L, "Enfermeria", 3, new BigDecimal("20.00"),
+                "Bio de prueba", true, false, usuario);
+        when(repository.findById(1L)).thenReturn(Optional.of(perfilExistente));
+        PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Pediatría", 6, new BigDecimal("22.00"),
+                "Nueva bio actualizada", false, false, 1L, "data:image/png;base64,AAAA");
+
+        assertThrows(PerfilCuidadorExceptionAccesoDenegado.class, () -> service.update(1L, dto));
+
+        Mockito.verifyNoInteractions(fotoValidador);
     }
 }
