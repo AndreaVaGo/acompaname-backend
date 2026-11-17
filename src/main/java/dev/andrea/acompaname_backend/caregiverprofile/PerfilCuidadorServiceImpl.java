@@ -137,6 +137,13 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
         if (dto.gruposEdad() != null) {
             perfilCuidadorExistente.setGruposEdad(PerfilCuidadorMapper.gruposEdadATexto(dto.gruposEdad()));
         }
+        // Si no llegan titulaciones, se dejan las que ya tenía (una lista vacía las borra todas)
+        if (dto.titulaciones() != null) {
+            perfilCuidadorExistente.setTitulaciones(PerfilCuidadorMapper.titulacionesATexto(dto.titulaciones()));
+        }
+        // Las otras titulaciones se actualizan siempre: si no llegan o vienen vacías, se borran
+        perfilCuidadorExistente.setOtrasTitulaciones(
+                PerfilCuidadorMapper.otrasTitulacionesONull(dto.otrasTitulaciones()));
         PerfilCuidadorEntity perfilCuidadorActualizado = repository.save(perfilCuidadorExistente);
         return aDTO(perfilCuidadorActualizado);
     }
