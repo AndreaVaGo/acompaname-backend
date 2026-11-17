@@ -43,7 +43,8 @@ public class PagoControllerTest {
     ObjectMapper mapper;
 
     private PagoDTOResponse crearPagoResponse(EstadoPago estado) {
-        return new PagoDTOResponse(1L, new BigDecimal("90.00"), estado, LocalDate.of(2026, 9, 11), 1L);
+        return new PagoDTOResponse(1L, new BigDecimal("90.00"), estado, LocalDate.of(2026, 9, 11), 1L, "Pepe",
+                "Acompañamiento");
     }
 
     @Test
@@ -61,6 +62,21 @@ public class PagoControllerTest {
         assertThat(response.getStatus(), is(equalTo(200)));
         assertThat(response.getContentAsString(), is(equalTo(json)));
         assertThat(response.getContentAsString(), containsString("PENDIENTE"));
+    }
+
+    @Test
+    void testIndexIncluyeElNombreDelCuidadorYElTipoDeCuidado() throws Exception {
+        List<PagoDTOResponse> pagos = new ArrayList<>();
+        pagos.add(crearPagoResponse(EstadoPago.PENDIENTE));
+        when(service.getEntities()).thenReturn(pagos);
+
+        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/pagos"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getContentAsString(), containsString("\"cuidadorNombre\":\"Pepe\""));
+        assertThat(response.getContentAsString(), containsString("\"tipoCuidado\":\"Acompañamiento\""));
     }
 
     @Test
