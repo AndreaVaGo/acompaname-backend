@@ -5,11 +5,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dev.andrea.acompaname_backend.globals.GrupoEdad;
+import dev.andrea.acompaname_backend.globals.Titulacion;
 
 public record PerfilCuidadorDTOResponse(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
         String bio, boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String usuarioNombre,
         String foto, Double valoracionMedia, Long numValoraciones, String tipoCuidado, List<String> servicios,
-        String sexo, String ciudad, List<GrupoEdad> gruposEdad) {
+        String sexo, String ciudad, List<GrupoEdad> gruposEdad, List<Titulacion> titulaciones,
+        String otrasTitulaciones) {
+
+    // Constructor sin titulaciones: el mismo que había antes de añadir esos campos
+    public PerfilCuidadorDTOResponse(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
+            String bio, boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String usuarioNombre,
+            String foto, Double valoracionMedia, Long numValoraciones, String tipoCuidado, List<String> servicios,
+            String sexo, String ciudad, List<GrupoEdad> gruposEdad) {
+        this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId,
+                usuarioNombre, foto, valoracionMedia, numValoraciones, tipoCuidado, servicios, sexo, ciudad,
+                gruposEdad, new ArrayList<>(), null);
+    }
 
     // Constructor sin grupos de edad: el mismo que había antes de añadir este campo
     public PerfilCuidadorDTOResponse(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
