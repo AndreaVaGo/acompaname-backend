@@ -14,6 +14,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -66,7 +67,15 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        http.headers(header -> header.frameOptions(frame -> frame.sameOrigin()));
+        // Cabeceras de seguridad. Spring ya añade "X-Content-Type-Options: nosniff" y,
+        // cuando la petición llega por HTTPS, "Strict-Transport-Security" (HSTS).
+        // Aquí añadimos las que faltan. Esta API solo devuelve JSON, así que no
+        // necesita cargar nada: la política de contenido es la más estricta.
+        http.headers(header -> header
+                .frameOptions(frame -> frame.sameOrigin())
+                .contentSecurityPolicy(csp -> csp
+                        .policyDirectives("default-src 'none'; frame-ancestors 'self'"))
+                .referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.NO_REFERRER)));
 
         return http.build();
     }
