@@ -76,7 +76,7 @@ public class ValoracionControllerTest {
 
     @Test
     void testStore() throws Exception {
-        ValoracionDTORequest dto = new ValoracionDTORequest("Excelente trato", 5, LocalDate.of(2026, 9, 12), 1L);
+        ValoracionDTORequest dto = new ValoracionDTORequest("Excelente trato", 5, 1L);
         ValoracionDTOResponse dtoResponse = new ValoracionDTOResponse(1L, "Excelente trato", 5,
                 LocalDate.of(2026, 9, 12), 1L);
         String json = mapper.writeValueAsString(dtoResponse);
@@ -92,8 +92,22 @@ public class ValoracionControllerTest {
     }
 
     @Test
+    void testStoreSigueFuncionandoSiElClienteTodaviaEnviaLaFecha() throws Exception {
+        ValoracionDTOResponse dtoResponse = new ValoracionDTOResponse(1L, "Bien", 5, LocalDate.of(2026, 9, 12), 1L);
+        when(service.storeEntity(Mockito.any(ValoracionDTORequest.class))).thenReturn(dtoResponse);
+
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/valoraciones")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"comentario\":\"Bien\",\"puntuacion\":5,\"fecha\":\"2020-01-01\",\"solicitudId\":1}"))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(201)));
+    }
+
+    @Test
     void testStorePuntuacionMenorQueUno() throws Exception {
-        ValoracionDTORequest dto = new ValoracionDTORequest("Mal", 0, LocalDate.of(2026, 9, 12), 1L);
+        ValoracionDTORequest dto = new ValoracionDTORequest("Mal", 0, 1L);
 
         MockHttpServletResponse response = mockMvc.perform(post("/api/v1/valoraciones")
                 .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
@@ -106,7 +120,7 @@ public class ValoracionControllerTest {
 
     @Test
     void testStorePuntuacionMayorQueCinco() throws Exception {
-        ValoracionDTORequest dto = new ValoracionDTORequest("Genial", 6, LocalDate.of(2026, 9, 12), 1L);
+        ValoracionDTORequest dto = new ValoracionDTORequest("Genial", 6, 1L);
 
         MockHttpServletResponse response = mockMvc.perform(post("/api/v1/valoraciones")
                 .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
