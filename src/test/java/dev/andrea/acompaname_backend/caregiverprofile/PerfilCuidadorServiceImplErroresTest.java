@@ -52,7 +52,7 @@ public class PerfilCuidadorServiceImplErroresTest {
         // Uso un contexto de seguridad vacío para no afectar a los otros tests
         contextoOriginal = SecurityContextHolder.getContext();
         SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
-        service = new PerfilCuidadorServiceImpl(repository, usuarioRepository, valoracionRepository);
+        service = new PerfilCuidadorServiceImpl(repository, usuarioRepository, valoracionRepository, Mockito.mock(FotoValidador.class));
     }
 
     @AfterEach
