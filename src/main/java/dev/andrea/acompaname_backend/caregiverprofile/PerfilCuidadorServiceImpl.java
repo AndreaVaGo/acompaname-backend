@@ -24,12 +24,14 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
     private final PerfilCuidadorRepository repository;
     private final UsuarioRepository usuarioRepository;
     private final ValoracionRepository valoracionRepository;
+    private final FotoValidador fotoValidador;
 
     public PerfilCuidadorServiceImpl(PerfilCuidadorRepository repository, UsuarioRepository usuarioRepository,
-            ValoracionRepository valoracionRepository) {
+            ValoracionRepository valoracionRepository, FotoValidador fotoValidador) {
         this.repository = repository;
         this.usuarioRepository = usuarioRepository;
         this.valoracionRepository = valoracionRepository;
+        this.fotoValidador = fotoValidador;
     }
 
     private PerfilCuidadorEntity findEntityById(Long id) {
@@ -84,6 +86,8 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
         if (!usuario.getEmail().equals(emailLogueado())) {
             throw new PerfilCuidadorExceptionAccesoDenegado("No puede crear un perfil para otro usuario");
         }
+        // Si la foto no vale (tipo, tamaño o contenido), se lanza el error y no se guarda nada
+        fotoValidador.comprobar(dto.foto());
         PerfilCuidadorEntity perfilToSave = PerfilCuidadorMapper.toEntity(dto, usuario);
         PerfilCuidadorEntity perfilSaved = repository.save(perfilToSave);
         return PerfilCuidadorMapper.toDTO(perfilSaved);
@@ -102,6 +106,8 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
     public PerfilCuidadorDTOResponse update(Long id, PerfilCuidadorDTORequest dto) {
         PerfilCuidadorEntity perfilCuidadorExistente = findEntityById(id);
         verificarPropietario(perfilCuidadorExistente);
+        // Si la foto no vale (tipo, tamaño o contenido), se lanza el error y no se cambia nada
+        fotoValidador.comprobar(dto.foto());
         perfilCuidadorExistente.setEspecialidad(dto.especialidad());
         perfilCuidadorExistente.setAnosExperiencia(dto.anosExperiencia());
         perfilCuidadorExistente.setTarifaHora(dto.tarifaHora());
