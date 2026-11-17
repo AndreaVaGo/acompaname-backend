@@ -83,6 +83,14 @@ public class SolicitudServiceImpl implements SolicitudService {
         }
     }
 
+    // Una solicitud solo se puede borrar mientras está pendiente: una aceptada o completada
+    // es un servicio real (y puede tener su pago y su valoración), así que se queda guardada
+    private void verificarBorrable(SolicitudEntity solicitud) {
+        if (!solicitud.getEstado().admiteCambios()) {
+            throw new SolicitudExceptionEstadoInvalido("Solo se puede borrar una solicitud pendiente");
+        }
+    }
+
     // El cuidador solo ve la dirección cuando ha aceptado la solicitud; la familia la ve siempre
     private SolicitudDTOResponse aDTO(SolicitudEntity solicitud) {
         SolicitudDTOResponse dto = SolicitudMapper.toDTO(solicitud);
@@ -165,6 +173,7 @@ public class SolicitudServiceImpl implements SolicitudService {
     public void deleteById(Long id) {
         SolicitudEntity solicitud = findEntityById(id);
         verificarPropietario(solicitud);
+        verificarBorrable(solicitud);
         repository.deleteById(id);
     }
 
