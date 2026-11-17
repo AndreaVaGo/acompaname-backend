@@ -206,6 +206,16 @@ public class SolicitudServiceImplEstadosTest {
 
     @ParameterizedTest
     @EnumSource(value = EstadoSolicitud.class, names = { "ACEPTADA", "RECHAZADA", "COMPLETADA" })
+    void testNoSePuedeBorrarUnaSolicitudQueYaNoEstaPendiente(EstadoSolicitud estado) {
+        loguearComo("ana@test.com");
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitudEn(estado)));
+
+        assertThrows(SolicitudExceptionEstadoInvalido.class, () -> service.deleteById(1L));
+        verify(repository, never()).deleteById(Mockito.anyLong());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = EstadoSolicitud.class, names = { "ACEPTADA", "RECHAZADA", "COMPLETADA" })
     void testNoSePuedeEditarUnaSolicitudQueYaNoEstaPendiente(EstadoSolicitud estado) {
         loguearComo("ana@test.com");
         when(repository.findById(1L)).thenReturn(Optional.of(solicitudEn(estado)));
