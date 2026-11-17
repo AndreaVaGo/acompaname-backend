@@ -62,6 +62,21 @@ public class PerfilCuidadorEntity {
     // Son los nombres del enum GrupoEdad. Si es null o está vacío, no ha marcado ninguno
     private String gruposEdad;
 
+    // Titulaciones que ha marcado, separadas por comas (por ejemplo "ENFERMERIA,PRIMEROS_AUXILIOS").
+    // Son los nombres del enum Titulacion. Si es null o está vacío, no ha marcado ninguna
+    private String titulaciones;
+
+    // Otras titulaciones o formación escritas a mano (opcional, puede ser null)
+    private String otrasTitulaciones;
+
+    // Constructor sin titulaciones: el mismo que había antes de añadir esos campos
+    public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
+            String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario, String foto,
+            String tipoCuidado, String servicios, String sexo, String ciudad, String gruposEdad) {
+        this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, foto,
+                tipoCuidado, servicios, sexo, ciudad, gruposEdad, null, null);
+    }
+
     // Constructor sin grupos de edad: el mismo que había antes de añadir este campo
     public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
             String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario, String foto,
