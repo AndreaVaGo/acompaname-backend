@@ -131,6 +131,29 @@ public class SolicitudServiceImplPagoIntegrationTest {
     }
 
     @Test
+    void testNoSePuedeBorrarUnaSolicitudCompletadaYSuPagoSigueAhi() {
+        SolicitudEntity solicitud = crearSolicitudYEntrarComoCuidador();
+        service.cambiarEstado(solicitud.getId(), EstadoSolicitud.ACEPTADA);
+        service.cambiarEstado(solicitud.getId(), EstadoSolicitud.COMPLETADA);
+        loguearComo("ana@test.com");
+
+        assertThrows(SolicitudExceptionEstadoInvalido.class, () -> service.deleteById(solicitud.getId()));
+
+        assertThat(solicitudRepository.existsById(solicitud.getId()), is(equalTo(true)));
+        assertThat(pagoRepository.count(), is(equalTo(1L)));
+    }
+
+    @Test
+    void testSePuedeBorrarUnaSolicitudPendiente() {
+        SolicitudEntity solicitud = crearSolicitudYEntrarComoCuidador();
+        loguearComo("ana@test.com");
+
+        service.deleteById(solicitud.getId());
+
+        assertThat(solicitudRepository.existsById(solicitud.getId()), is(equalTo(false)));
+    }
+
+    @Test
     void testCompletarDosVecesLaSolicitudDaErrorYNoDuplicaElPago() {
         SolicitudEntity solicitud = crearSolicitudYEntrarComoCuidador();
         service.cambiarEstado(solicitud.getId(), EstadoSolicitud.ACEPTADA);
