@@ -1,0 +1,15 @@
+# Dependabot revisa las dependencias de Maven del back una vez por semana
+# y abre una sola petición con las actualizaciones agrupadas.
+# Las alertas de seguridad de GitHub funcionan aparte, sin esta configuración.
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      dependencias-maven:
+        patterns:
+          - "*"
