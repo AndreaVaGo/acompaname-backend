@@ -8,6 +8,7 @@ import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTORequ
 import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTOResponse;
 import dev.andrea.acompaname_backend.globals.GrupoEdad;
 import dev.andrea.acompaname_backend.globals.ListaDeTexto;
+import dev.andrea.acompaname_backend.globals.Titulacion;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 
 public class PerfilCuidadorMapper {
@@ -60,6 +61,30 @@ public class PerfilCuidadorMapper {
         return ListaDeTexto.aLista(texto).stream().map(GrupoEdad::valueOf).toList();
     }
 
+    // Pasa las titulaciones a un texto con comas ("ENFERMERIA,PRIMEROS_AUXILIOS") sin repetir ninguna.
+    // Es público porque el servicio también lo necesita al actualizar el perfil
+    public static String titulacionesATexto(List<Titulacion> titulaciones) {
+        if (titulaciones == null) {
+            return null;
+        }
+        List<String> nombres = titulaciones.stream().map(Titulacion::name).distinct().toList();
+        return ListaDeTexto.aTexto(nombres);
+    }
+
+    // Pasa el texto de la base de datos a una lista de titulaciones (si no hay nada, lista vacía)
+    private static List<Titulacion> titulacionesALista(String texto) {
+        return ListaDeTexto.aLista(texto).stream().map(Titulacion::valueOf).toList();
+    }
+
+    // Si las otras titulaciones vienen vacías, se guarda null
+    // Es público porque el servicio también lo necesita al actualizar el perfil
+    public static String otrasTitulacionesONull(String otras) {
+        if (otras == null || otras.isBlank()) {
+            return null;
+        }
+        return otras.trim();
+    }
+
     public static PerfilCuidadorEntity toEntity(PerfilCuidadorDTORequest dto, UsuarioEntity usuario) {
         PerfilCuidadorEntity perfil = new PerfilCuidadorEntity();
         perfil.setEspecialidad(dto.especialidad());
@@ -74,6 +99,8 @@ public class PerfilCuidadorMapper {
         perfil.setSexo(sexoONull(dto.sexo()));
         perfil.setCiudad(dto.ciudad());
         perfil.setGruposEdad(gruposEdadATexto(dto.gruposEdad()));
+        perfil.setTitulaciones(titulacionesATexto(dto.titulaciones()));
+        perfil.setOtrasTitulaciones(otrasTitulacionesONull(dto.otrasTitulaciones()));
         perfil.setUsuario(usuario);
         return perfil;
     }
@@ -102,7 +129,9 @@ public class PerfilCuidadorMapper {
                 serviciosALista(entity.getServicios()),
                 entity.getSexo(),
                 entity.getCiudad(),
-                gruposEdadALista(entity.getGruposEdad()));
+                gruposEdadALista(entity.getGruposEdad()),
+                titulacionesALista(entity.getTitulaciones()),
+                entity.getOtrasTitulaciones());
         return dtoResponse;
 
     }
