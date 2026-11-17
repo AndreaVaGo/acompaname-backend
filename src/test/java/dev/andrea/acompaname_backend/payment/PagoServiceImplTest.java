@@ -101,6 +101,8 @@ public class PagoServiceImplTest {
 
         assertThat(pagos.size(), is(equalTo(1)));
         assertThat(pagos.get(0).importe(), is(equalTo(new BigDecimal("90.00"))));
+        assertThat(pagos.get(0).cuidadorNombre(), is(equalTo("Pepe")));
+        assertThat(pagos.get(0).tipoCuidado(), is(equalTo("Acompañamiento")));
     }
 
     @Test
