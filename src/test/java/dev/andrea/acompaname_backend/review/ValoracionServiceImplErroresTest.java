@@ -87,7 +87,7 @@ public class ValoracionServiceImplErroresTest {
     }
 
     private ValoracionDTORequest dtoCualquiera() {
-        return new ValoracionDTORequest("Comentario nuevo", 4, LocalDate.of(2026, 9, 13), 1L);
+        return new ValoracionDTORequest("Comentario nuevo", 4, 1L);
     }
 
     @Test
@@ -102,7 +102,7 @@ public class ValoracionServiceImplErroresTest {
         when(solicitudRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(SolicitudExceptionNotFound.class,
-                () -> service.storeEntity(new ValoracionDTORequest("Bien", 5, LocalDate.of(2026, 9, 12), 99L)));
+                () -> service.storeEntity(new ValoracionDTORequest("Bien", 5, 99L)));
         verify(repository, never()).save(Mockito.any(ValoracionEntity.class));
     }
 
@@ -112,7 +112,7 @@ public class ValoracionServiceImplErroresTest {
         when(solicitudRepository.findById(1L)).thenReturn(Optional.of(solicitudAnaPepe()));
 
         assertThrows(ValoracionExceptionAccesoDenegado.class,
-                () -> service.storeEntity(new ValoracionDTORequest("Bien", 5, LocalDate.of(2026, 9, 12), 1L)));
+                () -> service.storeEntity(new ValoracionDTORequest("Bien", 5, 1L)));
         verify(repository, never()).save(Mockito.any(ValoracionEntity.class));
     }
 
