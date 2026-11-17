@@ -4,7 +4,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
@@ -47,6 +49,19 @@ public class SolicitudControllerEstadoTest {
 
         assertThat(response.getStatus(), is(equalTo(409)));
         assertThat(response.getContentAsString(), containsString("PENDIENTE a COMPLETADA"));
+    }
+
+    @Test
+    void testBorrarUnaSolicitudQueYaNoEstaPendienteDevuelve409() throws Exception {
+        doThrow(new SolicitudExceptionEstadoInvalido("Solo se puede borrar una solicitud pendiente"))
+                .when(service).deleteById(1L);
+
+        MockHttpServletResponse response = mockMvc.perform(delete("/api/v1/solicitudes/1"))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(409)));
+        assertThat(response.getContentAsString(), containsString("solicitud pendiente"));
     }
 
     @Test
