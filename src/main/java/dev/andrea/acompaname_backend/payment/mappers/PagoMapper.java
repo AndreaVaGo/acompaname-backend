@@ -20,7 +20,9 @@ public class PagoMapper {
     }
 
     public static PagoDTOResponse toDTO(PagoEntity entity) {
+        SolicitudEntity solicitud = entity.getSolicitud();
+        // La pantalla de pagos de la familia enseña quién cuida y de qué tipo es el cuidado
         return new PagoDTOResponse(entity.getId(), entity.getImporte(), entity.getEstado(), entity.getFecha(),
-                entity.getSolicitud().getId());
+                solicitud.getId(), solicitud.getCuidador().getUsuario().getNombre(), solicitud.getTipoCuidado());
     }
 }

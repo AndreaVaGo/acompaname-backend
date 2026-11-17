@@ -10,6 +10,8 @@ public record PagoDTOResponse(
         BigDecimal importe,
         EstadoPago estado,
         LocalDate fecha,
-        Long solicitudId
+        Long solicitudId,
+        String cuidadorNombre,
+        String tipoCuidado
 ) {
 }
