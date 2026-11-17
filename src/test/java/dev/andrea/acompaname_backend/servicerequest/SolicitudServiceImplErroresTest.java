@@ -346,6 +346,19 @@ public class SolicitudServiceImplErroresTest {
     }
 
     @Test
+    void testStoreSolicitandoseUnServicioASiMismaDaAccesoDenegadoYNoGuarda() {
+        loguearComo("ana@test.com");
+        UsuarioEntity ana = usuario(1L, "Ana", "ana@test.com", rol(1L, "FAMILIA"));
+        PerfilCuidadorEntity perfilDeAna = new PerfilCuidadorEntity(1L, "Geriatría", 4, new BigDecimal("18.00"),
+                "Bio", true, true, ana);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(ana));
+        when(perfilCuidadorRepository.findById(1L)).thenReturn(Optional.of(perfilDeAna));
+
+        assertThrows(SolicitudExceptionAccesoDenegado.class, () -> service.storeEntity(dtoCualquiera(1L, 1L)));
+        verify(repository, never()).save(Mockito.any(SolicitudEntity.class));
+    }
+
+    @Test
     void testStoreConFechaFinAnteriorALaDeInicioDaErrorYNoGuarda() {
         SolicitudDTORequest dto = dtoConFechaFin(LocalDate.of(2026, 9, 5));
 
