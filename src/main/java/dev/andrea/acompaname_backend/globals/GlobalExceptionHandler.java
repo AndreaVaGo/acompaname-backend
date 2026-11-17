@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -139,6 +140,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PagoExceptionConflicto.class)
     public ResponseEntity<String> handlePagoConflictoException(PagoExceptionConflicto exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
+    }
+
+    // La base de datos no deja borrar algo que tiene datos relacionados (por ejemplo, un usuario
+    // o un cuidador con solicitudes) ni guardar algo que repite un dato único: es un conflicto, no un fallo nuestro
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<String> handleDatosRelacionados(DataIntegrityViolationException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body("No se puede completar la operación porque hay datos relacionados");
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
