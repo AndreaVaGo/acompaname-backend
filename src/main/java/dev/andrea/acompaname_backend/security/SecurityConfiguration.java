@@ -53,6 +53,8 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/solicitudes/cuidadores-ocupados").permitAll()
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/cuidadores").hasAuthority("CUIDADOR")
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/solicitudes").hasAuthority("FAMILIA")
+                        // Las sugerencias las envían las familias y las personas cuidadoras; las lee el administrador
+                        .requestMatchers(HttpMethod.POST, "/" + endpoint + "/sugerencias").hasAnyAuthority("FAMILIA", "CUIDADOR")
                         .requestMatchers(HttpMethod.PUT, "/" + endpoint + "/cuidadores/**").hasAuthority("CUIDADOR")
                         .requestMatchers(HttpMethod.DELETE, "/" + endpoint + "/cuidadores/**").hasAuthority("CUIDADOR")
                         .requestMatchers(HttpMethod.PUT, "/" + endpoint + "/solicitudes/**").hasAuthority("FAMILIA")
