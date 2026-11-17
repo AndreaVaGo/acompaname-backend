@@ -15,4 +15,9 @@ public record CambiarPasswordDTO(
 
 ) {
 
+    // Igual que en el login: las contraseñas no se escriben nunca en toString()
+    @Override
+    public String toString() {
+        return "CambiarPasswordDTO[passwordActual=***, passwordNueva=***]";
+    }
 }
