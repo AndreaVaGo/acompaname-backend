@@ -6,4 +6,11 @@ import jakarta.validation.constraints.NotBlank;
 public record LoginDTORequest(
         @NotBlank(message = "El email es obligatorio") String email,
         @NotBlank(message = "La contraseña es obligatoria") String password) {
+
+    // Un record escribe todos sus campos en toString(). Lo cambiamos para que la
+    // contraseña nunca acabe en un log ni en un mensaje de error por descuido.
+    @Override
+    public String toString() {
+        return "LoginDTORequest[email=" + email + ", password=***]";
+    }
 }
