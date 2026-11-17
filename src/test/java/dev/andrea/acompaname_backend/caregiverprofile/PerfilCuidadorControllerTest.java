@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
@@ -26,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTORequest;
 import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTOResponse;
+import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionFotoInvalida;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = PerfilCuidadorController.class)
@@ -171,17 +173,33 @@ public class PerfilCuidadorControllerTest {
         }
 
         @Test
-        void testStoreFotoDemasiadoLarga() throws Exception {
+        void testStoreConFotoNoValidaDevuelve400() throws Exception {
                 PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", 4, new BigDecimal("18.00"),
-                                "Bio", true, true, 2L, "a".repeat(500001));
+                                "Bio", true, true, 2L, "esto-no-es-una-foto");
+                when(service.storeEntity(Mockito.any(PerfilCuidadorDTORequest.class)))
+                                .thenThrow(new PerfilCuidadorExceptionFotoInvalida("La foto debe ser JPG, PNG o WebP."));
 
                 MockHttpServletResponse response = mockMvc.perform(post("/api/v1/cuidadores")
                                 .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
                                 .andReturn()
                                 .getResponse();
                 assertThat(response.getStatus(), is(equalTo(400)));
-                assertThat(response.getContentAsString(), containsString("La foto es demasiado grande"));
-                Mockito.verifyNoInteractions(service);
+                assertThat(response.getContentAsString(), containsString("La foto debe ser JPG, PNG o WebP."));
+        }
+
+        @Test
+        void testUpdateConFotoNoValidaDevuelve400() throws Exception {
+                PerfilCuidadorDTORequest dto = new PerfilCuidadorDTORequest("Geriatría", 4, new BigDecimal("18.00"),
+                                "Bio", true, true, 2L, "esto-no-es-una-foto");
+                when(service.update(Mockito.eq(1L), Mockito.any(PerfilCuidadorDTORequest.class)))
+                                .thenThrow(new PerfilCuidadorExceptionFotoInvalida("La foto debe ser JPG, PNG o WebP."));
+
+                MockHttpServletResponse response = mockMvc.perform(put("/api/v1/cuidadores/1")
+                                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                                .andReturn()
+                                .getResponse();
+                assertThat(response.getStatus(), is(equalTo(400)));
+                assertThat(response.getContentAsString(), containsString("La foto debe ser JPG, PNG o WebP."));
         }
 
         @Test
