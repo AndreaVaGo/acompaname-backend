@@ -4,14 +4,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import jakarta.persistence.EntityManager;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -38,6 +42,8 @@ public class SolicitudRepositoryIntegrationTest {
     private PerfilCuidadorRepository perfilCuidadorRepository;
     @Autowired
     private UsuarioRepository usuarioRepository;
+    @Autowired
+    private EntityManager entityManager;
 
     private UsuarioEntity crearUsuario(String nombre, String email) {
         UsuarioEntity usuario = UsuarioEntity.builder()
@@ -76,6 +82,35 @@ public class SolicitudRepositoryIntegrationTest {
                 .cuidador(cuidador)
                 .build();
         return repository.saveAndFlush(solicitud);
+    }
+
+    // La base de datos no deja borrar a quien tiene solicitudes: por eso la API responde 409 y no 500
+    @Test
+    void testNoSePuedeBorrarUnUsuarioQueTieneSolicitudes() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        UsuarioEntity pepe = crearUsuario("Pepe", "pepe@test.com");
+        crearSolicitud(ana, crearCuidador(pepe));
+        // Se vacía la memoria del test para que el borrado llegue de verdad a la base de datos
+        entityManager.clear();
+
+        assertThrows(DataIntegrityViolationException.class, () -> {
+            usuarioRepository.deleteById(ana.getId());
+            usuarioRepository.flush();
+        });
+    }
+
+    @Test
+    void testNoSePuedeBorrarUnPerfilDeCuidadorQueTieneSolicitudes() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        UsuarioEntity pepe = crearUsuario("Pepe", "pepe@test.com");
+        PerfilCuidadorEntity perfilPepe = crearCuidador(pepe);
+        crearSolicitud(ana, perfilPepe);
+        entityManager.clear();
+
+        assertThrows(DataIntegrityViolationException.class, () -> {
+            perfilCuidadorRepository.deleteById(perfilPepe.getId());
+            perfilCuidadorRepository.flush();
+        });
     }
 
     @Test
