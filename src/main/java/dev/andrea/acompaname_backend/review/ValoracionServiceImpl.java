@@ -115,7 +115,6 @@ public class ValoracionServiceImpl implements ValoracionService {
         verificarPropietario(valoracionExistente.getSolicitud());
         valoracionExistente.setComentario(dto.comentario());
         valoracionExistente.setPuntuacion(dto.puntuacion());
-        valoracionExistente.setFecha(dto.fecha());
         ValoracionEntity valoracionActualizada = repository.save(valoracionExistente);
         return ValoracionMapper.toDTO(valoracionActualizada);
     }
