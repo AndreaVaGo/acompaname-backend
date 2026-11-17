@@ -26,7 +26,8 @@ public record PerfilCuidadorDTORequest(
 
         @NotNull(message = "El usuario id no puede ser nulo") Long usuarioId,
 
-        @Size(max = 500000, message = "La foto es demasiado grande") String foto,
+        // La foto (tipo, tamaño y contenido) la comprueba FotoValidador desde el servicio
+        String foto,
 
         @Pattern(regexp = "hospitalario|domicilio|ambos", message = "El tipo de cuidado debe ser hospitalario, domicilio o ambos") String tipoCuidado,
 
