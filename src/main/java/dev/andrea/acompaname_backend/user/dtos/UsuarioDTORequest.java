@@ -24,4 +24,10 @@ public record UsuarioDTORequest(
 
 ) {
 
+    // Igual que en el login: la contraseña no se escribe nunca en toString()
+    @Override
+    public String toString() {
+        return "UsuarioDTORequest[nombre=" + nombre + ", email=" + email + ", telefono=" + telefono
+                + ", password=***, rolesIds=" + rolesIds + "]";
+    }
 }
