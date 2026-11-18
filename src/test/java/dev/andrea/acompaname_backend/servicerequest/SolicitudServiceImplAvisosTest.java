@@ -160,13 +160,28 @@ public class SolicitudServiceImplAvisosTest {
     }
 
     @Test
-    void testAlCompletarNoSeMandaNingunAviso() {
+    void testAlCompletarSoloSeAvisaDelServicioCompletado() {
         loguearComo("pepe@test.com");
         SolicitudEntity solicitud = solicitudEn(EstadoSolicitud.ACEPTADA);
         when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
         when(repository.save(solicitud)).thenReturn(solicitud);
         when(pagoRepository.existsBySolicitudId(1L)).thenReturn(false);
         when(pagoRepository.save(Mockito.any(PagoEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        service.cambiarEstado(1L, EstadoSolicitud.COMPLETADA);
+
+        verify(avisos).avisarServicioCompletado(solicitud, new BigDecimal("18.00"));
+        verify(avisos, never()).avisarSolicitudAceptada(Mockito.any());
+        verify(avisos, never()).avisarSolicitudRechazada(Mockito.any());
+    }
+
+    @Test
+    void testSiElPagoYaExistiaAlCompletarNoSeAvisaOtraVez() {
+        loguearComo("pepe@test.com");
+        SolicitudEntity solicitud = solicitudEn(EstadoSolicitud.ACEPTADA);
+        when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(repository.save(solicitud)).thenReturn(solicitud);
+        when(pagoRepository.existsBySolicitudId(1L)).thenReturn(true);
 
         service.cambiarEstado(1L, EstadoSolicitud.COMPLETADA);
 

@@ -1,5 +1,6 @@
 package dev.andrea.acompaname_backend.servicerequest;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -287,7 +288,12 @@ public class SolicitudServiceImpl implements SolicitudService {
         if (seCompleta && !pagoRepository.existsBySolicitudId(solicitud.getId())) {
             // Al completar la solicitud se genera su pago pendiente, con la tarifa del cuidador:
             // la familia solo paga cuando el servicio ya se ha realizado
-            pagoRepository.save(PagoMapper.toEntity(solicitud.getCuidador().getTarifaHora(), solicitud));
+            BigDecimal importe = solicitud.getCuidador().getTarifaHora();
+            pagoRepository.save(PagoMapper.toEntity(importe, solicitud));
+            // Se avisa a la familia de que tiene un pago pendiente (solo cuando se crea el pago)
+            if (avisos != null) {
+                avisos.avisarServicioCompletado(solicitudActualizada, importe);
+            }
         }
         // Ya está guardado el cambio: se avisa a la familia de si la han aceptado o rechazado
         if (avisos != null && nuevoEstado == EstadoSolicitud.ACEPTADA) {
