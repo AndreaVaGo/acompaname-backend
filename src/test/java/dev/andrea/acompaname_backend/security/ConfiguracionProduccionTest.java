@@ -79,4 +79,19 @@ public class ConfiguracionProduccionTest {
 
         assertThat(propiedades.getProperty("app.frontend-url"), is(equalTo("${FRONTEND_URL}")));
     }
+
+    @Test
+    void testDetrasDelProxyTomcatLeeLaIpRealDelCliente() throws IOException {
+        Properties propiedades = cargarPropiedadesDeProduccion();
+
+        assertThat(propiedades.getProperty("server.forward-headers-strategy"), is(equalTo("native")));
+    }
+
+    @Test
+    void testNoSeAmpliaLaListaDeProxiesDeConfianza() throws IOException {
+        Properties propiedades = cargarPropiedadesDeProduccion();
+
+        // Si se pusiera una lista propia (por ejemplo ".*"), cualquiera podría falsear su IP
+        assertThat(propiedades.getProperty("server.tomcat.remoteip.internal-proxies"), is(nullValue()));
+    }
 }
