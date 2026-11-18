@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import dev.andrea.acompaname_backend.payment.PagoRepository;
+import dev.andrea.acompaname_backend.schedule.BloqueOcupadoEntity;
+import dev.andrea.acompaname_backend.schedule.BloqueOcupadoRepository;
 import dev.andrea.acompaname_backend.payment.mappers.PagoMapper;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
@@ -36,13 +38,16 @@ public class SolicitudServiceImpl implements SolicitudService {
     private final UsuarioRepository usuarioRepository;
     private final PerfilCuidadorRepository perfilCuidadorRepository;
     private final PagoRepository pagoRepository;
+    private final BloqueOcupadoRepository bloqueRepository;
 
     public SolicitudServiceImpl(SolicitudRepository repository, UsuarioRepository usuarioRepository,
-            PerfilCuidadorRepository perfilCuidadorRepository, PagoRepository pagoRepository) {
+            PerfilCuidadorRepository perfilCuidadorRepository, PagoRepository pagoRepository,
+            BloqueOcupadoRepository bloqueRepository) {
         this.repository = repository;
         this.usuarioRepository = usuarioRepository;
         this.perfilCuidadorRepository = perfilCuidadorRepository;
         this.pagoRepository = pagoRepository;
+        this.bloqueRepository = bloqueRepository;
     }
 
     private SolicitudEntity findEntityById(Long id) {
@@ -139,6 +144,14 @@ public class SolicitudServiceImpl implements SolicitudService {
         for (SolicitudEntity otra : mismosDias) {
             if (otra.seCruzaCon(solicitud.momentoInicio(), solicitud.momentoFin())) {
                 throw new SolicitudExceptionSolapamiento("Ya tienes otro servicio aceptado en esas fechas");
+            }
+        }
+
+        // También chocan los bloques ocupados de su calendario (turno en el hospital, citas...)
+        for (BloqueOcupadoEntity bloque : bloqueRepository.findByCuidadorIdAndFechaBetween(cuidadorId,
+                solicitud.getFechaCuidado(), fechaFinReal(solicitud))) {
+            if (bloque.seCruzaCon(solicitud.momentoInicio(), solicitud.momentoFin())) {
+                throw new SolicitudExceptionSolapamiento("Tienes un bloque ocupado en tu calendario en esas fechas");
             }
         }
     }
@@ -283,6 +296,13 @@ public class SolicitudServiceImpl implements SolicitudService {
                 EstadoSolicitud.ACEPTADA)) {
             Long cuidadorId = solicitud.getCuidador().getId();
             if (solicitud.seCruzaCon(momentoInicio, momentoFin) && !ocupados.contains(cuidadorId)) {
+                ocupados.add(cuidadorId);
+            }
+        }
+        // También está ocupada la persona cuidadora que tiene un bloque en su calendario a esas horas
+        for (BloqueOcupadoEntity bloque : bloqueRepository.findByFechaBetween(inicio, finReal)) {
+            Long cuidadorId = bloque.getCuidador().getId();
+            if (bloque.seCruzaCon(momentoInicio, momentoFin) && !ocupados.contains(cuidadorId)) {
                 ocupados.add(cuidadorId);
             }
         }
