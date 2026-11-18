@@ -90,4 +90,45 @@ public class BloqueOcupadoRepositoryIntegrationTest extends ContenedorMySqlRepos
 
         assertThat(repository.findByCuidadorIdOrderByFechaAscHoraInicioAsc(pepe.getId()).isEmpty(), is(true));
     }
+
+    @Test
+    void testFindByFechaBetweenDevuelveLosBloquesDeTodasLasPersonasEnEseRango() {
+        PerfilCuidadorEntity pepe = crearCuidador("pepe.rango@test.com");
+        PerfilCuidadorEntity lucia = crearCuidador("lucia.rango@test.com");
+        crearBloque(pepe, LocalDate.of(2026, 12, 1), LocalTime.of(8, 0), LocalTime.of(9, 0));
+        crearBloque(lucia, LocalDate.of(2026, 12, 2), LocalTime.of(8, 0), LocalTime.of(9, 0));
+        crearBloque(lucia, LocalDate.of(2026, 12, 9), LocalTime.of(8, 0), LocalTime.of(9, 0));
+
+        List<BloqueOcupadoEntity> enElRango = repository.findByFechaBetween(LocalDate.of(2026, 12, 1),
+                LocalDate.of(2026, 12, 2));
+
+        assertThat(enElRango.size(), is(equalTo(2)));
+    }
+
+    @Test
+    void testFindByFechaBetweenIncluyeLosDiasDeLosExtremos() {
+        PerfilCuidadorEntity pepe = crearCuidador("pepe.extremos@test.com");
+        crearBloque(pepe, LocalDate.of(2026, 12, 1), LocalTime.of(8, 0), LocalTime.of(9, 0));
+        crearBloque(pepe, LocalDate.of(2026, 12, 5), LocalTime.of(8, 0), LocalTime.of(9, 0));
+
+        List<BloqueOcupadoEntity> enElRango = repository.findByFechaBetween(LocalDate.of(2026, 12, 1),
+                LocalDate.of(2026, 12, 5));
+
+        assertThat(enElRango.size(), is(equalTo(2)));
+    }
+
+    @Test
+    void testFindByCuidadorIdAndFechaBetweenFiltraPorPersonaYPorFechas() {
+        PerfilCuidadorEntity pepe = crearCuidador("pepe.filtro@test.com");
+        PerfilCuidadorEntity lucia = crearCuidador("lucia.filtro@test.com");
+        crearBloque(pepe, LocalDate.of(2026, 12, 1), LocalTime.of(8, 0), LocalTime.of(9, 0));
+        crearBloque(pepe, LocalDate.of(2026, 12, 20), LocalTime.of(8, 0), LocalTime.of(9, 0));
+        crearBloque(lucia, LocalDate.of(2026, 12, 1), LocalTime.of(8, 0), LocalTime.of(9, 0));
+
+        List<BloqueOcupadoEntity> deP = repository.findByCuidadorIdAndFechaBetween(pepe.getId(),
+                LocalDate.of(2026, 12, 1), LocalDate.of(2026, 12, 10));
+
+        assertThat(deP.size(), is(equalTo(1)));
+        assertThat(deP.get(0).getCuidador().getId(), is(equalTo(pepe.getId())));
+    }
 }
