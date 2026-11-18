@@ -148,7 +148,7 @@ public class SolicitudServiceImplEstadosTest {
 
         assertThrows(SolicitudExceptionEstadoInvalido.class,
                 () -> service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA));
-        verify(repository, never()).countSolapamientos(Mockito.anyLong(), Mockito.anyLong(),
+        verify(repository, never()).findDelCuidadorQueSeCruzan(Mockito.anyLong(), Mockito.anyLong(),
                 Mockito.any(LocalDate.class), Mockito.any(LocalDate.class), Mockito.any(EstadoSolicitud.class));
     }
 
