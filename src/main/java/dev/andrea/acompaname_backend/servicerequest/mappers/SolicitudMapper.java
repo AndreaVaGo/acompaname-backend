@@ -6,6 +6,8 @@ import java.util.List;
 
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
+import dev.andrea.acompaname_backend.servicerequest.PersonaCuidada;
+import dev.andrea.acompaname_backend.servicerequest.PersonasDeSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
@@ -37,9 +39,12 @@ public class SolicitudMapper {
             PerfilCuidadorEntity cuidador) {
         SolicitudEntity solicitud = new SolicitudEntity();
         solicitud.setTipoCuidado(dto.tipoCuidado());
-        solicitud.setNombrePaciente(dto.nombrePaciente());
+        // La primera persona de la lista también se guarda en nombrePaciente y edadPaciente
+        List<PersonaCuidada> personas = PersonasDeSolicitud.desdePeticion(dto);
+        solicitud.setPersonas(personas);
+        solicitud.setNombrePaciente(personas.get(0).getNombre());
+        solicitud.setEdadPaciente(personas.get(0).getEdad());
         solicitud.setNotas(dto.notas());
-        solicitud.setEdadPaciente(dto.edadPaciente());
         solicitud.setFechaCuidado(dto.fechaCuidado());
         solicitud.setFechaFin(dto.fechaFin());
         solicitud.setNecesidades(necesidadesATexto(dto.necesidades()));
@@ -60,7 +65,7 @@ public class SolicitudMapper {
                 entity.getEstado(), entity.getFamilia().getId(), entity.getCuidador().getId(),
                 entity.getFamilia().getNombre(), entity.getCuidador().getUsuario().getNombre(),
                 necesidadesALista(entity.getNecesidades()), entity.getDireccion(), entity.getGrupoEdad(),
-                entity.getHoraInicio(), entity.getHoraFin());
+                entity.getHoraInicio(), entity.getHoraFin(), PersonasDeSolicitud.aDTO(entity));
     }
 
 }

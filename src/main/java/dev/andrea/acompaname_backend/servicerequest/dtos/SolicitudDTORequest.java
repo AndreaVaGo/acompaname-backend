@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import dev.andrea.acompaname_backend.globals.GrupoEdad;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -16,11 +17,11 @@ public record SolicitudDTORequest(
 
                 @NotBlank(message = "El tipo de cuidado no puede estar vacio") String tipoCuidado,
 
-                @NotBlank(message = "El nombre del paciente no puede estar vacio") @Size(max = 100, message = "El nombre no puede superar 100 caracteres") String nombrePaciente,
+                @Size(max = 100, message = "El nombre no puede superar 100 caracteres") String nombrePaciente,
 
                 @Size(max = 1000, message = "Las notas no pueden superar 1000 caracteres") String notas,
 
-                @NotNull(message = "La edad del paciente no puede ser nulo") @Min(value = 0, message = "La edad no puede ser negativa") @Max(value = 120, message = "La edad no puede superar 120 años") Integer edadPaciente,
+                @Min(value = 0, message = "La edad no puede ser negativa") @Max(value = 120, message = "La edad no puede superar 120 años") Integer edadPaciente,
 
                 @NotNull(message = "La fecha del cuidado no puede ser nulo") @FutureOrPresent(message = "La fecha del cuidado no puede estar en el pasado") LocalDate fechaCuidado,
 
@@ -40,10 +41,22 @@ public record SolicitudDTORequest(
                 // Hora de inicio (el primer día) y hora de fin (el último día) del cuidado
                 @NotNull(message = "La hora de inicio no puede ser nula") LocalTime horaInicio,
 
-                @NotNull(message = "La hora de fin no puede ser nula") LocalTime horaFin
+                @NotNull(message = "La hora de fin no puede ser nula") LocalTime horaFin,
+
+                // Personas que reciben el cuidado (entre 1 y 5). Si no llega, se usan nombrePaciente y edadPaciente
+                @Valid @Size(max = 5, message = "No se pueden indicar más de 5 personas a cuidar") List<PersonaCuidadaDTO> personas
 
 ) 
 {
+
+        // Constructor sin la lista de personas (forma antigua: una sola persona con nombrePaciente y edadPaciente)
+        public SolicitudDTORequest(String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
+                        LocalDate fechaCuidado, LocalDate fechaFin, Long familiaId, Long cuidadorId,
+                        List<String> necesidades, String direccion, GrupoEdad grupoEdad, LocalTime horaInicio,
+                        LocalTime horaFin) {
+                this(tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, fechaFin, familiaId, cuidadorId,
+                                necesidades, direccion, grupoEdad, horaInicio, horaFin, null);
+        }
 
         // Constructor sin horas: el cuidado dura el día completo (de 00:00 a 23:59).
         // Se deja para no romper el código que ya existía
