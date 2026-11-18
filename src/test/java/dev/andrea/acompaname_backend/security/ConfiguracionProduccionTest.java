@@ -72,4 +72,11 @@ public class ConfiguracionProduccionTest {
         assertThat(propiedades.getProperty("spring.mail.password"), is(equalTo("${MAIL_PASSWORD}")));
         assertThat(propiedades.getProperty("mail.from"), is(equalTo("${MAIL_FROM}")));
     }
+
+    @Test
+    void testLaDireccionDelFrontParaLosEnlacesNoTieneValorPorDefecto() throws IOException {
+        Properties propiedades = cargarPropiedadesDeProduccion();
+
+        assertThat(propiedades.getProperty("app.frontend-url"), is(equalTo("${FRONTEND_URL}")));
+    }
 }
