@@ -44,6 +44,8 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/roles").permitAll()
                         // El login es público: aquí es donde la persona consigue su token
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/" + endpoint + "/olvide-password").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/" + endpoint + "/restablecer-password").permitAll()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores/mi-perfil").authenticated()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores").permitAll()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores/*").permitAll()
