@@ -49,7 +49,12 @@ public class SolicitudMapper {
         solicitud.setFechaFin(dto.fechaFin());
         solicitud.setNecesidades(necesidadesATexto(dto.necesidades()));
         solicitud.setDireccion(dto.direccion());
-        solicitud.setGrupoEdad(dto.grupoEdad());
+        // El grupo de la solicitud es el de la primera persona (o el que llegue suelto si ella no tiene)
+        if (personas.get(0).getGrupoEdad() != null) {
+            solicitud.setGrupoEdad(personas.get(0).getGrupoEdad());
+        } else {
+            solicitud.setGrupoEdad(dto.grupoEdad());
+        }
         solicitud.setHoraInicio(dto.horaInicio());
         solicitud.setHoraFin(dto.horaFin());
         solicitud.setEstado(EstadoSolicitud.PENDIENTE);

@@ -3,6 +3,7 @@ package dev.andrea.acompaname_backend.servicerequest;
 import java.util.ArrayList;
 import java.util.List;
 
+import dev.andrea.acompaname_backend.globals.GrupoEdad;
 import dev.andrea.acompaname_backend.servicerequest.dtos.PersonaCuidadaDTO;
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionPersonasInvalidas;
@@ -19,10 +20,15 @@ public class PersonasDeSolicitud {
 
         if (dto.personas() != null && !dto.personas().isEmpty()) {
             for (PersonaCuidadaDTO persona : dto.personas()) {
-                personas.add(new PersonaCuidada(persona.nombre().trim(), persona.edad()));
+                // Si la persona no trae grupo de edad, usa el de la solicitud
+                GrupoEdad grupo = persona.grupoEdad();
+                if (grupo == null) {
+                    grupo = dto.grupoEdad();
+                }
+                personas.add(new PersonaCuidada(persona.nombre().trim(), persona.edad(), grupo));
             }
         } else if (dto.nombrePaciente() != null && !dto.nombrePaciente().isBlank() && dto.edadPaciente() != null) {
-            personas.add(new PersonaCuidada(dto.nombrePaciente().trim(), dto.edadPaciente()));
+            personas.add(new PersonaCuidada(dto.nombrePaciente().trim(), dto.edadPaciente(), dto.grupoEdad()));
         }
 
         if (personas.isEmpty()) {
@@ -41,11 +47,29 @@ public class PersonasDeSolicitud {
         List<PersonaCuidadaDTO> lista = new ArrayList<>();
         if (solicitud.getPersonas() != null && !solicitud.getPersonas().isEmpty()) {
             for (PersonaCuidada persona : solicitud.getPersonas()) {
-                lista.add(new PersonaCuidadaDTO(persona.getNombre(), persona.getEdad()));
+                // Las personas sin grupo (solicitudes antiguas) usan el grupo de la solicitud
+                GrupoEdad grupo = persona.getGrupoEdad();
+                if (grupo == null) {
+                    grupo = solicitud.getGrupoEdad();
+                }
+                lista.add(new PersonaCuidadaDTO(persona.getNombre(), persona.getEdad(), grupo));
             }
         } else if (solicitud.getNombrePaciente() != null) {
-            lista.add(new PersonaCuidadaDTO(solicitud.getNombrePaciente(), solicitud.getEdadPaciente()));
+            lista.add(new PersonaCuidadaDTO(solicitud.getNombrePaciente(), solicitud.getEdadPaciente(),
+                    solicitud.getGrupoEdad()));
         }
         return lista;
+    }
+
+    // Grupos de edad distintos de las personas, sin repetir y en orden (los que no tienen grupo no cuentan)
+    public static List<GrupoEdad> gruposDe(List<PersonaCuidada> personas) {
+        List<GrupoEdad> grupos = new ArrayList<>();
+        for (PersonaCuidada persona : personas) {
+            GrupoEdad grupo = persona.getGrupoEdad();
+            if (grupo != null && !grupos.contains(grupo)) {
+                grupos.add(grupo);
+            }
+        }
+        return grupos;
     }
 }

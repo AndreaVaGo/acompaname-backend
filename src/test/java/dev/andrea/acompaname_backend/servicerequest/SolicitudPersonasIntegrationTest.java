@@ -113,4 +113,22 @@ public class SolicitudPersonasIntegrationTest extends ContenedorMySqlRepositorio
 
         assertThat(contarPersonasEnLaTabla(), is(equalTo(0L)));
     }
+
+    @Test
+    void testCadaPersonaGuardaSuGrupoDeEdad() {
+        SolicitudEntity solicitud = crearSolicitud();
+        solicitud.getPersonas().add(new PersonaCuidada("Zoe", 5, dev.andrea.acompaname_backend.globals.GrupoEdad.NINOS));
+        solicitud.getPersonas().add(new PersonaCuidada("Abuelo", 80, dev.andrea.acompaname_backend.globals.GrupoEdad.MAYORES));
+        solicitud.getPersonas().add(new PersonaCuidada("Sin grupo", 40));
+        Long id = repository.saveAndFlush(solicitud).getId();
+        entityManager.clear();
+
+        SolicitudEntity leida = repository.findById(id).get();
+
+        assertThat(leida.getPersonas().get(0).getGrupoEdad(),
+                is(equalTo(dev.andrea.acompaname_backend.globals.GrupoEdad.NINOS)));
+        assertThat(leida.getPersonas().get(1).getGrupoEdad(),
+                is(equalTo(dev.andrea.acompaname_backend.globals.GrupoEdad.MAYORES)));
+        assertThat(leida.getPersonas().get(2).getGrupoEdad(), is(org.hamcrest.Matchers.nullValue()));
+    }
 }
