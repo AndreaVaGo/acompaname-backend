@@ -69,6 +69,19 @@ public class PerfilCuidadorEntity {
     // Otras titulaciones o formación escritas a mano (opcional, puede ser null)
     private String otrasTitulaciones;
 
+    // Recargo por cada persona extra, en porcentaje de la tarifa (0 a 100).
+    // Si es null se usa el recargo por defecto de la aplicación
+    private Integer recargoPersonaExtra;
+
+    // Constructor sin recargo propio: el mismo que había antes de añadir este campo
+    public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
+            String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario, String foto,
+            String tipoCuidado, String servicios, String sexo, String ciudad, String gruposEdad,
+            String titulaciones, String otrasTitulaciones) {
+        this(id, especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuario, foto,
+                tipoCuidado, servicios, sexo, ciudad, gruposEdad, titulaciones, otrasTitulaciones, null);
+    }
+
     // Constructor sin titulaciones: el mismo que había antes de añadir esos campos
     public PerfilCuidadorEntity(Long id, String especialidad, Integer anosExperiencia, BigDecimal tarifaHora,
             String bio, boolean tieneVehiculo, boolean disponibleAhora, UsuarioEntity usuario, String foto,

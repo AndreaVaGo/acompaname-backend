@@ -5,6 +5,8 @@ import java.util.List;
 
 import dev.andrea.acompaname_backend.globals.GrupoEdad;
 import dev.andrea.acompaname_backend.globals.Titulacion;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -46,9 +48,21 @@ public record PerfilCuidadorDTORequest(
         List<Titulacion> titulaciones,
 
         // Otras titulaciones escritas a mano (opcional)
-        @Size(max = 200, message = "Otras titulaciones no puede superar 200 caracteres") String otrasTitulaciones
+        @Size(max = 200, message = "Otras titulaciones no puede superar 200 caracteres") String otrasTitulaciones,
+
+        // Recargo por persona extra en porcentaje (opcional). Si no llega se usa el de la aplicación
+        @Min(value = 0, message = "El recargo no puede ser negativo") @Max(value = 100, message = "El recargo no puede superar el 100 %") Integer recargoPersonaExtra
 
 ) {
+
+    // Constructor sin recargo propio: el mismo que había antes de añadir este campo
+    public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,
+            boolean tieneVehiculo, boolean disponibleAhora, Long usuarioId, String foto, String tipoCuidado,
+            List<String> servicios, String sexo, String ciudad, List<GrupoEdad> gruposEdad,
+            List<Titulacion> titulaciones, String otrasTitulaciones) {
+        this(especialidad, anosExperiencia, tarifaHora, bio, tieneVehiculo, disponibleAhora, usuarioId, foto,
+                tipoCuidado, servicios, sexo, ciudad, gruposEdad, titulaciones, otrasTitulaciones, null);
+    }
 
     // Constructor sin titulaciones: el mismo que había antes de añadir esos campos
     public PerfilCuidadorDTORequest(String especialidad, Integer anosExperiencia, BigDecimal tarifaHora, String bio,

@@ -101,6 +101,7 @@ public class PerfilCuidadorMapper {
         perfil.setGruposEdad(gruposEdadATexto(dto.gruposEdad()));
         perfil.setTitulaciones(titulacionesATexto(dto.titulaciones()));
         perfil.setOtrasTitulaciones(otrasTitulacionesONull(dto.otrasTitulaciones()));
+        perfil.setRecargoPersonaExtra(dto.recargoPersonaExtra());
         perfil.setUsuario(usuario);
         return perfil;
     }
@@ -131,7 +132,8 @@ public class PerfilCuidadorMapper {
                 entity.getCiudad(),
                 gruposEdadALista(entity.getGruposEdad()),
                 titulacionesALista(entity.getTitulaciones()),
-                entity.getOtrasTitulaciones());
+                entity.getOtrasTitulaciones(),
+                entity.getRecargoPersonaExtra());
         return dtoResponse;
 
     }

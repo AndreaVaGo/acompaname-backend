@@ -144,6 +144,8 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
         // Las otras titulaciones se actualizan siempre: si no llegan o vienen vacías, se borran
         perfilCuidadorExistente.setOtrasTitulaciones(
                 PerfilCuidadorMapper.otrasTitulacionesONull(dto.otrasTitulaciones()));
+        // El recargo propio se actualiza siempre: si no llega, vuelve al recargo por defecto
+        perfilCuidadorExistente.setRecargoPersonaExtra(dto.recargoPersonaExtra());
         PerfilCuidadorEntity perfilCuidadorActualizado = repository.save(perfilCuidadorExistente);
         return aDTO(perfilCuidadorActualizado);
     }
