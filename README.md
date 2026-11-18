@@ -113,6 +113,12 @@ Y al **administrador**:
 
    Si quieres que se cree también el **usuario administrador**, define antes las variables <mark>ADMIN_EMAIL</mark> y <mark>ADMIN_PASSWORD</mark> (ver [Panel de administración](#-panel-de-administración)).
 
+   **Datos de ejemplo (solo desarrollo, opcional).** Si arrancas con el perfil <mark>dev</mark>, se crean una familia, dos personas cuidadoras con perfil, cuatro solicitudes (una de cada estado) y dos pagos, para probar la app sin registrar usuarios a mano. No se duplican al reiniciar y nunca se crean en producción ni en los tests.
+```bash
+   SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
+```
+   Todos entran con la contraseña <mark>Password123!</mark>: <mark>familia@test.com</mark> (familia), <mark>cuidador@test.com</mark> y <mark>cuidadora@test.com</mark> (personas cuidadoras).
+
 4. **Ejecuta los tests** (opcional, pero recomendado; los de integración necesitan la base de datos del paso 2 arrancada con <mark>docker compose up -d</mark>)
 ```bash
    ./mvnw test
