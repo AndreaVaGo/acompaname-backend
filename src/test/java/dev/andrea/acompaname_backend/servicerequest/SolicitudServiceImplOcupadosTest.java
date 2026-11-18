@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.payment.PagoRepository;
+import dev.andrea.acompaname_backend.schedule.BloqueOcupadoRepository;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionFechaInvalida;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
 
@@ -37,6 +38,8 @@ public class SolicitudServiceImplOcupadosTest {
     private PerfilCuidadorRepository perfilCuidadorRepository;
     @Mock
     private PagoRepository pagoRepository;
+    @Mock
+    private BloqueOcupadoRepository bloqueRepository;
 
     private SolicitudServiceImpl service;
 
@@ -45,7 +48,7 @@ public class SolicitudServiceImplOcupadosTest {
     @BeforeEach
     void setup() {
         service = new SolicitudServiceImpl(repository, usuarioRepository, perfilCuidadorRepository,
-                pagoRepository);
+                pagoRepository, bloqueRepository);
     }
 
     // Solicitud aceptada de un cuidador, con las fechas y horas que le pasemos (las horas pueden ser null)

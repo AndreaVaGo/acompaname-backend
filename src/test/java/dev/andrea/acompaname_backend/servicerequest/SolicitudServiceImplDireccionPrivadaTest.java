@@ -23,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.payment.PagoRepository;
+import dev.andrea.acompaname_backend.schedule.BloqueOcupadoRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
@@ -40,13 +41,15 @@ public class SolicitudServiceImplDireccionPrivadaTest {
         private PerfilCuidadorRepository perfilCuidadorRepository;
         @Mock
         private PagoRepository pagoRepository;
+        @Mock
+        private BloqueOcupadoRepository bloqueRepository;
 
         private static final String DIRECCION = "Calle Uría 10, 3º B, Oviedo";
 
         @BeforeEach
         void setup() {
                 service = new SolicitudServiceImpl(repository, usuarioRepository, perfilCuidadorRepository,
-                                pagoRepository);
+                                pagoRepository, bloqueRepository);
         }
 
         private void iniciarSesionComo(String email) {

@@ -27,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import dev.andrea.acompaname_backend.payment.PagoEntity;
 import dev.andrea.acompaname_backend.payment.PagoRepository;
+import dev.andrea.acompaname_backend.schedule.BloqueOcupadoRepository;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionNotFound;
@@ -56,6 +57,8 @@ public class SolicitudServiceImplErroresTest {
     private PerfilCuidadorRepository perfilCuidadorRepository;
     @Mock
     private PagoRepository pagoRepository;
+    @Mock
+    private BloqueOcupadoRepository bloqueRepository;
 
     private SolicitudServiceImpl service;
     private SecurityContext contextoOriginal;
@@ -67,7 +70,7 @@ public class SolicitudServiceImplErroresTest {
         contextoOriginal = SecurityContextHolder.getContext();
         SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
         service = new SolicitudServiceImpl(repository, usuarioRepository, perfilCuidadorRepository,
-                pagoRepository);
+                pagoRepository, bloqueRepository);
     }
 
     @AfterEach
