@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import dev.andrea.acompaname_backend.chat.dtos.MensajeDTORequest;
 import dev.andrea.acompaname_backend.chat.dtos.MensajeDTOResponse;
+import dev.andrea.acompaname_backend.chat.dtos.MensajesNoLeidosDTOResponse;
 import dev.andrea.acompaname_backend.chat.exceptions.ChatExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.chat.exceptions.ChatExceptionConflicto;
 
@@ -118,5 +120,28 @@ public class MensajeControllerTest {
                 .andReturn().getResponse();
 
         assertThat(response.getStatus(), is(equalTo(409)));
+    }
+
+    @Test
+    void testNoLeidosDevuelveElTotalYElReparto() throws Exception {
+        when(service.getNoLeidos()).thenReturn(new MensajesNoLeidosDTOResponse(3L, Map.of(5L, 2L, 6L, 1L)));
+
+        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/mensajes/no-leidos"))
+                .andReturn().getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(200)));
+        assertThat(response.getContentAsString(), containsString("\"total\":3"));
+        assertThat(response.getContentAsString(), containsString("\"5\":2"));
+    }
+
+    @Test
+    void testNoLeidosSinMensajesDevuelveTotalCero() throws Exception {
+        when(service.getNoLeidos()).thenReturn(new MensajesNoLeidosDTOResponse(0L, Map.of()));
+
+        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/mensajes/no-leidos"))
+                .andReturn().getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(200)));
+        assertThat(response.getContentAsString(), containsString("\"total\":0"));
     }
 }

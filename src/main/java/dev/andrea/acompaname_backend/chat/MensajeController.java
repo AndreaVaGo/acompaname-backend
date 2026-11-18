@@ -13,11 +13,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import dev.andrea.acompaname_backend.chat.dtos.MensajeDTORequest;
 import dev.andrea.acompaname_backend.chat.dtos.MensajeDTOResponse;
+import dev.andrea.acompaname_backend.chat.dtos.MensajesNoLeidosDTOResponse;
 import jakarta.validation.Valid;
 
 // El chat de cada solicitud. El front pregunta cada pocos segundos con "desde" (el último id que ya tiene)
 @RestController
-@RequestMapping(path = "${api-endpoint}/solicitudes/{solicitudId}/mensajes")
+@RequestMapping(path = "${api-endpoint}")
 public class MensajeController {
 
     private final MensajeService service;
@@ -26,13 +27,19 @@ public class MensajeController {
         this.service = service;
     }
 
-    @GetMapping("")
+    @GetMapping("/solicitudes/{solicitudId}/mensajes")
     public List<MensajeDTOResponse> index(@PathVariable Long solicitudId,
             @RequestParam(required = false) Long desde) {
         return service.getMensajes(solicitudId, desde);
     }
 
-    @PostMapping("")
+    // Para pintar los avisos de mensajes sin leer en las tarjetas y en el menú
+    @GetMapping("/mensajes/no-leidos")
+    public MensajesNoLeidosDTOResponse noLeidos() {
+        return service.getNoLeidos();
+    }
+
+    @PostMapping("/solicitudes/{solicitudId}/mensajes")
     public ResponseEntity<MensajeDTOResponse> store(@PathVariable Long solicitudId,
             @Valid @RequestBody MensajeDTORequest dto) {
         return ResponseEntity.status(201).body(service.enviar(solicitudId, dto));
