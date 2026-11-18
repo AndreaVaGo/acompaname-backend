@@ -29,6 +29,7 @@ import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionN
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionEstadoInvalido;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionFechaInvalida;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionPersonasInvalidas;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionSolapamiento;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionAccesoDenegado;
@@ -76,6 +77,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(SolicitudExceptionFechaInvalida.class)
     public ResponseEntity<String> handleSolicitudFechaInvalidaException(SolicitudExceptionFechaInvalida exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    }
+
+    // La lista de personas a cuidar está vacía o tiene más de 5
+    @ExceptionHandler(SolicitudExceptionPersonasInvalidas.class)
+    public ResponseEntity<String> handleSolicitudPersonasInvalidasException(
+            SolicitudExceptionPersonasInvalidas exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
 

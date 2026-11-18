@@ -120,7 +120,7 @@ public class SolicitudServiceImpl implements SolicitudService {
         return new SolicitudDTOResponse(dto.id(), dto.tipoCuidado(), dto.nombrePaciente(), dto.notas(),
                 dto.edadPaciente(), dto.fechaCuidado(), dto.fechaFin(), dto.estado(), dto.familiaId(),
                 dto.cuidadorId(), dto.familiaNombre(), dto.cuidadorNombre(), dto.necesidades(), null,
-                dto.grupoEdad(), dto.horaInicio(), dto.horaFin());
+                dto.grupoEdad(), dto.horaInicio(), dto.horaFin(), dto.personas());
     }
 
     // La fecha de fin es opcional, pero si viene no puede ser anterior a la de inicio.
@@ -224,9 +224,12 @@ public class SolicitudServiceImpl implements SolicitudService {
         verificarPropietario(solicitudExistente);
         verificarEditable(solicitudExistente);
         solicitudExistente.setTipoCuidado(dto.tipoCuidado());
-        solicitudExistente.setNombrePaciente(dto.nombrePaciente());
+        // Se cambia la lista de personas; la primera también va en nombrePaciente y edadPaciente
+        List<PersonaCuidada> personas = PersonasDeSolicitud.desdePeticion(dto);
+        solicitudExistente.setPersonas(personas);
+        solicitudExistente.setNombrePaciente(personas.get(0).getNombre());
+        solicitudExistente.setEdadPaciente(personas.get(0).getEdad());
         solicitudExistente.setNotas(dto.notas());
-        solicitudExistente.setEdadPaciente(dto.edadPaciente());
         solicitudExistente.setFechaCuidado(dto.fechaCuidado());
         solicitudExistente.setFechaFin(dto.fechaFin());
         solicitudExistente.setHoraInicio(dto.horaInicio());
