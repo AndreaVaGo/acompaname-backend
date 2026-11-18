@@ -1,6 +1,7 @@
 package dev.andrea.acompaname_backend.servicerequest.dtos;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import dev.andrea.acompaname_backend.globals.GrupoEdad;
@@ -34,10 +35,24 @@ public record SolicitudDTORequest(
                 @Size(max = 200, message = "La dirección no puede superar 200 caracteres") String direccion,
 
                 // Grupo de edad de la persona cuidada (opcional). Si llega uno que no existe, Spring responde 400
-                GrupoEdad grupoEdad
+                GrupoEdad grupoEdad,
+
+                // Hora de inicio (el primer día) y hora de fin (el último día) del cuidado
+                @NotNull(message = "La hora de inicio no puede ser nula") LocalTime horaInicio,
+
+                @NotNull(message = "La hora de fin no puede ser nula") LocalTime horaFin
 
 ) 
 {
+
+        // Constructor sin horas: el cuidado dura el día completo (de 00:00 a 23:59).
+        // Se deja para no romper el código que ya existía
+        public SolicitudDTORequest(String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
+                        LocalDate fechaCuidado, LocalDate fechaFin, Long familiaId, Long cuidadorId,
+                        List<String> necesidades, String direccion, GrupoEdad grupoEdad) {
+                this(tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, fechaFin, familiaId, cuidadorId,
+                                necesidades, direccion, grupoEdad, LocalTime.MIN, LocalTime.of(23, 59));
+        }
 
         // Constructor sin grupo de edad, para no romper el código que ya existía
         public SolicitudDTORequest(String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
