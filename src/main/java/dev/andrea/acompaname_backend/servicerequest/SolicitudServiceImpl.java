@@ -103,13 +103,18 @@ public class SolicitudServiceImpl implements SolicitudService {
         return new SolicitudDTOResponse(dto.id(), dto.tipoCuidado(), dto.nombrePaciente(), dto.notas(),
                 dto.edadPaciente(), dto.fechaCuidado(), dto.fechaFin(), dto.estado(), dto.familiaId(),
                 dto.cuidadorId(), dto.familiaNombre(), dto.cuidadorNombre(), dto.necesidades(), null,
-                dto.grupoEdad());
+                dto.grupoEdad(), dto.horaInicio(), dto.horaFin());
     }
 
-    // La fecha de fin es opcional, pero si viene no puede ser anterior a la de inicio
+    // La fecha de fin es opcional, pero si viene no puede ser anterior a la de inicio.
+    // Si el cuidado dura un solo día, la hora de fin tiene que ser posterior a la de inicio
     private void verificarFechas(SolicitudDTORequest dto) {
         if (dto.fechaFin() != null && dto.fechaFin().isBefore(dto.fechaCuidado())) {
             throw new SolicitudExceptionFechaInvalida("La fecha de fin no puede ser anterior a la fecha de inicio");
+        }
+        boolean unSoloDia = dto.fechaFin() == null || dto.fechaFin().equals(dto.fechaCuidado());
+        if (unSoloDia && !dto.horaFin().isAfter(dto.horaInicio())) {
+            throw new SolicitudExceptionFechaInvalida("La hora de fin tiene que ser posterior a la hora de inicio");
         }
     }
 
@@ -194,6 +199,8 @@ public class SolicitudServiceImpl implements SolicitudService {
         solicitudExistente.setEdadPaciente(dto.edadPaciente());
         solicitudExistente.setFechaCuidado(dto.fechaCuidado());
         solicitudExistente.setFechaFin(dto.fechaFin());
+        solicitudExistente.setHoraInicio(dto.horaInicio());
+        solicitudExistente.setHoraFin(dto.horaFin());
         // Si no vienen necesidades se mantienen las que había; una lista vacía las borra
         if (dto.necesidades() != null) {
             solicitudExistente.setNecesidades(String.join(",", dto.necesidades()));
