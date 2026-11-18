@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -83,6 +84,8 @@ public class SolicitudServiceImplPagoIntegrationTest extends ContenedorMySqlRepo
                 .tipoCuidado("DOMICILIO")
                 .estado(EstadoSolicitud.PENDIENTE)
                 .fechaCuidado(LocalDate.of(2026, 11, 10))
+                .horaInicio(LocalTime.of(10, 0))
+                .horaFin(LocalTime.of(14, 0))
                 .familia(ana)
                 .cuidador(crearCuidador(pepe))
                 .build();
@@ -101,7 +104,7 @@ public class SolicitudServiceImplPagoIntegrationTest extends ContenedorMySqlRepo
     }
 
     @Test
-    void testCompletarLaSolicitudCreaSuPagoPendienteConLaTarifaDelCuidador() {
+    void testCompletarLaSolicitudCreaSuPagoPendienteConHorasPorTarifa() {
         SolicitudEntity solicitud = crearSolicitudYEntrarComoCuidador();
         service.cambiarEstado(solicitud.getId(), EstadoSolicitud.ACEPTADA);
 
@@ -110,7 +113,23 @@ public class SolicitudServiceImplPagoIntegrationTest extends ContenedorMySqlRepo
         List<PagoEntity> pagos = pagoRepository.findAll();
         assertThat(pagos.size(), is(equalTo(1)));
         assertThat(pagos.get(0).getEstado(), is(equalTo(EstadoPago.PENDIENTE)));
-        assertThat(pagos.get(0).getImporte().compareTo(new BigDecimal("18.00")), is(equalTo(0)));
+        // 4 horas (de 10:00 a 14:00) x 18,00 = 72,00
+        assertThat(pagos.get(0).getImporte().compareTo(new BigDecimal("72.00")), is(equalTo(0)));
+    }
+
+    @Test
+    void testCadaPersonaExtraSumaUnRecargoDelVeinticincoPorCiento() {
+        SolicitudEntity solicitud = crearSolicitudYEntrarComoCuidador();
+        solicitud.getPersonas().add(new PersonaCuidada("Carmen", 82));
+        solicitud.getPersonas().add(new PersonaCuidada("Antonio", 85));
+        solicitudRepository.saveAndFlush(solicitud);
+        service.cambiarEstado(solicitud.getId(), EstadoSolicitud.ACEPTADA);
+
+        service.cambiarEstado(solicitud.getId(), EstadoSolicitud.COMPLETADA);
+
+        // 4 horas x 18,00 x (1 + 0,25 x 1 persona extra) = 90,00
+        List<PagoEntity> pagos = pagoRepository.findAll();
+        assertThat(pagos.get(0).getImporte().compareTo(new BigDecimal("90.00")), is(equalTo(0)));
     }
 
     @Test

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import dev.andrea.acompaname_backend.globals.GrupoEdad;
 import dev.andrea.acompaname_backend.globals.ListaDeTexto;
+import dev.andrea.acompaname_backend.payment.CalculoDeImporte;
 import dev.andrea.acompaname_backend.payment.PagoRepository;
 import dev.andrea.acompaname_backend.schedule.BloqueOcupadoEntity;
 import dev.andrea.acompaname_backend.schedule.BloqueOcupadoRepository;
@@ -48,6 +49,7 @@ public class SolicitudServiceImpl implements SolicitudService {
     // Los avisos por correo son opcionales: si no hay (por ejemplo, en los tests que no los usan),
     // la solicitud funciona igual, solo que sin mandar correos
     private AvisosDeSolicitud avisos;
+    private CalculoDeImporte calculoDeImporte = new CalculoDeImporte(CalculoDeImporte.RECARGO_POR_DEFECTO);
 
     public SolicitudServiceImpl(SolicitudRepository repository, UsuarioRepository usuarioRepository,
             PerfilCuidadorRepository perfilCuidadorRepository, PagoRepository pagoRepository,
@@ -62,6 +64,13 @@ public class SolicitudServiceImpl implements SolicitudService {
     @Autowired(required = false)
     public void setAvisos(AvisosDeSolicitud avisos) {
         this.avisos = avisos;
+    }
+
+    // El cálculo del importe usa el recargo configurado; si no hay configuración (tests sin Spring),
+    // usa el recargo por defecto
+    @Autowired(required = false)
+    public void setCalculoDeImporte(CalculoDeImporte calculoDeImporte) {
+        this.calculoDeImporte = calculoDeImporte;
     }
 
     private SolicitudEntity findEntityById(Long id) {
@@ -286,9 +295,9 @@ public class SolicitudServiceImpl implements SolicitudService {
         solicitud.setEstado(nuevoEstado);
         SolicitudEntity solicitudActualizada = repository.save(solicitud);
         if (seCompleta && !pagoRepository.existsBySolicitudId(solicitud.getId())) {
-            // Al completar la solicitud se genera su pago pendiente, con la tarifa del cuidador:
-            // la familia solo paga cuando el servicio ya se ha realizado
-            BigDecimal importe = solicitud.getCuidador().getTarifaHora();
+            // Al completar la solicitud se genera su pago pendiente: horas x tarifa del cuidador,
+            // con recargo por cada persona extra. La familia solo paga cuando el servicio ya se ha realizado
+            BigDecimal importe = calculoDeImporte.calcular(solicitud, solicitud.getCuidador().getTarifaHora());
             pagoRepository.save(PagoMapper.toEntity(importe, solicitud));
             // Se avisa a la familia de que tiene un pago pendiente (solo cuando se crea el pago)
             if (avisos != null) {

@@ -109,6 +109,14 @@ public class SolicitudEntity {
         return ultimoDia.atTime(horaFin);
     }
 
+    // Cuántas personas se cuidan. Las solicitudes antiguas no tienen lista y cuentan como una
+    public int numeroDePersonas() {
+        if (personas == null || personas.isEmpty()) {
+            return 1;
+        }
+        return personas.size();
+    }
+
     // Dos cuidados se cruzan si cada uno empieza antes de que acabe el otro.
     // Si uno acaba justo cuando empieza el otro (12:00 y 12:00) no se cruzan
     public boolean seCruzaCon(LocalDateTime inicio, LocalDateTime fin) {

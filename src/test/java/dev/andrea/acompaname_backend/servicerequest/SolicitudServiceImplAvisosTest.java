@@ -170,7 +170,8 @@ public class SolicitudServiceImplAvisosTest {
 
         service.cambiarEstado(1L, EstadoSolicitud.COMPLETADA);
 
-        verify(avisos).avisarServicioCompletado(solicitud, new BigDecimal("18.00"));
+        // Sin horas, el cuidado cuenta como el día completo: 24 horas x 18,00 = 432,00
+        verify(avisos).avisarServicioCompletado(solicitud, new BigDecimal("432.00"));
         verify(avisos, never()).avisarSolicitudAceptada(Mockito.any());
         verify(avisos, never()).avisarSolicitudRechazada(Mockito.any());
     }
