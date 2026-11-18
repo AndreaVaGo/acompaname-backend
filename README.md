@@ -291,6 +291,16 @@ El proyecto cuenta con **470 tests** que cubren la lógica de negocio, la capa H
 ./mvnw test
 ```
 
+Mientras desarrollas no hace falta pasar toda la batería (es lenta porque algunos tests arrancan MySQL con Docker). Puedes lanzar solo un grupo por nombre de clase, o un único test:
+
+```bash
+./mvnw test -Dtest='Solicitud*Test'
+./mvnw test -Dtest=SolicitudServiceImplHorasTest
+./mvnw test -Dtest=SolicitudServiceImplHorasTest#nombreDelMetodo
+```
+
+Los tests de integración comparten dos contenedores MySQL (uno para los de repositorio y otro para los de la aplicación completa, en <mark>src/test/java/.../support</mark>), así que Docker solo arranca dos bases de datos en toda la ejecución. Lanza la batería completa una vez antes de hacer merge.
+
 La cobertura se mide con **JaCoCo**: **96 % de instrucciones** y **95 % de ramas** (el mínimo pedido era el 70 %).
 
 ![Resultado de los tests del backend](docs/screenshots/tests-backend.png)
