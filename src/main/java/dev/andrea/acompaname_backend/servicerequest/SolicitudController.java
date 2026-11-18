@@ -1,6 +1,7 @@
 package dev.andrea.acompaname_backend.servicerequest;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -46,12 +47,15 @@ public class SolicitudController {
         return service.getMisSolicitudes();
     }
 
-    // Público: solo devuelve ids de cuidadores ocupados, para filtrar la búsqueda por fechas
+    // Público: solo devuelve ids de cuidadores ocupados, para filtrar la búsqueda por fechas y horas.
+    // La fecha de fin y las horas son opcionales: sin ellas se busca el día completo
     @GetMapping("/cuidadores-ocupados")
     public List<Long> getCuidadoresOcupados(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin) {
-        return service.getCuidadoresOcupados(inicio, fin);
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime horaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime horaFin) {
+        return service.getCuidadoresOcupados(inicio, fin, horaInicio, horaFin);
     }
 
     @PostMapping("")
