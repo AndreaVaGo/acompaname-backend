@@ -47,4 +47,9 @@ public class MensajeEntity {
     // La pone el servidor al guardar el mensaje
     @Column(nullable = false)
     private LocalDateTime fecha;
+
+    // false hasta que la otra persona abre el chat y lo ve.
+    // El valor por defecto es para los mensajes que ya existían antes de añadir este campo: se dan por leídos
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean leido;
 }

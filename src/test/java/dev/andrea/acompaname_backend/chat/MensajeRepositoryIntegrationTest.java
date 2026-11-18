@@ -94,4 +94,78 @@ public class MensajeRepositoryIntegrationTest extends ContenedorMySqlRepositorio
 
         assertThat(nuevos.stream().map(MensajeEntity::getTexto).toList(), contains("Segundo", "Tercero"));
     }
+
+    @Test
+    void testUnMensajeNuevoQuedaSinLeer() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        UsuarioEntity pepe = crearUsuario("Pepe", "pepe@test.com");
+        SolicitudEntity solicitud = crearSolicitud(ana, pepe);
+
+        MensajeEntity mensaje = escribir(solicitud, ana, "Hola");
+
+        assertThat(repository.findById(mensaje.getId()).get().isLeido(), is(false));
+    }
+
+    @Test
+    void testSinLeerDevuelveSoloLosMensajesDeLaOtraPersona() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        UsuarioEntity pepe = crearUsuario("Pepe", "pepe@test.com");
+        SolicitudEntity solicitud = crearSolicitud(ana, pepe);
+        escribir(solicitud, ana, "De Ana");
+        escribir(solicitud, pepe, "De Pepe");
+
+        // Ana solo tiene sin leer lo que escribió Pepe
+        List<MensajeEntity> sinLeerAna = repository
+                .findBySolicitudIdAndEmisorIdNotAndLeidoFalse(solicitud.getId(), ana.getId());
+
+        assertThat(sinLeerAna.stream().map(MensajeEntity::getTexto).toList(), contains("De Pepe"));
+    }
+
+    @Test
+    void testSinLeerNoIncluyeLosMensajesYaLeidos() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        UsuarioEntity pepe = crearUsuario("Pepe", "pepe@test.com");
+        SolicitudEntity solicitud = crearSolicitud(ana, pepe);
+        MensajeEntity leido = escribir(solicitud, pepe, "Ya leído");
+        leido.setLeido(true);
+        repository.saveAndFlush(leido);
+        escribir(solicitud, pepe, "Sin leer");
+
+        List<MensajeEntity> sinLeerAna = repository
+                .findBySolicitudIdAndEmisorIdNotAndLeidoFalse(solicitud.getId(), ana.getId());
+
+        assertThat(sinLeerAna.stream().map(MensajeEntity::getTexto).toList(), contains("Sin leer"));
+    }
+
+    @Test
+    void testNoLeidosDeUnaPersonaIncluyeSolicitudesComoFamiliaYComoCuidadora() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        UsuarioEntity pepe = crearUsuario("Pepe", "pepe@test.com");
+        UsuarioEntity luis = crearUsuario("Luis", "luis@test.com");
+        // Pepe es cuidador en la solicitud de Ana y Luis es familia en otra
+        SolicitudEntity deAna = crearSolicitud(ana, pepe);
+        UsuarioEntity marta = crearUsuario("Marta", "marta@test.com");
+        SolicitudEntity deLuis = crearSolicitud(luis, marta);
+        escribir(deAna, ana, "Ana a Pepe");
+        escribir(deLuis, marta, "Marta a Luis");
+
+        List<MensajeEntity> deLaFamilia = repository.findNoLeidosDe("luis@test.com");
+        List<MensajeEntity> deLaCuidadora = repository.findNoLeidosDe("pepe@test.com");
+
+        assertThat(deLaFamilia.stream().map(MensajeEntity::getTexto).toList(), contains("Marta a Luis"));
+        assertThat(deLaCuidadora.stream().map(MensajeEntity::getTexto).toList(), contains("Ana a Pepe"));
+    }
+
+    @Test
+    void testNoLeidosNoIncluyeLosMensajesDeSolicitudesAjenas() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        UsuarioEntity pepe = crearUsuario("Pepe", "pepe@test.com");
+        UsuarioEntity luis = crearUsuario("Luis", "luis@test.com");
+        UsuarioEntity marta = crearUsuario("Marta", "marta@test.com");
+        crearSolicitud(ana, pepe);
+        SolicitudEntity deLuis = crearSolicitud(luis, marta);
+        escribir(deLuis, marta, "Marta a Luis");
+
+        assertThat(repository.findNoLeidosDe("ana@test.com"), is(empty()));
+    }
 }

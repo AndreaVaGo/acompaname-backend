@@ -18,6 +18,8 @@ public class MensajeMapper {
         mensaje.setTexto(dto.texto().trim());
         // La fecha la pone el servidor, no quien escribe
         mensaje.setFecha(LocalDateTime.now());
+        // Un mensaje nuevo siempre empieza sin leer
+        mensaje.setLeido(false);
         return mensaje;
     }
 

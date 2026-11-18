@@ -62,4 +62,12 @@ public class MensajeMapperTest {
         assertThat(suyo.emisorNombre(), is(equalTo("Ana")));
         assertThat(suyo.texto(), is(equalTo("Hola")));
     }
+
+    @Test
+    void testToEntityEmpiezaSinLeer() {
+        MensajeEntity mensaje = MensajeMapper.toEntity(new MensajeDTORequest("Hola"), solicitud(),
+                usuario(1L, "Ana", "ana@test.com"));
+
+        assertThat(mensaje.isLeido(), is(equalTo(false)));
+    }
 }
