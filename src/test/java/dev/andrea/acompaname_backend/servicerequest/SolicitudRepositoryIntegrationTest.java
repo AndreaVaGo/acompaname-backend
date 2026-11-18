@@ -84,6 +84,20 @@ public class SolicitudRepositoryIntegrationTest {
         return repository.saveAndFlush(solicitud);
     }
 
+    // Ids de los cuidadores que tienen solicitudes en ese estado cuyos días se cruzan con el periodo
+    private List<Long> idsOcupados(LocalDate inicio, LocalDate fin, EstadoSolicitud estado) {
+        return repository.findPorFechasQueSeCruzan(inicio, fin, estado).stream()
+                .map(solicitud -> solicitud.getCuidador().getId())
+                .distinct()
+                .toList();
+    }
+
+    // Cuántas otras solicitudes de ese cuidador se cruzan con el periodo (sin contar la que tiene ese id)
+    private long cuantasSeCruzan(Long cuidadorId, Long solicitudId, LocalDate inicio, LocalDate fin,
+            EstadoSolicitud estado) {
+        return repository.findDelCuidadorQueSeCruzan(cuidadorId, solicitudId, inicio, fin, estado).size();
+    }
+
     // La base de datos no deja borrar a quien tiene solicitudes: por eso la API responde 409 y no 500
     @Test
     void testNoSePuedeBorrarUnUsuarioQueTieneSolicitudes() {
@@ -173,7 +187,7 @@ public class SolicitudRepositoryIntegrationTest {
         PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
         crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 8), LocalDate.of(2026, 9, 12), EstadoSolicitud.ACEPTADA);
 
-        List<Long> ocupados = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 10),
+        List<Long> ocupados = idsOcupados(LocalDate.of(2026, 9, 10),
                 LocalDate.of(2026, 9, 11), EstadoSolicitud.ACEPTADA);
 
         assertThat(ocupados, is(equalTo(List.of(pepe.getId()))));
@@ -185,9 +199,9 @@ public class SolicitudRepositoryIntegrationTest {
         PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
         crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 10), null, EstadoSolicitud.ACEPTADA);
 
-        List<Long> elMismoDia = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 10),
+        List<Long> elMismoDia = idsOcupados(LocalDate.of(2026, 9, 10),
                 LocalDate.of(2026, 9, 10), EstadoSolicitud.ACEPTADA);
-        List<Long> alDiaSiguiente = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 11),
+        List<Long> alDiaSiguiente = idsOcupados(LocalDate.of(2026, 9, 11),
                 LocalDate.of(2026, 9, 11), EstadoSolicitud.ACEPTADA);
 
         assertThat(elMismoDia, is(equalTo(List.of(pepe.getId()))));
@@ -200,7 +214,7 @@ public class SolicitudRepositoryIntegrationTest {
         PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
         crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 5), EstadoSolicitud.ACEPTADA);
 
-        List<Long> ocupados = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 10),
+        List<Long> ocupados = idsOcupados(LocalDate.of(2026, 9, 10),
                 LocalDate.of(2026, 9, 12), EstadoSolicitud.ACEPTADA);
 
         assertThat(ocupados, is(empty()));
@@ -215,7 +229,7 @@ public class SolicitudRepositoryIntegrationTest {
         crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.RECHAZADA);
         crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.COMPLETADA);
 
-        List<Long> ocupados = repository.findCuidadoresOcupados(dia, dia, EstadoSolicitud.ACEPTADA);
+        List<Long> ocupados = idsOcupados(dia, dia, EstadoSolicitud.ACEPTADA);
 
         assertThat(ocupados, is(empty()));
     }
@@ -227,7 +241,7 @@ public class SolicitudRepositoryIntegrationTest {
         crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 10), null, EstadoSolicitud.ACEPTADA);
         crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 11), null, EstadoSolicitud.ACEPTADA);
 
-        List<Long> ocupados = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 10),
+        List<Long> ocupados = idsOcupados(LocalDate.of(2026, 9, 10),
                 LocalDate.of(2026, 9, 11), EstadoSolicitud.ACEPTADA);
 
         assertThat(ocupados, is(equalTo(List.of(pepe.getId()))));
@@ -240,14 +254,14 @@ public class SolicitudRepositoryIntegrationTest {
         crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 5), LocalDate.of(2026, 9, 10), EstadoSolicitud.ACEPTADA);
 
         // El servicio acaba el 10: buscar desde el 10 sigue contando como ocupado, desde el 11 ya no
-        List<Long> terminaElDiaBuscado = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 10),
+        List<Long> terminaElDiaBuscado = idsOcupados(LocalDate.of(2026, 9, 10),
                 LocalDate.of(2026, 9, 12), EstadoSolicitud.ACEPTADA);
-        List<Long> terminaAntes = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 11),
+        List<Long> terminaAntes = idsOcupados(LocalDate.of(2026, 9, 11),
                 LocalDate.of(2026, 9, 12), EstadoSolicitud.ACEPTADA);
         // El servicio empieza el 5: buscar hasta el 5 cuenta como ocupado, hasta el 4 ya no
-        List<Long> empiezaElDiaBuscado = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 1),
+        List<Long> empiezaElDiaBuscado = idsOcupados(LocalDate.of(2026, 9, 1),
                 LocalDate.of(2026, 9, 5), EstadoSolicitud.ACEPTADA);
-        List<Long> empiezaDespues = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 1),
+        List<Long> empiezaDespues = idsOcupados(LocalDate.of(2026, 9, 1),
                 LocalDate.of(2026, 9, 4), EstadoSolicitud.ACEPTADA);
 
         assertThat(terminaElDiaBuscado, is(equalTo(List.of(pepe.getId()))));
@@ -264,7 +278,7 @@ public class SolicitudRepositoryIntegrationTest {
         crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 10), null, EstadoSolicitud.ACEPTADA);
         crearSolicitud(ana, marta, LocalDate.of(2026, 9, 20), null, EstadoSolicitud.ACEPTADA);
 
-        List<Long> ocupados = repository.findCuidadoresOcupados(LocalDate.of(2026, 9, 10),
+        List<Long> ocupados = idsOcupados(LocalDate.of(2026, 9, 10),
                 LocalDate.of(2026, 9, 11), EstadoSolicitud.ACEPTADA);
 
         assertThat(ocupados, is(equalTo(List.of(pepe.getId()))));
@@ -278,7 +292,7 @@ public class SolicitudRepositoryIntegrationTest {
         crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.ACEPTADA);
         SolicitudEntity laQueSeAcepta = crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.PENDIENTE);
 
-        long solapados = repository.countSolapamientos(pepe.getId(), laQueSeAcepta.getId(), dia, dia,
+        long solapados = cuantasSeCruzan(pepe.getId(), laQueSeAcepta.getId(), dia, dia,
                 EstadoSolicitud.ACEPTADA);
 
         assertThat(solapados, is(equalTo(1L)));
@@ -292,7 +306,7 @@ public class SolicitudRepositoryIntegrationTest {
         LocalDate dia = LocalDate.of(2026, 9, 10);
         SolicitudEntity laQueSeAcepta = crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.PENDIENTE);
 
-        long solapados = repository.countSolapamientos(pepe.getId(), laQueSeAcepta.getId(), dia, dia,
+        long solapados = cuantasSeCruzan(pepe.getId(), laQueSeAcepta.getId(), dia, dia,
                 EstadoSolicitud.ACEPTADA);
 
         assertThat(solapados, is(equalTo(1L)));
@@ -306,9 +320,9 @@ public class SolicitudRepositoryIntegrationTest {
         SolicitudEntity laQueSeAcepta = crearSolicitud(ana, pepe, LocalDate.of(2026, 9, 10),
                 LocalDate.of(2026, 9, 12), EstadoSolicitud.PENDIENTE);
 
-        long empiezaElDiaEnQueTermina = repository.countSolapamientos(pepe.getId(), laQueSeAcepta.getId(),
+        long empiezaElDiaEnQueTermina = cuantasSeCruzan(pepe.getId(), laQueSeAcepta.getId(),
                 LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 12), EstadoSolicitud.ACEPTADA);
-        long empiezaAlDiaSiguiente = repository.countSolapamientos(pepe.getId(), laQueSeAcepta.getId(),
+        long empiezaAlDiaSiguiente = cuantasSeCruzan(pepe.getId(), laQueSeAcepta.getId(),
                 LocalDate.of(2026, 9, 11), LocalDate.of(2026, 9, 12), EstadoSolicitud.ACEPTADA);
 
         assertThat(empiezaElDiaEnQueTermina, is(equalTo(1L)));
@@ -323,7 +337,7 @@ public class SolicitudRepositoryIntegrationTest {
         LocalDate dia = LocalDate.of(2026, 9, 10);
         SolicitudEntity laQueSeAcepta = crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.PENDIENTE);
 
-        long solapados = repository.countSolapamientos(pepe.getId(), laQueSeAcepta.getId(), dia, dia,
+        long solapados = cuantasSeCruzan(pepe.getId(), laQueSeAcepta.getId(), dia, dia,
                 EstadoSolicitud.ACEPTADA);
 
         assertThat(solapados, is(equalTo(0L)));
@@ -339,7 +353,7 @@ public class SolicitudRepositoryIntegrationTest {
         crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.COMPLETADA);
         SolicitudEntity laQueSeAcepta = crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.PENDIENTE);
 
-        long solapados = repository.countSolapamientos(pepe.getId(), laQueSeAcepta.getId(), dia, dia,
+        long solapados = cuantasSeCruzan(pepe.getId(), laQueSeAcepta.getId(), dia, dia,
                 EstadoSolicitud.ACEPTADA);
 
         assertThat(solapados, is(equalTo(0L)));
@@ -354,7 +368,7 @@ public class SolicitudRepositoryIntegrationTest {
         crearSolicitud(ana, marta, dia, null, EstadoSolicitud.ACEPTADA);
         SolicitudEntity laQueSeAcepta = crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.PENDIENTE);
 
-        long solapados = repository.countSolapamientos(pepe.getId(), laQueSeAcepta.getId(), dia, dia,
+        long solapados = cuantasSeCruzan(pepe.getId(), laQueSeAcepta.getId(), dia, dia,
                 EstadoSolicitud.ACEPTADA);
 
         assertThat(solapados, is(equalTo(0L)));
@@ -367,9 +381,9 @@ public class SolicitudRepositoryIntegrationTest {
         LocalDate dia = LocalDate.of(2026, 9, 10);
         SolicitudEntity aceptada = crearSolicitud(ana, pepe, dia, null, EstadoSolicitud.ACEPTADA);
 
-        long contandoLaPropia = repository.countSolapamientos(pepe.getId(), aceptada.getId() + 1, dia, dia,
+        long contandoLaPropia = cuantasSeCruzan(pepe.getId(), aceptada.getId() + 1, dia, dia,
                 EstadoSolicitud.ACEPTADA);
-        long excluyendoLaPropia = repository.countSolapamientos(pepe.getId(), aceptada.getId(), dia, dia,
+        long excluyendoLaPropia = cuantasSeCruzan(pepe.getId(), aceptada.getId(), dia, dia,
                 EstadoSolicitud.ACEPTADA);
 
         assertThat(contandoLaPropia, is(equalTo(1L)));
