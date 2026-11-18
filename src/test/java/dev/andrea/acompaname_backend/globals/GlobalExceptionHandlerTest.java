@@ -24,6 +24,8 @@ import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptio
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionEmailDuplicado;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionPasswordInvalida;
+import dev.andrea.acompaname_backend.passwordreset.TokenRecuperacionInvalidoException;
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionConflicto;
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionNotFound;
@@ -192,6 +194,24 @@ public class GlobalExceptionHandlerTest {
 
         assertThat(response.getStatusCode().value(), is(409));
         assertThat(response.getBody(), is(equalTo("No se puede completar la operación porque hay datos relacionados")));
+    }
+
+    @Test
+    void testPasswordInvalidaDa400ConElMensaje() {
+        ResponseEntity<String> response = handler
+                .handlePasswordInvalida(new UsuarioExceptionPasswordInvalida("La nueva contraseña debe ser distinta de la actual"));
+
+        assertThat(response.getStatusCode().value(), is(400));
+        assertThat(response.getBody(), is(equalTo("La nueva contraseña debe ser distinta de la actual")));
+    }
+
+    @Test
+    void testTokenDeRecuperacionInvalidoDa400ConElMensaje() {
+        ResponseEntity<String> response = handler
+                .handleTokenRecuperacionInvalido(new TokenRecuperacionInvalidoException());
+
+        assertThat(response.getStatusCode().value(), is(400));
+        assertThat(response.getBody(), is(equalTo("El enlace no es válido o ha caducado. Pide uno nuevo.")));
     }
 
     @Test

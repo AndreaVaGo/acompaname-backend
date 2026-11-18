@@ -21,6 +21,7 @@ import dev.andrea.acompaname_backend.payment.exceptions.PagoExceptionNotFound;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionFotoInvalida;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionNotFound;
+import dev.andrea.acompaname_backend.passwordreset.TokenRecuperacionInvalidoException;
 import dev.andrea.acompaname_backend.security.DemasiadasPeticionesException;
 import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionFechaInvalida;
@@ -33,6 +34,7 @@ import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptio
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionEmailDuplicado;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
+import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionPasswordInvalida;
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionConflicto;
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionNotFound;
@@ -174,6 +176,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<String> handleMetodoNoPermitido(HttpRequestMethodNotSupportedException exception) {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body("Método no permitido");
+    }
+
+    // La contraseña nueva no vale (por ejemplo, es igual a la actual o la actual no es correcta)
+    @ExceptionHandler(UsuarioExceptionPasswordInvalida.class)
+    public ResponseEntity<String> handlePasswordInvalida(UsuarioExceptionPasswordInvalida exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    }
+
+    // El enlace de recuperar la contraseña no existe, ya se usó o ha caducado
+    @ExceptionHandler(TokenRecuperacionInvalidoException.class)
+    public ResponseEntity<String> handleTokenRecuperacionInvalido(TokenRecuperacionInvalidoException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
 
     // Una misma dirección IP ha hecho demasiadas peticiones seguidas (login o registro)
