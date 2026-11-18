@@ -72,6 +72,34 @@ public class SolicitudEntity {
     private LocalTime horaInicio;
     private LocalTime horaFin;
 
+    // Momento exacto en que empieza el cuidado: la fecha con su hora de inicio.
+    // Sin hora (solicitudes antiguas) empieza a las 00:00
+    public LocalDateTime momentoInicio() {
+        if (horaInicio == null) {
+            return fechaCuidado.atTime(LocalTime.MIN);
+        }
+        return fechaCuidado.atTime(horaInicio);
+    }
+
+    // Momento exacto en que acaba el cuidado: la fecha de fin (o la de inicio, si no hay) con su hora de fin.
+    // Sin hora (solicitudes antiguas) acaba a las 23:59
+    public LocalDateTime momentoFin() {
+        LocalDate ultimoDia = fechaFin;
+        if (ultimoDia == null) {
+            ultimoDia = fechaCuidado;
+        }
+        if (horaFin == null) {
+            return ultimoDia.atTime(LocalTime.MAX);
+        }
+        return ultimoDia.atTime(horaFin);
+    }
+
+    // Dos cuidados se cruzan si cada uno empieza antes de que acabe el otro.
+    // Si uno acaba justo cuando empieza el otro (12:00 y 12:00) no se cruzan
+    public boolean seCruzaCon(LocalDateTime inicio, LocalDateTime fin) {
+        return momentoInicio().isBefore(fin) && momentoFin().isAfter(inicio);
+    }
+
     // Constructor sin horas, para no romper el código que ya existía
     public SolicitudEntity(Long id, String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
             LocalDate fechaCuidado, LocalDate fechaFin, EstadoSolicitud estado, UsuarioEntity familia,
