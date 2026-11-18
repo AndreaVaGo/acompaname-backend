@@ -27,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.chat.dtos.MensajeDTORequest;
 import dev.andrea.acompaname_backend.chat.dtos.MensajeDTOResponse;
+import dev.andrea.acompaname_backend.chat.dtos.MensajesNoLeidosDTOResponse;
 import dev.andrea.acompaname_backend.chat.exceptions.ChatExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.chat.exceptions.ChatExceptionConflicto;
 import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
@@ -218,5 +219,71 @@ public class MensajeServiceImplTest {
                 .thenReturn(List.of(mensaje(1L, ana, "Hola", solicitud)));
 
         assertThat(service.getMensajes(5L, null), hasSize(1));
+    }
+
+    @Test
+    void testAlLeerSeMarcanComoLeidosLosMensajesDeLaOtraPersona() {
+        SolicitudEntity solicitud = solicitud(EstadoSolicitud.ACEPTADA);
+        loguearComo("ana@test.com");
+        MensajeEntity dePepe = mensaje(2L, pepe, "Buenas", solicitud);
+        when(repository.findBySolicitudIdOrderByIdAsc(5L)).thenReturn(List.of(dePepe));
+        when(repository.findBySolicitudIdAndEmisorIdNotAndLeidoFalse(5L, 1L)).thenReturn(List.of(dePepe));
+
+        service.getMensajes(5L, null);
+
+        assertThat(dePepe.isLeido(), is(true));
+        verify(repository).saveAll(List.of(dePepe));
+    }
+
+    @Test
+    void testAlLeerNoSeMarcanLosMensajesPropios() {
+        SolicitudEntity solicitud = solicitud(EstadoSolicitud.ACEPTADA);
+        loguearComo("ana@test.com");
+        MensajeEntity deAna = mensaje(1L, ana, "Hola", solicitud);
+        when(repository.findBySolicitudIdOrderByIdAsc(5L)).thenReturn(List.of(deAna));
+        // El repositorio no los devuelve como pendientes de Ana, porque los escribió ella
+        when(repository.findBySolicitudIdAndEmisorIdNotAndLeidoFalse(5L, 1L)).thenReturn(List.of());
+
+        service.getMensajes(5L, null);
+
+        assertThat(deAna.isLeido(), is(false));
+    }
+
+    @Test
+    void testUnaTerceraPersonaNoMarcaNadaComoLeido() {
+        solicitud(EstadoSolicitud.ACEPTADA);
+        loguearComo("intruso@test.com");
+
+        assertThrows(ChatExceptionAccesoDenegado.class, () -> service.getMensajes(5L, null));
+
+        verify(repository, never()).saveAll(ArgumentMatchers.anyList());
+    }
+
+    @Test
+    void testNoLeidosCuentaElTotalYPorSolicitud() {
+        SolicitudEntity cinco = SolicitudEntity.builder().id(5L).build();
+        SolicitudEntity seis = SolicitudEntity.builder().id(6L).build();
+        loguearComo("ana@test.com");
+        when(repository.findNoLeidosDe("ana@test.com")).thenReturn(List.of(
+                mensaje(1L, pepe, "a", cinco),
+                mensaje(2L, pepe, "b", cinco),
+                mensaje(3L, pepe, "c", seis)));
+
+        MensajesNoLeidosDTOResponse resultado = service.getNoLeidos();
+
+        assertThat(resultado.total(), is(equalTo(3L)));
+        assertThat(resultado.porSolicitud().get(5L), is(equalTo(2L)));
+        assertThat(resultado.porSolicitud().get(6L), is(equalTo(1L)));
+    }
+
+    @Test
+    void testNoLeidosSinMensajesDevuelveCeroYMapaVacio() {
+        loguearComo("ana@test.com");
+        when(repository.findNoLeidosDe("ana@test.com")).thenReturn(List.of());
+
+        MensajesNoLeidosDTOResponse resultado = service.getNoLeidos();
+
+        assertThat(resultado.total(), is(equalTo(0L)));
+        assertThat(resultado.porSolicitud().isEmpty(), is(true));
     }
 }

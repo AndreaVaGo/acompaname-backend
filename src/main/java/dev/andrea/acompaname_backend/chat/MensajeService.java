@@ -4,6 +4,7 @@ import java.util.List;
 
 import dev.andrea.acompaname_backend.chat.dtos.MensajeDTORequest;
 import dev.andrea.acompaname_backend.chat.dtos.MensajeDTOResponse;
+import dev.andrea.acompaname_backend.chat.dtos.MensajesNoLeidosDTOResponse;
 
 public interface MensajeService {
 
@@ -11,4 +12,7 @@ public interface MensajeService {
     List<MensajeDTOResponse> getMensajes(Long solicitudId, Long desdeId);
 
     MensajeDTOResponse enviar(Long solicitudId, MensajeDTORequest dto);
+
+    // Cuántos mensajes sin leer tiene la persona que consulta, en total y por solicitud
+    MensajesNoLeidosDTOResponse getNoLeidos();
 }
