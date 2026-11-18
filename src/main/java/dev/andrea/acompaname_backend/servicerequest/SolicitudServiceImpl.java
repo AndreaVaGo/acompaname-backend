@@ -297,7 +297,8 @@ public class SolicitudServiceImpl implements SolicitudService {
         if (seCompleta && !pagoRepository.existsBySolicitudId(solicitud.getId())) {
             // Al completar la solicitud se genera su pago pendiente: horas x tarifa del cuidador,
             // con recargo por cada persona extra. La familia solo paga cuando el servicio ya se ha realizado
-            BigDecimal importe = calculoDeImporte.calcular(solicitud, solicitud.getCuidador().getTarifaHora());
+            BigDecimal importe = calculoDeImporte.calcular(solicitud, solicitud.getCuidador().getTarifaHora(),
+                    solicitud.getCuidador().getRecargoPersonaExtra());
             pagoRepository.save(PagoMapper.toEntity(importe, solicitud));
             // Se avisa a la familia de que tiene un pago pendiente (solo cuando se crea el pago)
             if (avisos != null) {

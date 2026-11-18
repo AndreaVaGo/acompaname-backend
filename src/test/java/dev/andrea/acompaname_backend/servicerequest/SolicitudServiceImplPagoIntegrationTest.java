@@ -133,6 +133,24 @@ public class SolicitudServiceImplPagoIntegrationTest extends ContenedorMySqlRepo
     }
 
     @Test
+    void testSiLaPersonaCuidadoraTieneRecargoPropioSeUsaEseRecargo() {
+        SolicitudEntity solicitud = crearSolicitudYEntrarComoCuidador();
+        solicitud.getPersonas().add(new PersonaCuidada("Carmen", 82));
+        solicitud.getPersonas().add(new PersonaCuidada("Antonio", 85));
+        solicitudRepository.saveAndFlush(solicitud);
+        PerfilCuidadorEntity cuidador = solicitud.getCuidador();
+        cuidador.setRecargoPersonaExtra(50);
+        perfilCuidadorRepository.saveAndFlush(cuidador);
+        service.cambiarEstado(solicitud.getId(), EstadoSolicitud.ACEPTADA);
+
+        service.cambiarEstado(solicitud.getId(), EstadoSolicitud.COMPLETADA);
+
+        // 4 horas x 18,00 x (1 + 0,50 x 1 persona extra) = 108,00
+        List<PagoEntity> pagos = pagoRepository.findAll();
+        assertThat(pagos.get(0).getImporte().compareTo(new BigDecimal("108.00")), is(equalTo(0)));
+    }
+
+    @Test
     void testRechazarLaSolicitudNoCreaPago() {
         SolicitudEntity solicitud = crearSolicitudYEntrarComoCuidador();
 

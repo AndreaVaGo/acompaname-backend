@@ -133,4 +133,32 @@ public class CalculoDeImporteTest {
         // 3 x 14,555 = 43,665 -> 43,67
         assertThat(calculo.calcular(solicitud, new BigDecimal("14.555")), is(equalTo(new BigDecimal("43.67"))));
     }
+
+    @Test
+    void testElRecargoPropioDeLaPersonaCuidadoraSustituyeAlPorDefecto() {
+        SolicitudEntity solicitud = unDia(LocalTime.of(10, 0), LocalTime.of(14, 0));
+        solicitud.getPersonas().add(new PersonaCuidada("Carmen", 82));
+        solicitud.getPersonas().add(new PersonaCuidada("Antonio", 85));
+
+        // 4 x 15 x (1 + 0,50) = 90,00 con un recargo propio del 50 %
+        assertThat(calculo.calcular(solicitud, TARIFA, 50), is(equalTo(new BigDecimal("90.00"))));
+    }
+
+    @Test
+    void testSinRecargoPropioSeUsaElPorDefecto() {
+        SolicitudEntity solicitud = unDia(LocalTime.of(10, 0), LocalTime.of(14, 0));
+        solicitud.getPersonas().add(new PersonaCuidada("Carmen", 82));
+        solicitud.getPersonas().add(new PersonaCuidada("Antonio", 85));
+
+        assertThat(calculo.calcular(solicitud, TARIFA, null), is(equalTo(new BigDecimal("75.00"))));
+    }
+
+    @Test
+    void testUnRecargoPropioDeCeroNoCobraNadaPorPersonaExtra() {
+        SolicitudEntity solicitud = unDia(LocalTime.of(10, 0), LocalTime.of(14, 0));
+        solicitud.getPersonas().add(new PersonaCuidada("Carmen", 82));
+        solicitud.getPersonas().add(new PersonaCuidada("Antonio", 85));
+
+        assertThat(calculo.calcular(solicitud, TARIFA, 0), is(equalTo(new BigDecimal("60.00"))));
+    }
 }

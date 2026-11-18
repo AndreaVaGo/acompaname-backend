@@ -26,6 +26,16 @@ public class CalculoDeImporte {
     }
 
     public BigDecimal calcular(SolicitudEntity solicitud, BigDecimal tarifaHora) {
+        return calcular(solicitud, tarifaHora, null);
+    }
+
+    // El recargo propio de la persona cuidadora va en porcentaje (30 = 30 %).
+    // Si es null se usa el recargo por defecto de la aplicación
+    public BigDecimal calcular(SolicitudEntity solicitud, BigDecimal tarifaHora, Integer recargoPropioPorcentaje) {
+        BigDecimal recargoPersonaExtra = this.recargoPersonaExtra;
+        if (recargoPropioPorcentaje != null) {
+            recargoPersonaExtra = BigDecimal.valueOf(recargoPropioPorcentaje).divide(BigDecimal.valueOf(100));
+        }
         long horas = horasDe(solicitud);
         int personasExtra = solicitud.numeroDePersonas() - 1;
 
