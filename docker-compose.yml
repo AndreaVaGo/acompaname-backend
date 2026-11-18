@@ -13,5 +13,15 @@ services:
     volumes:
       - acompaname_data:/var/lib/mysql
 
+  # Servidor de correo de pruebas: recibe los correos de la app y los enseña en http://localhost:8025
+  # sin mandar nada de verdad. Para usarlo hay que arrancar el back con MAIL_ENABLED=true
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: acompaname-mailhog
+    restart: always
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
 volumes:
   acompaname_data:
