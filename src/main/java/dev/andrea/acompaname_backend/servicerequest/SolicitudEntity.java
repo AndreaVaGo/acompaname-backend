@@ -2,6 +2,7 @@ package dev.andrea.acompaname_backend.servicerequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.globals.GrupoEdad;
@@ -65,6 +66,20 @@ public class SolicitudEntity {
     // Grupo de edad de la persona cuidada. Es opcional: las solicitudes antiguas no lo tienen (null)
     @Enumerated(EnumType.STRING)
     private GrupoEdad grupoEdad;
+
+    // Hora de inicio (el primer día) y hora de fin (el último día) del cuidado.
+    // Las solicitudes antiguas no las tienen (null) y cuentan como días completos
+    private LocalTime horaInicio;
+    private LocalTime horaFin;
+
+    // Constructor sin horas, para no romper el código que ya existía
+    public SolicitudEntity(Long id, String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
+            LocalDate fechaCuidado, LocalDate fechaFin, EstadoSolicitud estado, UsuarioEntity familia,
+            PerfilCuidadorEntity cuidador, String necesidades, String direccion, LocalDateTime fechaCreacion,
+            LocalDateTime fechaAceptacion, GrupoEdad grupoEdad) {
+        this(id, tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, fechaFin, estado, familia, cuidador,
+                necesidades, direccion, fechaCreacion, fechaAceptacion, grupoEdad, null, null);
+    }
 
     // Constructor sin grupo de edad, para no romper el código que ya existía
     public SolicitudEntity(Long id, String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
