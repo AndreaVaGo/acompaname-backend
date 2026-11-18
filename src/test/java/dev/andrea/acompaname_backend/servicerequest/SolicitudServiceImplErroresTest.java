@@ -268,8 +268,8 @@ public class SolicitudServiceImplErroresTest {
         SolicitudEntity solicitud = solicitudAnaPepe();
         when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
         // Pregunta por el cuidador 1, excluyendo la propia solicitud 1, en un solo día (sin fecha de fin)
-        when(repository.countSolapamientos(1L, 1L, LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 10),
-                EstadoSolicitud.ACEPTADA)).thenReturn(1L);
+        when(repository.findDelCuidadorQueSeCruzan(1L, 1L, LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 10),
+                EstadoSolicitud.ACEPTADA)).thenReturn(List.of(solicitudAnaPepe()));
 
         assertThrows(SolicitudExceptionSolapamiento.class,
                 () -> service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA));
@@ -281,8 +281,8 @@ public class SolicitudServiceImplErroresTest {
         loguearComo("pepe@test.com");
         SolicitudEntity solicitud = solicitudAnaPepe();
         when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
-        when(repository.countSolapamientos(1L, 1L, LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 10),
-                EstadoSolicitud.ACEPTADA)).thenReturn(0L);
+        when(repository.findDelCuidadorQueSeCruzan(1L, 1L, LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 10),
+                EstadoSolicitud.ACEPTADA)).thenReturn(List.of());
         when(repository.save(Mockito.any(SolicitudEntity.class))).thenReturn(solicitud);
 
         SolicitudDTOResponse resultado = service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA);
@@ -296,8 +296,8 @@ public class SolicitudServiceImplErroresTest {
         SolicitudEntity solicitud = solicitudAnaPepe();
         solicitud.setFechaFin(LocalDate.of(2026, 9, 12));
         when(repository.findById(1L)).thenReturn(Optional.of(solicitud));
-        when(repository.countSolapamientos(1L, 1L, LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 12),
-                EstadoSolicitud.ACEPTADA)).thenReturn(1L);
+        when(repository.findDelCuidadorQueSeCruzan(1L, 1L, LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 12),
+                EstadoSolicitud.ACEPTADA)).thenReturn(List.of(solicitudAnaPepe()));
 
         assertThrows(SolicitudExceptionSolapamiento.class,
                 () -> service.cambiarEstado(1L, EstadoSolicitud.ACEPTADA));
@@ -312,7 +312,7 @@ public class SolicitudServiceImplErroresTest {
 
         service.cambiarEstado(1L, EstadoSolicitud.RECHAZADA);
 
-        verify(repository, never()).countSolapamientos(Mockito.anyLong(), Mockito.anyLong(),
+        verify(repository, never()).findDelCuidadorQueSeCruzan(Mockito.anyLong(), Mockito.anyLong(),
                 Mockito.any(LocalDate.class), Mockito.any(LocalDate.class), Mockito.any(EstadoSolicitud.class));
     }
 
