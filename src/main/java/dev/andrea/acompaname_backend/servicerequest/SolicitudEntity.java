@@ -3,11 +3,16 @@ package dev.andrea.acompaname_backend.servicerequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.globals.GrupoEdad;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -15,6 +20,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -72,6 +78,15 @@ public class SolicitudEntity {
     private LocalTime horaInicio;
     private LocalTime horaFin;
 
+    // Personas que reciben el cuidado (entre 1 y 5). Se guardan en su propia tabla, en orden.
+    // Las solicitudes antiguas no tienen lista: cuentan como una sola persona (nombrePaciente y edadPaciente).
+    // nombrePaciente y edadPaciente guardan siempre la primera persona de la lista
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "solicitud_personas", joinColumns = @JoinColumn(name = "solicitud_id"))
+    @OrderColumn(name = "orden")
+    @Builder.Default
+    private List<PersonaCuidada> personas = new ArrayList<>();
+
     // Momento exacto en que empieza el cuidado: la fecha con su hora de inicio.
     // Sin hora (solicitudes antiguas) empieza a las 00:00
     public LocalDateTime momentoInicio() {
@@ -98,6 +113,16 @@ public class SolicitudEntity {
     // Si uno acaba justo cuando empieza el otro (12:00 y 12:00) no se cruzan
     public boolean seCruzaCon(LocalDateTime inicio, LocalDateTime fin) {
         return momentoInicio().isBefore(fin) && momentoFin().isAfter(inicio);
+    }
+
+    // Constructor sin la lista de personas, para no romper el código que ya existía
+    public SolicitudEntity(Long id, String tipoCuidado, String nombrePaciente, String notas, Integer edadPaciente,
+            LocalDate fechaCuidado, LocalDate fechaFin, EstadoSolicitud estado, UsuarioEntity familia,
+            PerfilCuidadorEntity cuidador, String necesidades, String direccion, LocalDateTime fechaCreacion,
+            LocalDateTime fechaAceptacion, GrupoEdad grupoEdad, LocalTime horaInicio, LocalTime horaFin) {
+        this(id, tipoCuidado, nombrePaciente, notas, edadPaciente, fechaCuidado, fechaFin, estado, familia, cuidador,
+                necesidades, direccion, fechaCreacion, fechaAceptacion, grupoEdad, horaInicio, horaFin,
+                new ArrayList<>());
     }
 
     // Constructor sin horas, para no romper el código que ya existía
