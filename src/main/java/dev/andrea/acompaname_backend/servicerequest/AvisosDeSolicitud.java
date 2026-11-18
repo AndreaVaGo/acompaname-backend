@@ -35,7 +35,7 @@ public class AvisosDeSolicitud {
             UsuarioEntity cuidador = solicitud.getCuidador().getUsuario();
             String texto = "Hola " + cuidador.getNombre() + ",\n\n"
                     + solicitud.getFamilia().getNombre() + " te ha enviado una solicitud de cuidado"
-                    + tipoDe(solicitud) + " " + cuandoDe(solicitud) + ".\n\n"
+                    + tipoDe(solicitud) + personasDe(solicitud) + " " + cuandoDe(solicitud) + ".\n\n"
                     + "Entra para verla y decidir si la aceptas:\n"
                     + urlDelFront + "/solicitudes-cuidador\n\n"
                     + FIRMA;
@@ -51,7 +51,7 @@ public class AvisosDeSolicitud {
             UsuarioEntity familia = solicitud.getFamilia();
             String texto = "Hola " + familia.getNombre() + ",\n\n"
                     + "¡Buenas noticias! " + solicitud.getCuidador().getUsuario().getNombre()
-                    + " ha aceptado tu solicitud de cuidado" + tipoDe(solicitud) + " " + cuandoDe(solicitud) + ".\n\n"
+                    + " ha aceptado tu solicitud de cuidado" + tipoDe(solicitud) + personasDe(solicitud) + " " + cuandoDe(solicitud) + ".\n\n"
                     + "Puedes ver los detalles aquí:\n"
                     + urlDelFront + "/solicitudes\n\n"
                     + FIRMA;
@@ -67,7 +67,7 @@ public class AvisosDeSolicitud {
             UsuarioEntity familia = solicitud.getFamilia();
             String texto = "Hola " + familia.getNombre() + ",\n\n"
                     + solicitud.getCuidador().getUsuario().getNombre()
-                    + " no puede atender tu solicitud de cuidado" + tipoDe(solicitud) + " " + cuandoDe(solicitud)
+                    + " no puede atender tu solicitud de cuidado" + tipoDe(solicitud) + personasDe(solicitud) + " " + cuandoDe(solicitud)
                     + ".\n\n"
                     + "No te preocupes: puedes buscar a otra persona cuidadora aquí:\n"
                     + urlDelFront + "/buscar\n\n"
@@ -85,6 +85,15 @@ public class AvisosDeSolicitud {
             return "";
         }
         return " (" + tipo + ")";
+    }
+
+    // " de 3 personas" si se cuida a varias personas, o nada si es una sola
+    private String personasDe(SolicitudEntity solicitud) {
+        int numero = PersonasDeSolicitud.aDTO(solicitud).size();
+        if (numero <= 1) {
+            return "";
+        }
+        return " de " + numero + " personas";
     }
 
     // "para el 15/12/2026" si es un solo día, o "del 15/12/2026 al 18/12/2026" si son varios
