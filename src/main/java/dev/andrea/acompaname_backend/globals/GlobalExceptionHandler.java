@@ -40,6 +40,8 @@ import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionPasswordInv
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionConflicto;
 import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionNotFound;
+import dev.andrea.acompaname_backend.chat.exceptions.ChatExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.chat.exceptions.ChatExceptionConflicto;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 @RestControllerAdvice
@@ -169,6 +171,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PagoExceptionAccesoDenegado.class)
     public ResponseEntity<String> handlePagoAccesoDenegadoException(PagoExceptionAccesoDenegado exception) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(ChatExceptionAccesoDenegado.class)
+    public ResponseEntity<String> handleChatAccesoDenegadoException(ChatExceptionAccesoDenegado exception) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(ChatExceptionConflicto.class)
+    public ResponseEntity<String> handleChatConflictoException(ChatExceptionConflicto exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
     }
 
     @ExceptionHandler(ValoracionExceptionConflicto.class)
