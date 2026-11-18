@@ -73,6 +73,13 @@ public class CalculoDeImporteTest {
     }
 
     @Test
+    void testSinFechaCuentaComoUnaHoraSinFallar() {
+        SolicitudEntity solicitud = SolicitudEntity.builder().build();
+
+        assertThat(calculo.horasDe(solicitud), is(equalTo(1L)));
+    }
+
+    @Test
     void testSinHorasElCuidadoCuentaComoElDiaCompleto() {
         SolicitudEntity solicitud = unDia(null, null);
 

@@ -40,7 +40,11 @@ public class CalculoDeImporte {
 
     // Horas que dura el cuidado, de inicio a fin. Una fracción cuenta como hora entera
     // y el mínimo es una hora
-    public long horasDe(SolicitudEntity solicitud) {
+    public static long horasDe(SolicitudEntity solicitud) {
+        // Sin fecha no se puede calcular la duración: cuenta como una hora (el mínimo)
+        if (solicitud.getFechaCuidado() == null) {
+            return 1;
+        }
         long minutos = Duration.between(solicitud.momentoInicio(), solicitud.momentoFin()).toMinutes();
         long horas = minutos / 60;
         if (minutos % 60 > 0) {
