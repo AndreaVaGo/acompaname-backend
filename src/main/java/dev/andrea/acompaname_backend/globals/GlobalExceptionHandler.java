@@ -29,6 +29,7 @@ import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionN
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionEstadoInvalido;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionFechaInvalida;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionGrupoNoAtendido;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionPersonasInvalidas;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionSolapamiento;
@@ -77,6 +78,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(SolicitudExceptionFechaInvalida.class)
     public ResponseEntity<String> handleSolicitudFechaInvalidaException(SolicitudExceptionFechaInvalida exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    }
+
+    // La persona cuidadora no atiende alguno de los grupos de edad de la solicitud
+    @ExceptionHandler(SolicitudExceptionGrupoNoAtendido.class)
+    public ResponseEntity<String> handleSolicitudGrupoNoAtendidoException(
+            SolicitudExceptionGrupoNoAtendido exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
 

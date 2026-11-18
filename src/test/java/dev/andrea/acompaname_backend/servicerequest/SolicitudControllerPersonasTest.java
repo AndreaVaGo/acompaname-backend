@@ -163,4 +163,46 @@ public class SolicitudControllerPersonasTest {
 
         assertThat(response.getStatus(), is(equalTo(400)));
     }
+
+    @Test
+    void testStoreConGrupoDeEdadPorPersonaLoPasaAlServicio() throws Exception {
+        List<PersonaCuidadaDTO> personas = new ArrayList<>();
+        personas.add(new PersonaCuidadaDTO("Mateo", 8, dev.andrea.acompaname_backend.globals.GrupoEdad.NINOS));
+        personas.add(new PersonaCuidadaDTO("Abuelo", 80, dev.andrea.acompaname_backend.globals.GrupoEdad.MAYORES));
+        when(service.storeEntity(any(SolicitudDTORequest.class))).thenReturn(respuesta(personas));
+
+        MockHttpServletResponse response = crear(peticion(personas));
+
+        ArgumentCaptor<SolicitudDTORequest> captor = ArgumentCaptor.forClass(SolicitudDTORequest.class);
+        verify(service).storeEntity(captor.capture());
+        assertThat(response.getStatus(), is(equalTo(201)));
+        assertThat(captor.getValue().personas().get(1).grupoEdad(),
+                is(equalTo(dev.andrea.acompaname_backend.globals.GrupoEdad.MAYORES)));
+        assertThat(response.getContentAsString(), containsString("\"grupoEdad\":\"MAYORES\""));
+    }
+
+    @Test
+    void testStoreConUnGrupoDeEdadQueNoExisteDevuelve400() throws Exception {
+        String json = "{\"tipoCuidado\":\"domicilio\",\"fechaCuidado\":\"2030-01-10\",\"familiaId\":1,"
+                + "\"cuidadorId\":1,\"horaInicio\":\"09:00\",\"horaFin\":\"12:00\","
+                + "\"personas\":[{\"nombre\":\"Mateo\",\"edad\":8,\"grupoEdad\":\"MARCIANOS\"}]}";
+
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/solicitudes")
+                .contentType(MediaType.APPLICATION_JSON).content(json)).andReturn().getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        verify(service, never()).storeEntity(any(SolicitudDTORequest.class));
+    }
+
+    @Test
+    void testStoreSiLaCuidadoraNoAtiendeUnGrupoDevuelve400ConElMensaje() throws Exception {
+        when(service.storeEntity(any(SolicitudDTORequest.class))).thenThrow(
+                new dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionGrupoNoAtendido(
+                        "Esta persona cuidadora no atiende el grupo de edad: Personas mayores"));
+
+        MockHttpServletResponse response = crear(peticion(lista(2)));
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        assertThat(response.getContentAsString(), containsString("Personas mayores"));
+    }
 }

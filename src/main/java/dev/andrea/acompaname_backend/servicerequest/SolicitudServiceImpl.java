@@ -13,6 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.andrea.acompaname_backend.globals.GrupoEdad;
+import dev.andrea.acompaname_backend.globals.ListaDeTexto;
 import dev.andrea.acompaname_backend.payment.PagoRepository;
 import dev.andrea.acompaname_backend.schedule.BloqueOcupadoEntity;
 import dev.andrea.acompaname_backend.schedule.BloqueOcupadoRepository;
@@ -25,6 +27,7 @@ import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionEstadoInvalido;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionFechaInvalida;
+import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionGrupoNoAtendido;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionNotFound;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionSolapamiento;
 import dev.andrea.acompaname_backend.servicerequest.mappers.SolicitudMapper;
@@ -123,6 +126,21 @@ public class SolicitudServiceImpl implements SolicitudService {
                 dto.grupoEdad(), dto.horaInicio(), dto.horaFin(), dto.personas());
     }
 
+    // La persona cuidadora tiene que atender TODOS los grupos de edad de la solicitud.
+    // Si no ha marcado ningún grupo en su perfil, no hay restricción
+    private void verificarGruposAtendidos(PerfilCuidadorEntity cuidador, List<PersonaCuidada> personas) {
+        List<String> atendidos = ListaDeTexto.aLista(cuidador.getGruposEdad());
+        if (atendidos.isEmpty()) {
+            return;
+        }
+        for (GrupoEdad grupo : PersonasDeSolicitud.gruposDe(personas)) {
+            if (!atendidos.contains(grupo.name())) {
+                throw new SolicitudExceptionGrupoNoAtendido(
+                        "Esta persona cuidadora no atiende el grupo de edad: " + grupo.etiqueta());
+            }
+        }
+    }
+
     // La fecha de fin es opcional, pero si viene no puede ser anterior a la de inicio.
     // Si el cuidado dura un solo día, la hora de fin tiene que ser posterior a la de inicio
     private void verificarFechas(SolicitudDTORequest dto) {
@@ -198,6 +216,8 @@ public class SolicitudServiceImpl implements SolicitudService {
             throw new SolicitudExceptionAccesoDenegado("No puede solicitarse un servicio a sí misma");
         }
 
+        verificarGruposAtendidos(cuidador, PersonasDeSolicitud.desdePeticion(dto));
+
         SolicitudEntity solicitudToSave = SolicitudMapper.toEntity(dto, familia, cuidador);
         SolicitudEntity solicitudSave = repository.save(solicitudToSave);
         // Ya está guardada: se avisa a la persona cuidadora (si el correo falla, la solicitud sigue creada)
@@ -226,6 +246,7 @@ public class SolicitudServiceImpl implements SolicitudService {
         solicitudExistente.setTipoCuidado(dto.tipoCuidado());
         // Se cambia la lista de personas; la primera también va en nombrePaciente y edadPaciente
         List<PersonaCuidada> personas = PersonasDeSolicitud.desdePeticion(dto);
+        verificarGruposAtendidos(solicitudExistente.getCuidador(), personas);
         solicitudExistente.setPersonas(personas);
         solicitudExistente.setNombrePaciente(personas.get(0).getNombre());
         solicitudExistente.setEdadPaciente(personas.get(0).getEdad());
@@ -240,9 +261,9 @@ public class SolicitudServiceImpl implements SolicitudService {
         }
         // La dirección se actualiza siempre: si no llega, se borra
         solicitudExistente.setDireccion(dto.direccion());
-        // Si no llega el grupo de edad, se deja el que ya tenía
-        if (dto.grupoEdad() != null) {
-            solicitudExistente.setGrupoEdad(dto.grupoEdad());
+        // El grupo de la solicitud es el de la primera persona. Si no llega ninguno, se deja el que ya tenía
+        if (personas.get(0).getGrupoEdad() != null) {
+            solicitudExistente.setGrupoEdad(personas.get(0).getGrupoEdad());
         }
         SolicitudEntity solicitudActualizada = repository.save(solicitudExistente);
         return aDTO(solicitudActualizada);
