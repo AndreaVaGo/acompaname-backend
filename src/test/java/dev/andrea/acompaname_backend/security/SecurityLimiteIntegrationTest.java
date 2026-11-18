@@ -7,28 +7,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import dev.andrea.acompaname_backend.auth.LoginDTORequest;
 import tools.jackson.databind.ObjectMapper;
+import dev.andrea.acompaname_backend.support.ContenedorMySqlAplicacion;
 
 // La aplicación completa con un MySQL de verdad. Se baja el límite a 2 intentos cada
 // 2 segundos para poder comprobarlo sin esperar un minuto entero.
 @SpringBootTest(properties = { "rate-limit.max-requests=2", "rate-limit.window-seconds=2" })
 @AutoConfigureMockMvc
-@Testcontainers
-public class SecurityLimiteIntegrationTest {
-
-    @Container
-    @ServiceConnection
-    static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0");
+public class SecurityLimiteIntegrationTest extends ContenedorMySqlAplicacion {
 
     @Autowired
     private MockMvc mockMvc;

@@ -16,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,9 +25,6 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.jayway.jsonpath.JsonPath;
 
@@ -38,6 +34,7 @@ import dev.andrea.acompaname_backend.role.RoleRepository;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
 import tools.jackson.databind.ObjectMapper;
+import dev.andrea.acompaname_backend.support.ContenedorMySqlAplicacion;
 
 // La aplicación completa con un MySQL de verdad (Testcontainers): login, token y qué pasa
 // cuando el token está caducado, manipulado, o la persona cambia de rol o la bloquean.
@@ -45,12 +42,7 @@ import tools.jackson.databind.ObjectMapper;
 // (el límite real se prueba en SecurityLimiteIntegrationTest).
 @SpringBootTest(properties = "rate-limit.max-requests=1000")
 @AutoConfigureMockMvc
-@Testcontainers
-public class SecurityJwtIntegrationTest {
-
-    @Container
-    @ServiceConnection
-    static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0");
+public class SecurityJwtIntegrationTest extends ContenedorMySqlAplicacion {
 
     private static final String EMAIL = "ana.jwt@test.com";
     private static final String PASSWORD = "Secreta123";

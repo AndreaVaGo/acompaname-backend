@@ -13,10 +13,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import dev.andrea.acompaname_backend.admin.dtos.AdminPagoDTOResponse;
 import dev.andrea.acompaname_backend.admin.dtos.AdminPagosResumenDTOResponse;
@@ -30,16 +26,12 @@ import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
+import dev.andrea.acompaname_backend.support.ContenedorMySqlRepositorios;
 
 // Prueba contra un MySQL real (Testcontainers) las consultas de la lista de pagos del administrador
 // y el servicio que calcula el resumen con esos datos.
 @DataJpaTest
-@Testcontainers
-public class AdminPagosIntegrationTest {
-
-    @Container
-    @ServiceConnection
-    static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0");
+public class AdminPagosIntegrationTest extends ContenedorMySqlRepositorios {
 
     @Autowired
     private UsuarioRepository usuarioRepository;

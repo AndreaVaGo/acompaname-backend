@@ -13,13 +13,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
@@ -29,17 +25,13 @@ import dev.andrea.acompaname_backend.payment.PagoRepository;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionEstadoInvalido;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
+import dev.andrea.acompaname_backend.support.ContenedorMySqlRepositorios;
 
 // Prueba con el servicio de verdad y un MySQL real (Testcontainers), sin mocks,
 // que el pago de una solicitud se genera al completarla y no antes.
 @DataJpaTest
-@Testcontainers
 @Import(SolicitudServiceImpl.class)
-public class SolicitudServiceImplPagoIntegrationTest {
-
-    @Container
-    @ServiceConnection
-    static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0");
+public class SolicitudServiceImplPagoIntegrationTest extends ContenedorMySqlRepositorios {
 
     @Autowired
     private SolicitudServiceImpl service;

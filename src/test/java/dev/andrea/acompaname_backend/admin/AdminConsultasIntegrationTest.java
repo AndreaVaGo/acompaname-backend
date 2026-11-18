@@ -14,10 +14,6 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
@@ -33,16 +29,12 @@ import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
+import dev.andrea.acompaname_backend.support.ContenedorMySqlRepositorios;
 
 // Prueba contra un MySQL real (Testcontainers) las consultas que usa el panel del administrador:
 // los conteos, las sumas y las medias las hace la base de datos, y un mock no puede comprobarlas.
 @DataJpaTest
-@Testcontainers
-public class AdminConsultasIntegrationTest {
-
-    @Container
-    @ServiceConnection
-    static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0");
+public class AdminConsultasIntegrationTest extends ContenedorMySqlRepositorios {
 
     @Autowired
     private UsuarioRepository usuarioRepository;

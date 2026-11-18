@@ -12,31 +12,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
 import dev.andrea.acompaname_backend.security.JwtService;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
+import dev.andrea.acompaname_backend.support.ContenedorMySqlAplicacion;
 
 // La aplicación completa con MySQL de verdad: quién puede enviar sugerencias y quién puede leerlas.
 // El límite de peticiones se sube a 1000 para que estos tests no lo alcancen.
 @SpringBootTest(properties = "rate-limit.max-requests=1000")
 @AutoConfigureMockMvc
-@Testcontainers
-public class SugerenciaSecurityIntegrationTest {
-
-    @Container
-    @ServiceConnection
-    static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0");
+public class SugerenciaSecurityIntegrationTest extends ContenedorMySqlAplicacion {
 
     private static final String CUERPO = "{\"texto\":\"Me gustaría poder cambiar el color de la web\"}";
 

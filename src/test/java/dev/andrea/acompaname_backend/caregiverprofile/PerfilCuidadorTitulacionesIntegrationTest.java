@@ -10,22 +10,14 @@ import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
 import jakarta.persistence.EntityManager;
+import dev.andrea.acompaname_backend.support.ContenedorMySqlRepositorios;
 
 @DataJpaTest
-@Testcontainers
-public class PerfilCuidadorTitulacionesIntegrationTest {
-
-    @Container
-    @ServiceConnection
-    static MySQLContainer<?> mysqlContainer = new MySQLContainer<>("mysql:8.0");
+public class PerfilCuidadorTitulacionesIntegrationTest extends ContenedorMySqlRepositorios {
 
     @Autowired
     private PerfilCuidadorRepository repository;
