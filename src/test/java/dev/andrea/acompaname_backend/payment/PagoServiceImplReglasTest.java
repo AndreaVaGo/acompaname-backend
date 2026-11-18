@@ -101,4 +101,44 @@ public class PagoServiceImplReglasTest {
         assertThrows(PagoExceptionConflicto.class, () -> service.marcarComoPagado(1L));
         verify(repository, never()).save(Mockito.any(PagoEntity.class));
     }
+
+    // ---- Aviso al cuidador ----
+
+    @Test
+    void testAlPagarSeAvisaAlCuidador() {
+        AvisosDePago avisos = Mockito.mock(AvisosDePago.class);
+        service.setAvisos(avisos);
+        loguearComo("ana@test.com");
+        PagoEntity pendiente = pago(EstadoPago.PENDIENTE);
+        when(repository.findById(1L)).thenReturn(Optional.of(pendiente));
+        when(repository.save(pendiente)).thenReturn(pendiente);
+
+        service.marcarComoPagado(1L);
+
+        verify(avisos).avisarPagoRecibido(pendiente);
+    }
+
+    @Test
+    void testSiNoSePuedePagarNoSeAvisaAlCuidador() {
+        AvisosDePago avisos = Mockito.mock(AvisosDePago.class);
+        service.setAvisos(avisos);
+        loguearComo("ana@test.com");
+        when(repository.findById(1L)).thenReturn(Optional.of(pago(EstadoPago.COMPLETADO)));
+
+        assertThrows(PagoExceptionConflicto.class, () -> service.marcarComoPagado(1L));
+
+        Mockito.verifyNoInteractions(avisos);
+    }
+
+    @Test
+    void testSinAvisosElPagoSigueFuncionando() {
+        loguearComo("ana@test.com");
+        PagoEntity pendiente = pago(EstadoPago.PENDIENTE);
+        when(repository.findById(1L)).thenReturn(Optional.of(pendiente));
+        when(repository.save(pendiente)).thenReturn(pendiente);
+
+        service.marcarComoPagado(1L);
+
+        verify(repository).save(pendiente);
+    }
 }

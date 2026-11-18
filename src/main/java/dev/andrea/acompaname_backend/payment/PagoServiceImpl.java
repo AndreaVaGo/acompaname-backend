@@ -3,6 +3,7 @@ package dev.andrea.acompaname_backend.payment;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -20,8 +21,17 @@ public class PagoServiceImpl implements PagoService {
 
     private final PagoRepository repository;
 
+    // Los avisos por correo son opcionales: si no hay (por ejemplo, en los tests que no los usan),
+    // el pago funciona igual, solo que sin mandar correos
+    private AvisosDePago avisos;
+
     public PagoServiceImpl(PagoRepository repository) {
         this.repository = repository;
+    }
+
+    @Autowired(required = false)
+    public void setAvisos(AvisosDePago avisos) {
+        this.avisos = avisos;
     }
 
     private PagoEntity findEntityById(Long id) {
@@ -83,6 +93,10 @@ public class PagoServiceImpl implements PagoService {
         verificarPendiente(pago);
         pago.setEstado(EstadoPago.COMPLETADO);
         PagoEntity pagoActualizado = repository.save(pago);
+        // Ya está pagado: se avisa a la persona cuidadora (si el correo falla, el pago sigue hecho)
+        if (avisos != null) {
+            avisos.avisarPagoRecibido(pagoActualizado);
+        }
         return PagoMapper.toDTO(pagoActualizado);
     }
 }
