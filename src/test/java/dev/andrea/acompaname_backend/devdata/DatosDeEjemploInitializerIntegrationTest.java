@@ -132,6 +132,23 @@ public class DatosDeEjemploInitializerIntegrationTest extends ContenedorMySqlRep
     }
 
     @Test
+    void testLaSolicitudPendienteEsDeDosPersonasYLasDemasDeUna() throws Exception {
+        crearRoles();
+
+        inicializador.run();
+
+        for (SolicitudEntity solicitud : solicitudRepository.findAll()) {
+            if (solicitud.getEstado() == EstadoSolicitud.PENDIENTE) {
+                assertThat(solicitud.getPersonas().size(), is(equalTo(2)));
+                assertThat(solicitud.getPersonas().get(0).getNombre(), is(equalTo("Carmen")));
+                assertThat(solicitud.getPersonas().get(1).getNombre(), is(equalTo("Antonio")));
+            } else {
+                assertThat(solicitud.getPersonas().size(), is(equalTo(1)));
+            }
+        }
+    }
+
+    @Test
     void testCreaUnPagoPendienteYUnoCompletado() throws Exception {
         crearRoles();
 

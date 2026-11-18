@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -23,6 +25,7 @@ import dev.andrea.acompaname_backend.payment.PagoRepository;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.role.RoleRepository;
 import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
+import dev.andrea.acompaname_backend.servicerequest.PersonaCuidada;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
@@ -86,8 +89,11 @@ public class DatosDeEjemploInitializer implements CommandLineRunner {
         LocalDate hoy = LocalDate.now();
 
         // 1. Pendiente: Pepe todavía no la ha aceptado
-        crearSolicitud(familia, pepe, EstadoSolicitud.PENDIENTE, "domicilio", "Carmen", 82, GrupoEdad.MAYORES,
-                hoy.plusDays(3), LocalTime.of(9, 0), LocalTime.of(12, 0), "Calle Uría 10, Oviedo");
+        // Es un matrimonio mayor: se cuida a dos personas
+        SolicitudEntity pendiente = crearSolicitud(familia, pepe, EstadoSolicitud.PENDIENTE, "domicilio", "Carmen", 82,
+                GrupoEdad.MAYORES, hoy.plusDays(3), LocalTime.of(9, 0), LocalTime.of(12, 0), "Calle Uría 10, Oviedo");
+        pendiente.getPersonas().add(new PersonaCuidada("Antonio", 85));
+        solicitudRepository.save(pendiente);
 
         // 2. Aceptada: Pepe la aceptó y la familia todavía tiene el pago pendiente (4 horas x 14,50)
         SolicitudEntity aceptada = crearSolicitud(familia, pepe, EstadoSolicitud.ACEPTADA, "domicilio", "Carmen", 82,
@@ -160,6 +166,7 @@ public class DatosDeEjemploInitializer implements CommandLineRunner {
                 .tipoCuidado(tipoCuidado)
                 .nombrePaciente(paciente)
                 .edadPaciente(edad)
+                .personas(new ArrayList<>(List.of(new PersonaCuidada(paciente, edad))))
                 .grupoEdad(grupoEdad)
                 .necesidades("movilidad,higiene")
                 .notas("Solicitud de ejemplo creada para desarrollo")
