@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ public class SolicitudControllerOcupadosTest {
         @Test
         void testCuidadoresOcupadosConInicioYFin() throws Exception {
                 List<Long> ocupados = List.of(1L, 3L);
-                when(service.getCuidadoresOcupados(LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 12)))
+                when(service.getCuidadoresOcupados(LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 12), null, null))
                                 .thenReturn(ocupados);
 
                 MockHttpServletResponse response = mockMvc
@@ -52,12 +53,39 @@ public class SolicitudControllerOcupadosTest {
 
         @Test
         void testCuidadoresOcupadosSoloConInicioBuscaUnDia() throws Exception {
-                when(service.getCuidadoresOcupados(LocalDate.of(2026, 9, 10), null)).thenReturn(List.of(2L));
+                when(service.getCuidadoresOcupados(LocalDate.of(2026, 9, 10), null, null, null)).thenReturn(List.of(2L));
 
                 mockMvc.perform(get("/api/v1/solicitudes/cuidadores-ocupados")
                                 .param("inicio", "2026-09-10"))
                                 .andExpect(status().isOk());
 
-                verify(service).getCuidadoresOcupados(LocalDate.of(2026, 9, 10), null);
+                verify(service).getCuidadoresOcupados(LocalDate.of(2026, 9, 10), null, null, null);
+        }
+
+        @Test
+        void testCuidadoresOcupadosConHoras() throws Exception {
+                when(service.getCuidadoresOcupados(LocalDate.of(2026, 9, 10), null, LocalTime.of(15, 0),
+                                LocalTime.of(18, 0))).thenReturn(List.of(4L));
+
+                MockHttpServletResponse response = mockMvc
+                                .perform(get("/api/v1/solicitudes/cuidadores-ocupados")
+                                                .param("inicio", "2026-09-10")
+                                                .param("horaInicio", "15:00")
+                                                .param("horaFin", "18:00"))
+                                .andExpect(status().isOk())
+                                .andReturn()
+                                .getResponse();
+
+                assertThat(response.getContentAsString(), is(equalTo("[4]")));
+                verify(service).getCuidadoresOcupados(LocalDate.of(2026, 9, 10), null, LocalTime.of(15, 0),
+                                LocalTime.of(18, 0));
+        }
+
+        @Test
+        void testCuidadoresOcupadosConUnaHoraQueNoExisteDevuelve400() throws Exception {
+                mockMvc.perform(get("/api/v1/solicitudes/cuidadores-ocupados")
+                                .param("inicio", "2026-09-10")
+                                .param("horaInicio", "25:99"))
+                                .andExpect(status().isBadRequest());
         }
 }
