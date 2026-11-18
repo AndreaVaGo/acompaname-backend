@@ -2,6 +2,8 @@ package dev.andrea.acompaname_backend.servicerequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -126,17 +128,18 @@ public class SolicitudServiceImpl implements SolicitudService {
         return solicitud.getFechaFin();
     }
 
-    // Un cuidador no puede aceptar dos solicitudes cuyas fechas se cruzan
+    // Un cuidador no puede aceptar dos solicitudes cuyas fechas y horas se cruzan
     private void verificarSolapamiento(SolicitudEntity solicitud) {
         Long cuidadorId = solicitud.getCuidador().getId();
-        LocalDate inicio = solicitud.getFechaCuidado();
-        LocalDate fin = fechaFinReal(solicitud);
 
-        // La base de datos cuenta los otros servicios aceptados del cuidador cuyas fechas se cruzan
-        long solapados = repository.countSolapamientos(cuidadorId, solicitud.getId(), inicio, fin,
-                EstadoSolicitud.ACEPTADA);
-        if (solapados > 0) {
-            throw new SolicitudExceptionSolapamiento("Ya tienes otro servicio aceptado en esas fechas");
+        // La base de datos busca los otros servicios aceptados del cuidador que coinciden en algún día
+        List<SolicitudEntity> mismosDias = repository.findDelCuidadorQueSeCruzan(cuidadorId, solicitud.getId(),
+                solicitud.getFechaCuidado(), fechaFinReal(solicitud), EstadoSolicitud.ACEPTADA);
+        // De esos, solo chocan los que también coinciden en las horas
+        for (SolicitudEntity otra : mismosDias) {
+            if (otra.seCruzaCon(solicitud.momentoInicio(), solicitud.momentoFin())) {
+                throw new SolicitudExceptionSolapamiento("Ya tienes otro servicio aceptado en esas fechas");
+            }
         }
     }
 
@@ -248,7 +251,8 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     // Para la búsqueda de la familia: devuelve solo ids, sin datos de las solicitudes
     @Override
-    public List<Long> getCuidadoresOcupados(LocalDate inicio, LocalDate fin) {
+    public List<Long> getCuidadoresOcupados(LocalDate inicio, LocalDate fin, LocalTime horaInicio,
+            LocalTime horaFin) {
         // Sin fecha de fin se busca un solo día
         LocalDate finReal = fin;
         if (finReal == null) {
@@ -257,8 +261,31 @@ public class SolicitudServiceImpl implements SolicitudService {
         if (finReal.isBefore(inicio)) {
             throw new SolicitudExceptionFechaInvalida("La fecha de fin no puede ser anterior a la fecha de inicio");
         }
+        // Sin horas se busca el día completo
+        LocalTime desde = horaInicio;
+        if (desde == null) {
+            desde = LocalTime.MIN;
+        }
+        LocalTime hasta = horaFin;
+        if (hasta == null) {
+            hasta = LocalTime.MAX;
+        }
+        LocalDateTime momentoInicio = inicio.atTime(desde);
+        LocalDateTime momentoFin = finReal.atTime(hasta);
+        if (!momentoFin.isAfter(momentoInicio)) {
+            throw new SolicitudExceptionFechaInvalida("La hora de fin tiene que ser posterior a la hora de inicio");
+        }
 
-        // Los cuidadores con un servicio aceptado que se cruza con esas fechas los busca la base de datos
-        return repository.findCuidadoresOcupados(inicio, finReal, EstadoSolicitud.ACEPTADA);
+        // La base de datos busca los servicios aceptados que coinciden en algún día; de esos,
+        // los que también coinciden en las horas dejan ocupado a su cuidador (sin repetirlo)
+        List<Long> ocupados = new ArrayList<>();
+        for (SolicitudEntity solicitud : repository.findPorFechasQueSeCruzan(inicio, finReal,
+                EstadoSolicitud.ACEPTADA)) {
+            Long cuidadorId = solicitud.getCuidador().getId();
+            if (solicitud.seCruzaCon(momentoInicio, momentoFin) && !ocupados.contains(cuidadorId)) {
+                ocupados.add(cuidadorId);
+            }
+        }
+        return ocupados;
     }
 }
