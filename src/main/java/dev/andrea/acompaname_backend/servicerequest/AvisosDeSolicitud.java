@@ -1,6 +1,8 @@
 package dev.andrea.acompaname_backend.servicerequest;
 
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ import dev.andrea.acompaname_backend.user.UsuarioEntity;
 // Manda los correos de aviso cuando cambia una solicitud:
 // - solicitud nueva: avisa a la persona cuidadora
 // - solicitud aceptada o rechazada: avisa a la familia
+// - servicio completado: avisa a la familia de que tiene un pago pendiente
 // Si el correo falla, solo se anota en el log: la solicitud nunca debe romperse por un correo.
 @Component
 public class AvisosDeSolicitud {
@@ -75,6 +78,24 @@ public class AvisosDeSolicitud {
             correo.enviar(familia.getEmail(), "Tu solicitud no ha podido ser aceptada", texto);
         } catch (Exception e) {
             log.warn("No se pudo enviar el aviso de solicitud rechazada (solicitud {})", solicitud.getId(), e);
+        }
+    }
+
+    // A la familia: el servicio ya está completado y tiene un pago pendiente
+    public void avisarServicioCompletado(SolicitudEntity solicitud, BigDecimal importe) {
+        try {
+            UsuarioEntity familia = solicitud.getFamilia();
+            String texto = "Hola " + familia.getNombre() + ",\n\n"
+                    + solicitud.getCuidador().getUsuario().getNombre()
+                    + " ha completado el servicio de cuidado" + tipoDe(solicitud) + personasDe(solicitud) + " "
+                    + cuandoDe(solicitud) + ".\n\n"
+                    + "Tienes un pago pendiente de " + String.format(Locale.forLanguageTag("es-ES"), "%.2f €", importe)
+                    + ". Puedes pagarlo aquí:\n"
+                    + urlDelFront + "/pagos\n\n"
+                    + FIRMA;
+            correo.enviar(familia.getEmail(), "Tu servicio ha sido completado", texto);
+        } catch (Exception e) {
+            log.warn("No se pudo enviar el aviso de servicio completado (solicitud {})", solicitud.getId(), e);
         }
     }
 
