@@ -22,6 +22,9 @@ import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorE
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionFotoInvalida;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.security.DemasiadasPeticionesException;
+import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionAccesoDenegado;
+import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionFechaInvalida;
+import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionNotFound;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionEstadoInvalido;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionFechaInvalida;
@@ -89,6 +92,24 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(SolicitudExceptionEstadoInvalido.class)
     public ResponseEntity<String> handleSolicitudEstadoInvalidoException(SolicitudExceptionEstadoInvalido exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
+    }
+
+    // Calendario de la persona cuidadora (bloques ocupados)
+    @ExceptionHandler(BloqueOcupadoExceptionNotFound.class)
+    public ResponseEntity<String> handleBloqueOcupadoNotFoundException(BloqueOcupadoExceptionNotFound exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(BloqueOcupadoExceptionAccesoDenegado.class)
+    public ResponseEntity<String> handleBloqueOcupadoAccesoDenegadoException(
+            BloqueOcupadoExceptionAccesoDenegado exception) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getMessage());
+    }
+
+    @ExceptionHandler(BloqueOcupadoExceptionFechaInvalida.class)
+    public ResponseEntity<String> handleBloqueOcupadoFechaInvalidaException(
+            BloqueOcupadoExceptionFechaInvalida exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
 
     @ExceptionHandler(ValoracionExceptionNotFound.class)
