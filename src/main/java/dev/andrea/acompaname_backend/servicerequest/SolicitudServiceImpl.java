@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,10 @@ public class SolicitudServiceImpl implements SolicitudService {
     private final PagoRepository pagoRepository;
     private final BloqueOcupadoRepository bloqueRepository;
 
+    // Los avisos por correo son opcionales: si no hay (por ejemplo, en los tests que no los usan),
+    // la solicitud funciona igual, solo que sin mandar correos
+    private AvisosDeSolicitud avisos;
+
     public SolicitudServiceImpl(SolicitudRepository repository, UsuarioRepository usuarioRepository,
             PerfilCuidadorRepository perfilCuidadorRepository, PagoRepository pagoRepository,
             BloqueOcupadoRepository bloqueRepository) {
@@ -48,6 +53,11 @@ public class SolicitudServiceImpl implements SolicitudService {
         this.perfilCuidadorRepository = perfilCuidadorRepository;
         this.pagoRepository = pagoRepository;
         this.bloqueRepository = bloqueRepository;
+    }
+
+    @Autowired(required = false)
+    public void setAvisos(AvisosDeSolicitud avisos) {
+        this.avisos = avisos;
     }
 
     private SolicitudEntity findEntityById(Long id) {
@@ -190,6 +200,10 @@ public class SolicitudServiceImpl implements SolicitudService {
 
         SolicitudEntity solicitudToSave = SolicitudMapper.toEntity(dto, familia, cuidador);
         SolicitudEntity solicitudSave = repository.save(solicitudToSave);
+        // Ya está guardada: se avisa a la persona cuidadora (si el correo falla, la solicitud sigue creada)
+        if (avisos != null) {
+            avisos.avisarSolicitudNueva(solicitudSave);
+        }
         return SolicitudMapper.toDTO(solicitudSave);
     }
 
@@ -250,6 +264,13 @@ public class SolicitudServiceImpl implements SolicitudService {
             // Al completar la solicitud se genera su pago pendiente, con la tarifa del cuidador:
             // la familia solo paga cuando el servicio ya se ha realizado
             pagoRepository.save(PagoMapper.toEntity(solicitud.getCuidador().getTarifaHora(), solicitud));
+        }
+        // Ya está guardado el cambio: se avisa a la familia de si la han aceptado o rechazado
+        if (avisos != null && nuevoEstado == EstadoSolicitud.ACEPTADA) {
+            avisos.avisarSolicitudAceptada(solicitudActualizada);
+        }
+        if (avisos != null && nuevoEstado == EstadoSolicitud.RECHAZADA) {
+            avisos.avisarSolicitudRechazada(solicitudActualizada);
         }
         return aDTO(solicitudActualizada);
     }
