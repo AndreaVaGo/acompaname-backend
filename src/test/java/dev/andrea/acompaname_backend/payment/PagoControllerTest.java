@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
@@ -45,6 +46,18 @@ public class PagoControllerTest {
     private PagoDTOResponse crearPagoResponse(EstadoPago estado) {
         return new PagoDTOResponse(1L, new BigDecimal("90.00"), estado, LocalDate.of(2026, 9, 11), 1L, "Pepe",
                 "Acompañamiento");
+    }
+
+    @Test
+    void testElPagoDevuelveLasHorasYLasPersonasDelDesglose() throws Exception {
+        PagoDTOResponse pago = new PagoDTOResponse(1L, new BigDecimal("90.00"), EstadoPago.PENDIENTE,
+                LocalDate.of(2026, 9, 11), 1L, "Pepe", "Acompañamiento", 4L, 3);
+        when(service.getEntities()).thenReturn(List.of(pago));
+
+        mockMvc.perform(get("/api/v1/pagos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].horas").value(4))
+                .andExpect(jsonPath("$[0].personas").value(3));
     }
 
     @Test

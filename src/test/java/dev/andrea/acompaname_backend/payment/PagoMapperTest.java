@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
 import dev.andrea.acompaname_backend.payment.mappers.PagoMapper;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
+import dev.andrea.acompaname_backend.servicerequest.PersonaCuidada;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 
@@ -81,5 +83,53 @@ public class PagoMapperTest {
         assertThat(pago.getImporte(), is(equalTo(new BigDecimal("36.00"))));
         assertThat(pago.getSolicitud(), is(equalTo(solicitud)));
         assertThat(pago.getFecha(), is(equalTo(LocalDate.now())));
+    }
+
+    // ---- Horas y personas del desglose ----
+
+    private PagoEntity pagoDe(SolicitudEntity solicitud) {
+        return PagoEntity.builder()
+                .id(3L)
+                .importe(new BigDecimal("90.00"))
+                .estado(EstadoPago.PENDIENTE)
+                .fecha(LocalDate.of(2026, 9, 11))
+                .solicitud(solicitud)
+                .build();
+    }
+
+    @Test
+    void testToDTOIncluyeLasHorasDeLaSolicitud() {
+        SolicitudEntity solicitud = crearSolicitud();
+        solicitud.setHoraInicio(LocalTime.of(10, 0));
+        solicitud.setHoraFin(LocalTime.of(14, 0));
+
+        PagoDTOResponse dto = PagoMapper.toDTO(pagoDe(solicitud));
+
+        assertThat(dto.horas(), is(equalTo(4L)));
+    }
+
+    @Test
+    void testToDTOSinHorasCuentaElDiaCompleto() {
+        PagoDTOResponse dto = PagoMapper.toDTO(pagoDe(crearSolicitud()));
+
+        assertThat(dto.horas(), is(equalTo(24L)));
+    }
+
+    @Test
+    void testToDTOIncluyeElNumeroDePersonas() {
+        SolicitudEntity solicitud = crearSolicitud();
+        solicitud.getPersonas().add(new PersonaCuidada("Carmen", 82));
+        solicitud.getPersonas().add(new PersonaCuidada("Antonio", 85));
+
+        PagoDTOResponse dto = PagoMapper.toDTO(pagoDe(solicitud));
+
+        assertThat(dto.personas(), is(equalTo(2)));
+    }
+
+    @Test
+    void testToDTOUnaSolicitudAntiguaSinListaCuentaComoUnaPersona() {
+        PagoDTOResponse dto = PagoMapper.toDTO(pagoDe(crearSolicitud()));
+
+        assertThat(dto.personas(), is(equalTo(1)));
     }
 }

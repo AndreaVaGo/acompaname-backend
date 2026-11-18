@@ -2,6 +2,7 @@ package dev.andrea.acompaname_backend.payment.mappers;
 
 import java.math.BigDecimal;
 
+import dev.andrea.acompaname_backend.payment.CalculoDeImporte;
 import dev.andrea.acompaname_backend.payment.EstadoPago;
 import dev.andrea.acompaname_backend.payment.PagoEntity;
 import dev.andrea.acompaname_backend.payment.dtos.PagoDTOResponse;
@@ -22,7 +23,9 @@ public class PagoMapper {
     public static PagoDTOResponse toDTO(PagoEntity entity) {
         SolicitudEntity solicitud = entity.getSolicitud();
         // La pantalla de pagos de la familia enseña quién cuida y de qué tipo es el cuidado
+        // Las horas y las personas salen de la solicitud: son los datos con los que se calculó el importe
         return new PagoDTOResponse(entity.getId(), entity.getImporte(), entity.getEstado(), entity.getFecha(),
-                solicitud.getId(), solicitud.getCuidador().getUsuario().getNombre(), solicitud.getTipoCuidado());
+                solicitud.getId(), solicitud.getCuidador().getUsuario().getNombre(), solicitud.getTipoCuidado(),
+                CalculoDeImporte.horasDe(solicitud), solicitud.numeroDePersonas());
     }
 }
