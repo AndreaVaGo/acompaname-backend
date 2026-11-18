@@ -1,6 +1,7 @@
 package dev.andrea.acompaname_backend.schedule;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
@@ -44,4 +45,20 @@ public class BloqueOcupadoEntity {
     // Para qué es (opcional, por ejemplo "Turno en el hospital")
     @Column(length = 100)
     private String motivo;
+
+    // Momento exacto en que empieza el bloque: su fecha con su hora de inicio
+    public LocalDateTime momentoInicio() {
+        return fecha.atTime(horaInicio);
+    }
+
+    // Momento exacto en que acaba el bloque: su fecha con su hora de fin
+    public LocalDateTime momentoFin() {
+        return fecha.atTime(horaFin);
+    }
+
+    // Igual que en las solicitudes: dos rangos se cruzan si cada uno empieza antes de que acabe el otro.
+    // Si uno acaba justo cuando empieza el otro (12:00 y 12:00) no se cruzan
+    public boolean seCruzaCon(LocalDateTime inicio, LocalDateTime fin) {
+        return momentoInicio().isBefore(fin) && momentoFin().isAfter(inicio);
+    }
 }
