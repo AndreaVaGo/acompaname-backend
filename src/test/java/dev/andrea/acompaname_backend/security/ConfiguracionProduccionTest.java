@@ -62,4 +62,14 @@ public class ConfiguracionProduccionTest {
 
         assertThat(propiedades.getProperty("jwt.secret"), is(not(nullValue())));
     }
+
+    @Test
+    void testElCorreoDeProduccionSeEnviaDeVerdadYNoTieneValoresPorDefecto() throws IOException {
+        Properties propiedades = cargarPropiedadesDeProduccion();
+
+        assertThat(propiedades.getProperty("mail.enabled"), is(equalTo("true")));
+        assertThat(propiedades.getProperty("spring.mail.host"), is(equalTo("${MAIL_HOST}")));
+        assertThat(propiedades.getProperty("spring.mail.password"), is(equalTo("${MAIL_PASSWORD}")));
+        assertThat(propiedades.getProperty("mail.from"), is(equalTo("${MAIL_FROM}")));
+    }
 }
