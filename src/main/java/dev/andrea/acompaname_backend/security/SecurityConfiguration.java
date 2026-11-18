@@ -59,6 +59,9 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.DELETE, "/" + endpoint + "/cuidadores/**").hasAuthority("CUIDADOR")
                         .requestMatchers(HttpMethod.PUT, "/" + endpoint + "/solicitudes/**").hasAuthority("FAMILIA")
                         .requestMatchers(HttpMethod.DELETE, "/" + endpoint + "/solicitudes/**").hasAuthority("FAMILIA")
+                        // El calendario propio (bloques ocupados) es solo de las personas cuidadoras
+                        .requestMatchers("/" + endpoint + "/bloques-ocupados/**").hasAuthority("CUIDADOR")
+                        .requestMatchers("/" + endpoint + "/bloques-ocupados").hasAuthority("CUIDADOR")
                         // Todo lo que cuelga de /admin es solo para el administrador
                         .requestMatchers("/" + endpoint + "/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated())
