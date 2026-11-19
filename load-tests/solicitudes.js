@@ -1,6 +1,7 @@
-// Escenario 3: una familia crea solicitudes y mira su lista.
-// OJO: esta prueba GUARDA solicitudes de verdad en la base de datos. Hazla solo en local (Docker) y,
-// al acabar, borra los datos de prueba (por ejemplo, con "docker compose down -v" y volviendo a arrancar).
+// Escenario 3: una familia crea una solicitud, mira su lista y la borra.
+// Cada vuelta borra la solicitud que ha creado, así la lista de la familia no crece sin parar
+// (como pasaría en la vida real: una familia tiene pocas solicitudes) y la base de datos queda limpia.
+// Aun así, hazla solo en local (Docker): si se corta a mitad, pueden quedar algunas solicitudes sin borrar.
 import http from "k6/http";
 import { check, sleep } from "k6";
 import { Counter } from "k6/metrics";
@@ -23,7 +24,13 @@ export const options = {
   stages: etapas(),
   thresholds: {
     http_req_failed: ["rate<0.01"],
-    http_req_duration: ["p(95)<1000"],
+    http_req_duration: ["p(95)<1500"],
+    // Umbral de 1,5 s (igual que login): con 100 usuarios a la vez, el back, MySQL y k6
+    // comparten la CPU del portátil. En esta prueba salió p95 = 1,15 s y 0 errores.
+    // Por separado, para saber cuál de las peticiones es la lenta
+    "http_req_duration{paso:crear}": ["p(95)<1500"],
+    "http_req_duration{paso:lista}": ["p(95)<1500"],
+    "http_req_duration{paso:borrar}": ["p(95)<1500"],
   },
 };
 
@@ -75,6 +82,16 @@ export default function (datos) {
   const parametrosLista = Object.assign({}, parametros, { tags: { paso: "lista" } });
   const lista = http.get(BASE_URL + "/solicitudes/mis-solicitudes", parametrosLista);
   check(lista, { "mis solicitudes responde 200": (r) => r.status === 200 });
+
+  // Se borra la solicitud creada (solo se pueden borrar las pendientes, y esta lo es). El borrado responde 204
+  if (creada.status === 201) {
+    const parametrosBorrar = Object.assign({}, parametros, {
+      tags: { paso: "borrar" },
+      responseCallback: http.expectedStatuses(204),
+    });
+    const borrada = http.del(BASE_URL + "/solicitudes/" + creada.json("id"), null, parametrosBorrar);
+    check(borrada, { "borrar responde 204": (r) => r.status === 204 });
+  }
 
   sleep(1);
 }

@@ -9,7 +9,7 @@ machine** (Docker), never against a published site.
 | --- | --- | --- |
 | `buscar.js` | Caregiver list, one profile and the "busy caregivers" lookup | No (public) |
 | `login.js` | `POST /login` | No |
-| `solicitudes.js` | A family creates requests (`POST /solicitudes`) and reads `GET /solicitudes/mis-solicitudes` | Yes (logs in once) |
+| `solicitudes.js` | A family creates a request (`POST /solicitudes`), reads `GET /solicitudes/mis-solicitudes` and deletes the request | Yes (logs in once) |
 
 Each script goes up slowly from 10 to 100 virtual users (about 5 minutes) and fails if more than 1% of the
 requests fail or if the 95th percentile (p95) is too slow. Use `PERFIL=rapido` for a 20 second smoke test.
@@ -45,5 +45,7 @@ ignored by Git: copy the numbers that matter (average, p95, errors) to the READM
 
 ## Cleaning up
 
-`solicitudes.js` stores real requests. When you finish, reset the local data (for example
+`solicitudes.js` creates real requests but deletes each one at the end of its iteration, so the family's
+list stays short (like in real life) and the database stays clean. If the run is stopped half way, a few
+pending requests can be left over: remove them or reset the local data (for example
 `docker compose down -v` and start again).
