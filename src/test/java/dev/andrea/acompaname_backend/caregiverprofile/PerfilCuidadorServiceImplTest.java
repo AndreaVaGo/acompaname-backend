@@ -64,7 +64,7 @@ public class PerfilCuidadorServiceImplTest {
         List<PerfilCuidadorEntity> perfilesMock = List.of(
                 new PerfilCuidadorEntity(1L, "Fisioterapia", 5, new BigDecimal("15.00"), "Bio de prueba", true, true,
                         usuario));
-        when(repository.findAll()).thenReturn(perfilesMock);
+        when(repository.findAllConUsuario()).thenReturn(perfilesMock);
 
         List<PerfilCuidadorDTOResponse> perfiles = service.getEntities();
         assertThat(perfiles.size(), is(equalTo(1)));
