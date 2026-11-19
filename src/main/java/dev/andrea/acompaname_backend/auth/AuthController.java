@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.andrea.acompaname_backend.captcha.VerificadorCaptcha;
 import dev.andrea.acompaname_backend.security.JwtService;
 import dev.andrea.acompaname_backend.security.LimitadorDePeticiones;
 import dev.andrea.acompaname_backend.security.SecurityUser;
@@ -29,12 +30,14 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final LimitadorDePeticiones limitador;
+    private final VerificadorCaptcha verificadorCaptcha;
 
     public AuthController(AuthenticationManager authenticationManager, JwtService jwtService,
-            LimitadorDePeticiones limitador) {
+            LimitadorDePeticiones limitador, VerificadorCaptcha verificadorCaptcha) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.limitador = limitador;
+        this.verificadorCaptcha = verificadorCaptcha;
     }
 
     @PostMapping("/login")
@@ -42,6 +45,8 @@ public class AuthController {
             HttpServletRequest peticion) {
         // Antes de comprobar nada, se mira que esta dirección IP no haya hecho demasiados intentos
         limitador.comprobar("login:" + peticion.getRemoteAddr());
+        // Después, el CAPTCHA (si está activado). Sin él válido, ni se mira la contraseña
+        verificadorCaptcha.verificar(request.captchaToken(), peticion.getRemoteAddr());
 
         Authentication auth;
         try {

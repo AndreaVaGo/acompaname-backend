@@ -20,9 +20,17 @@ public record UsuarioDTORequest(
         // Sustituye al @Size que había antes: la longitud ya está incluida en @PasswordSegura.
         @NotBlank(message = "La password no puede estar vacía") @PasswordSegura String password,
 
-        @NotNull(message = "Los roles no pueden ser nulos") Set<Long> rolesIds
+        @NotNull(message = "Los roles no pueden ser nulos") Set<Long> rolesIds,
+
+        // Token del CAPTCHA que da el widget del front. Solo se exige si captcha.enabled=true
+        String captchaToken
 
 ) {
+
+    // Sin CAPTCHA (tests, desarrollo): igual que antes
+    public UsuarioDTORequest(String nombre, String email, String telefono, String password, Set<Long> rolesIds) {
+        this(nombre, email, telefono, password, rolesIds, null);
+    }
 
     // Igual que en el login: la contraseña no se escribe nunca en toString()
     @Override

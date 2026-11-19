@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.andrea.acompaname_backend.captcha.VerificadorCaptcha;
 import dev.andrea.acompaname_backend.security.LimitadorDePeticiones;
 import dev.andrea.acompaname_backend.user.dtos.ActualizarContactoDTO;
 import dev.andrea.acompaname_backend.user.dtos.CambiarPasswordDTO;
@@ -26,10 +27,13 @@ public class UsuarioController {
 
     private final UsuarioService service;
     private final LimitadorDePeticiones limitador;
+    private final VerificadorCaptcha verificadorCaptcha;
 
-    public UsuarioController(UsuarioService service, LimitadorDePeticiones limitador) {
+    public UsuarioController(UsuarioService service, LimitadorDePeticiones limitador,
+            VerificadorCaptcha verificadorCaptcha) {
         this.service = service;
         this.limitador = limitador;
+        this.verificadorCaptcha = verificadorCaptcha;
     }
 
     @GetMapping("")
@@ -47,6 +51,8 @@ public class UsuarioController {
             HttpServletRequest peticion) {
         // Primero se mira el límite de registros desde esta IP; si se pasa, da 429
         limitador.comprobar("registro:" + peticion.getRemoteAddr());
+        // Después, el CAPTCHA (si está activado)
+        verificadorCaptcha.verificar(dto.captchaToken(), peticion.getRemoteAddr());
         UsuarioDTOResponse dtoResponse = service.storeEntity(dto);
         return ResponseEntity.status(201).body(dtoResponse);
     }

@@ -22,6 +22,7 @@ import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorE
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionFotoInvalida;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.passwordreset.TokenRecuperacionInvalidoException;
+import dev.andrea.acompaname_backend.captcha.CaptchaInvalidoException;
 import dev.andrea.acompaname_backend.security.DemasiadasPeticionesException;
 import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionFechaInvalida;
@@ -222,6 +223,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DemasiadasPeticionesException.class)
     public ResponseEntity<String> handleDemasiadasPeticiones(DemasiadasPeticionesException exception) {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(exception.getMessage());
+    }
+
+    // El CAPTCHA del registro o del login falta o no es válido
+    @ExceptionHandler(CaptchaInvalidoException.class)
+    public ResponseEntity<String> handleCaptchaInvalido(CaptchaInvalidoException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
 
     // Un parámetro de la URL con formato incorrecto (por ejemplo, /cuidadores/abc) es un fallo del cliente

@@ -27,6 +27,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import dev.andrea.acompaname_backend.captcha.CaptchaInvalidoException;
+import dev.andrea.acompaname_backend.captcha.VerificadorCaptcha;
 import dev.andrea.acompaname_backend.security.DemasiadasPeticionesException;
 import dev.andrea.acompaname_backend.security.LimitadorDePeticiones;
 import dev.andrea.acompaname_backend.user.dtos.ActualizarContactoDTO;
@@ -50,6 +52,8 @@ public class UsuarioControllerTest {
     private UsuarioService service;
     @MockitoBean
     private LimitadorDePeticiones limitador;
+    @MockitoBean
+    private VerificadorCaptcha verificadorCaptcha;
     @Autowired
     ObjectMapper mapper;
 
@@ -358,5 +362,49 @@ public class UsuarioControllerTest {
                 .getResponse();
 
         Mockito.verifyNoInteractions(limitador);
+    }
+
+    // ---------- CAPTCHA del registro ----------
+
+    @Test
+    void testElRegistroMandaElTokenDelCaptchaYLaIpAlVerificador() throws Exception {
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", PASSWORD_VALIDA,
+                Set.of(1L), "token-captcha");
+        UsuarioDTOResponse dtoResponse = new UsuarioDTOResponse(1L, "Ana", "ana@test.com", "600555666",
+                Set.of("FAMILIA"));
+        when(service.storeEntity(Mockito.any(UsuarioDTORequest.class))).thenReturn(dtoResponse);
+
+        mockMvc.perform(post("/api/v1/usuarios")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn().getResponse();
+
+        Mockito.verify(verificadorCaptcha).verificar("token-captcha", "127.0.0.1");
+    }
+
+    @Test
+    void testSiElCaptchaNoEsValidoDa400YNoSeCreaLaCuenta() throws Exception {
+        UsuarioDTORequest dto = new UsuarioDTORequest("Ana", "ana@test.com", "600555666", PASSWORD_VALIDA,
+                Set.of(1L));
+        Mockito.doThrow(new CaptchaInvalidoException("Completa el CAPTCHA para continuar."))
+                .when(verificadorCaptcha).verificar(ArgumentMatchers.any(), ArgumentMatchers.anyString());
+
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/usuarios")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn().getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        assertThat(response.getContentAsString(), containsString("CAPTCHA"));
+        Mockito.verifyNoInteractions(service);
+    }
+
+    @Test
+    void testUnRegistroMalEscritoNoLlegaAlCaptcha() throws Exception {
+        UsuarioDTORequest dto = new UsuarioDTORequest("", "ana@test.com", "600555666", PASSWORD_VALIDA, Set.of(1L));
+
+        mockMvc.perform(post("/api/v1/usuarios")
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(dto)))
+                .andReturn().getResponse();
+
+        Mockito.verifyNoInteractions(verificadorCaptcha);
     }
 }

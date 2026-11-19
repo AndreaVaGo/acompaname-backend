@@ -29,6 +29,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import dev.andrea.acompaname_backend.captcha.CaptchaInvalidoException;
+import dev.andrea.acompaname_backend.captcha.VerificadorCaptcha;
 import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.security.DemasiadasPeticionesException;
 import dev.andrea.acompaname_backend.security.JwtService;
@@ -52,6 +54,8 @@ public class AuthControllerTest {
     private JwtService jwtService;
     @MockitoBean
     private LimitadorDePeticiones limitador;
+    @MockitoBean
+    private VerificadorCaptcha verificadorCaptcha;
 
     // Hace que el AuthenticationManager acepte el login y devuelva a esa persona
     private void simularLoginCorrecto(Long id, String email, String nombreRol) {
@@ -200,5 +204,48 @@ public class AuthControllerTest {
         hacerLogin("", "1234");
 
         Mockito.verifyNoInteractions(limitador);
+    }
+
+    @Test
+    void testElLoginMandaElTokenDelCaptchaYLaIpAlVerificador() throws Exception {
+        simularLoginCorrecto(5L, "ana@test.com", "FAMILIA");
+        String cuerpo = mapper.writeValueAsString(new LoginDTORequest("ana@test.com", "1234", "token-captcha"));
+
+        mockMvc.perform(post("/api/v1/login").contentType(MediaType.APPLICATION_JSON).content(cuerpo))
+                .andReturn().getResponse();
+
+        // MockMvc hace las peticiones desde 127.0.0.1
+        Mockito.verify(verificadorCaptcha).verificar("token-captcha", "127.0.0.1");
+    }
+
+    @Test
+    void testSiElCaptchaNoEsValidoDa400YNoSeComprueba() throws Exception {
+        Mockito.doThrow(new CaptchaInvalidoException("El CAPTCHA no es válido. Inténtalo de nuevo."))
+                .when(verificadorCaptcha).verificar(ArgumentMatchers.any(), ArgumentMatchers.anyString());
+
+        MockHttpServletResponse response = hacerLogin("ana@test.com", "1234");
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        assertThat(response.getContentAsString(), containsString("CAPTCHA"));
+        Mockito.verifyNoInteractions(authenticationManager);
+        Mockito.verifyNoInteractions(jwtService);
+    }
+
+    @Test
+    void testElCaptchaSeMiraDespuesDelLimite() throws Exception {
+        Mockito.doThrow(new DemasiadasPeticionesException("Demasiados intentos."))
+                .when(limitador).comprobar(ArgumentMatchers.anyString());
+
+        MockHttpServletResponse response = hacerLogin("ana@test.com", "1234");
+
+        assertThat(response.getStatus(), is(equalTo(429)));
+        Mockito.verifyNoInteractions(verificadorCaptcha);
+    }
+
+    @Test
+    void testUnLoginMalEscritoNoLlegaAlCaptcha() throws Exception {
+        hacerLogin("", "1234");
+
+        Mockito.verifyNoInteractions(verificadorCaptcha);
     }
 }
