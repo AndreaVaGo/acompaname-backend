@@ -17,6 +17,9 @@ public interface MensajeRepository extends JpaRepository<MensajeEntity, Long> {
     // Los mensajes de una solicitud que no ha escrito esa persona y que todavía no ha leído
     List<MensajeEntity> findBySolicitudIdAndEmisorIdNotAndLeidoFalse(Long solicitudId, Long usuarioId);
 
+    // ¿Tiene la otra persona algún mensaje mío sin leer en esta solicitud? Sirve para no mandar un correo por cada mensaje
+    boolean existsBySolicitudIdAndEmisorIdAndLeidoFalse(Long solicitudId, Long emisorId);
+
     // Todos los mensajes sin leer de una persona (en las solicitudes donde es la familia o la persona cuidadora)
     @Query("select m from MensajeEntity m where m.leido = false and m.emisor.email <> :email "
             + "and (m.solicitud.familia.email = :email or m.solicitud.cuidador.usuario.email = :email)")

@@ -27,10 +27,13 @@ public class MensajeServiceImpl implements MensajeService {
 
     private final MensajeRepository repository;
     private final SolicitudRepository solicitudRepository;
+    private final AvisosDeChat avisos;
 
-    public MensajeServiceImpl(MensajeRepository repository, SolicitudRepository solicitudRepository) {
+    public MensajeServiceImpl(MensajeRepository repository, SolicitudRepository solicitudRepository,
+            AvisosDeChat avisos) {
         this.repository = repository;
         this.solicitudRepository = solicitudRepository;
+        this.avisos = avisos;
     }
 
     private String emailLogueado() {
@@ -117,7 +120,14 @@ public class MensajeServiceImpl implements MensajeService {
             throw new ChatExceptionConflicto("No se puede escribir en una solicitud rechazada");
         }
 
+        // Se mira antes de guardar: solo se avisa por correo si la otra persona no tenía ya mensajes mios sin leer
+        boolean yaHabiaSinLeer = repository.existsBySolicitudIdAndEmisorIdAndLeidoFalse(solicitudId, emisor.getId());
+
         MensajeEntity guardado = repository.save(MensajeMapper.toEntity(dto, solicitud, emisor));
+
+        if (!yaHabiaSinLeer) {
+            avisos.avisarMensajeNuevo(solicitud, emisor);
+        }
         return MensajeMapper.toDTO(guardado, emisor.getEmail());
     }
 }

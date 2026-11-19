@@ -44,6 +44,8 @@ public class MensajeServiceImplTest {
     private MensajeRepository repository;
     @Mock
     private SolicitudRepository solicitudRepository;
+    @Mock
+    private AvisosDeChat avisos;
 
     private MensajeServiceImpl service;
     private SecurityContext contextoOriginal;
@@ -54,7 +56,7 @@ public class MensajeServiceImplTest {
     void setup() {
         contextoOriginal = SecurityContextHolder.getContext();
         SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
-        service = new MensajeServiceImpl(repository, solicitudRepository);
+        service = new MensajeServiceImpl(repository, solicitudRepository, avisos);
         ana = usuario(1L, "Ana", "ana@test.com");
         pepe = usuario(2L, "Pepe", "pepe@test.com");
     }
@@ -285,5 +287,50 @@ public class MensajeServiceImplTest {
 
         assertThat(resultado.total(), is(equalTo(0L)));
         assertThat(resultado.porSolicitud().isEmpty(), is(true));
+    }
+
+    @Test
+    void testElPrimerMensajeSinLeerAvisaPorCorreo() {
+        SolicitudEntity solicitud = solicitud(EstadoSolicitud.PENDIENTE);
+        loguearComo("ana@test.com");
+        when(repository.existsBySolicitudIdAndEmisorIdAndLeidoFalse(5L, 1L)).thenReturn(false);
+        when(repository.save(ArgumentMatchers.any(MensajeEntity.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        service.enviar(5L, new MensajeDTORequest("Hola Pepe"));
+
+        verify(avisos).avisarMensajeNuevo(solicitud, ana);
+    }
+
+    @Test
+    void testSiYaHabiaMensajesSinLeerNoSeVuelveAAvisar() {
+        solicitud(EstadoSolicitud.PENDIENTE);
+        loguearComo("ana@test.com");
+        when(repository.existsBySolicitudIdAndEmisorIdAndLeidoFalse(5L, 1L)).thenReturn(true);
+        when(repository.save(ArgumentMatchers.any(MensajeEntity.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        service.enviar(5L, new MensajeDTORequest("Otro más"));
+
+        verify(avisos, never()).avisarMensajeNuevo(ArgumentMatchers.any(), ArgumentMatchers.any());
+    }
+
+    @Test
+    void testLaPersonaCuidadoraTambienAvisaALaFamilia() {
+        SolicitudEntity solicitud = solicitud(EstadoSolicitud.ACEPTADA);
+        loguearComo("pepe@test.com");
+        when(repository.save(ArgumentMatchers.any(MensajeEntity.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        service.enviar(5L, new MensajeDTORequest("Hola Ana"));
+
+        verify(avisos).avisarMensajeNuevo(solicitud, pepe);
+    }
+
+    @Test
+    void testSiNoSePuedeEscribirNoSeAvisa() {
+        solicitud(EstadoSolicitud.RECHAZADA);
+        loguearComo("ana@test.com");
+
+        assertThrows(ChatExceptionConflicto.class, () -> service.enviar(5L, new MensajeDTORequest("Hola")));
+
+        verify(avisos, never()).avisarMensajeNuevo(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 }

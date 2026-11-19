@@ -168,4 +168,27 @@ public class MensajeRepositoryIntegrationTest extends ContenedorMySqlRepositorio
 
         assertThat(repository.findNoLeidosDe("ana@test.com"), is(empty()));
     }
+
+    @Test
+    void testExisteMensajeSinLeerDeUnaPersonaSoloSiLoEscribioElla() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        UsuarioEntity pepe = crearUsuario("Pepe", "pepe@test.com");
+        SolicitudEntity solicitud = crearSolicitud(ana, pepe);
+        escribir(solicitud, ana, "Hola");
+
+        assertThat(repository.existsBySolicitudIdAndEmisorIdAndLeidoFalse(solicitud.getId(), ana.getId()), is(true));
+        assertThat(repository.existsBySolicitudIdAndEmisorIdAndLeidoFalse(solicitud.getId(), pepe.getId()), is(false));
+    }
+
+    @Test
+    void testNoExisteMensajeSinLeerSiYaSeLeyo() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        UsuarioEntity pepe = crearUsuario("Pepe", "pepe@test.com");
+        SolicitudEntity solicitud = crearSolicitud(ana, pepe);
+        MensajeEntity mensaje = escribir(solicitud, ana, "Hola");
+        mensaje.setLeido(true);
+        repository.saveAndFlush(mensaje);
+
+        assertThat(repository.existsBySolicitudIdAndEmisorIdAndLeidoFalse(solicitud.getId(), ana.getId()), is(false));
+    }
 }
