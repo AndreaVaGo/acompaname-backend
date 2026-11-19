@@ -15,6 +15,7 @@ import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.schedule.dtos.BloqueOcupadoDTORequest;
 import dev.andrea.acompaname_backend.schedule.dtos.BloqueOcupadoDTOResponse;
+import dev.andrea.acompaname_backend.schedule.dtos.ImportacionCalendarioDTOResponse;
 import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionFechaInvalida;
 import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionNotFound;
@@ -25,6 +26,8 @@ public class BloqueOcupadoServiceImpl implements BloqueOcupadoService {
 
     private final BloqueOcupadoRepository repository;
     private final PerfilCuidadorRepository perfilRepository;
+    // No guarda nada de nada: solo lee texto, así que no hace falta inyectarlo
+    private final LectorDeCalendario lector = new LectorDeCalendario();
 
     public BloqueOcupadoServiceImpl(BloqueOcupadoRepository repository, PerfilCuidadorRepository perfilRepository) {
         this.repository = repository;
@@ -65,6 +68,60 @@ public class BloqueOcupadoServiceImpl implements BloqueOcupadoService {
             respuesta.add(BloqueOcupadoMapper.toDTO(bloque));
         }
         return respuesta;
+    }
+
+    // Lo que se escribe como motivo en los bloques importados: nunca el título de la cita
+    static final String MOTIVO_IMPORTADO = "Calendario importado";
+
+    @Transactional
+    @Override
+    public ImportacionCalendarioDTOResponse importar(String contenido) {
+        PerfilCuidadorEntity perfil = perfilRepository.findByUsuarioEmail(emailLogueado()).orElseThrow(
+                () -> new PerfilCuidadorExceptionNotFound("Primero tienes que crear tu perfil de cuidador"));
+
+        // Si el archivo no vale, esto lanza el error antes de guardar nada
+        LecturaDeCalendario lectura = lector.leer(contenido);
+
+        // Los bloques que ya tiene, para no crearlos dos veces si importa el mismo archivo otra vez
+        List<BloqueOcupadoEntity> existentes = new ArrayList<>(
+                repository.findByCuidadorIdOrderByFechaAscHoraInicioAsc(perfil.getId()));
+
+        LocalDate hoy = LocalDate.now();
+        int importados = 0;
+        int duplicados = 0;
+        int omitidos = lectura.omitidos();
+
+        for (TramoOcupado tramo : lectura.tramos()) {
+            if (tramo.fecha().isBefore(hoy)) {
+                omitidos++;
+            } else if (yaExiste(existentes, tramo)) {
+                duplicados++;
+            } else {
+                BloqueOcupadoEntity nuevo = BloqueOcupadoEntity.builder()
+                        .cuidador(perfil)
+                        .fecha(tramo.fecha())
+                        .horaInicio(tramo.horaInicio())
+                        .horaFin(tramo.horaFin())
+                        .motivo(MOTIVO_IMPORTADO)
+                        .build();
+                existentes.add(repository.save(nuevo));
+                importados++;
+            }
+        }
+        return new ImportacionCalendarioDTOResponse(importados, duplicados, omitidos);
+    }
+
+    // Un bloque es el mismo si tiene la misma fecha y las mismas horas
+    private boolean yaExiste(List<BloqueOcupadoEntity> existentes, TramoOcupado tramo) {
+        for (BloqueOcupadoEntity bloque : existentes) {
+            boolean mismaFecha = bloque.getFecha().equals(tramo.fecha());
+            boolean mismoInicio = bloque.getHoraInicio().equals(tramo.horaInicio());
+            boolean mismoFin = bloque.getHoraFin().equals(tramo.horaFin());
+            if (mismaFecha && mismoInicio && mismoFin) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Transactional

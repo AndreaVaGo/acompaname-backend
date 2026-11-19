@@ -4,6 +4,7 @@ import java.util.List;
 
 import dev.andrea.acompaname_backend.schedule.dtos.BloqueOcupadoDTORequest;
 import dev.andrea.acompaname_backend.schedule.dtos.BloqueOcupadoDTOResponse;
+import dev.andrea.acompaname_backend.schedule.dtos.ImportacionCalendarioDTOResponse;
 
 public interface BloqueOcupadoService {
 
@@ -15,4 +16,8 @@ public interface BloqueOcupadoService {
 
     // Borra un bloque; solo puede hacerlo su dueña o dueño
     void borrar(Long id);
+
+    // Lee el texto de un archivo .ics y crea los bloques ocupados de la persona cuidadora logueada.
+    // No crea los que ya existen ni los que están en el pasado, y devuelve un resumen
+    ImportacionCalendarioDTOResponse importar(String contenido);
 }
