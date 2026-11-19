@@ -15,6 +15,8 @@ import dev.andrea.acompaname_backend.schedule.dtos.BloqueOcupadoDTORequest;
 import dev.andrea.acompaname_backend.schedule.dtos.BloqueOcupadoDTOResponse;
 import dev.andrea.acompaname_backend.schedule.dtos.ImportacionCalendarioDTOResponse;
 import dev.andrea.acompaname_backend.schedule.dtos.ImportarCalendarioDTORequest;
+import dev.andrea.acompaname_backend.schedule.dtos.RepeticionBloquesDTOResponse;
+import dev.andrea.acompaname_backend.schedule.dtos.RepetirBloquesDTORequest;
 import jakarta.validation.Valid;
 
 // El calendario propio de la persona cuidadora: los ratos en los que no puede trabajar
@@ -43,6 +45,12 @@ public class BloqueOcupadoController {
     public ResponseEntity<ImportacionCalendarioDTOResponse> importar(
             @Valid @RequestBody ImportarCalendarioDTORequest dto) {
         return ResponseEntity.ok(service.importar(dto.contenido()));
+    }
+
+    // Repite un rato ocupado varios días de la semana entre dos fechas (turnos)
+    @PostMapping("/repetir")
+    public ResponseEntity<RepeticionBloquesDTOResponse> repetir(@Valid @RequestBody RepetirBloquesDTORequest dto) {
+        return ResponseEntity.status(201).body(service.repetir(dto));
     }
 
     @DeleteMapping("/{id}")
