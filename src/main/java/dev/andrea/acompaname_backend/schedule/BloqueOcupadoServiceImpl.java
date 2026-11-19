@@ -1,6 +1,7 @@
 package dev.andrea.acompaname_backend.schedule;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,8 @@ import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorE
 import dev.andrea.acompaname_backend.schedule.dtos.BloqueOcupadoDTORequest;
 import dev.andrea.acompaname_backend.schedule.dtos.BloqueOcupadoDTOResponse;
 import dev.andrea.acompaname_backend.schedule.dtos.ImportacionCalendarioDTOResponse;
+import dev.andrea.acompaname_backend.schedule.dtos.RepeticionBloquesDTOResponse;
+import dev.andrea.acompaname_backend.schedule.dtos.RepetirBloquesDTORequest;
 import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionFechaInvalida;
 import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionNotFound;
@@ -109,6 +112,84 @@ public class BloqueOcupadoServiceImpl implements BloqueOcupadoService {
             }
         }
         return new ImportacionCalendarioDTOResponse(importados, duplicados, omitidos);
+    }
+
+    // Hasta dónde puede llegar una repetición (unos seis meses): como mucho 2 bloques por día, unos 370 en total
+    static final int MAXIMO_DIAS_REPETICION = 183;
+    private static final LocalTime FIN_DEL_DIA = LocalTime.of(23, 59);
+
+    @Transactional
+    @Override
+    public RepeticionBloquesDTOResponse repetir(RepetirBloquesDTORequest dto) {
+        PerfilCuidadorEntity perfil = perfilRepository.findByUsuarioEmail(emailLogueado()).orElseThrow(
+                () -> new PerfilCuidadorExceptionNotFound("Primero tienes que crear tu perfil de cuidador"));
+
+        if (dto.desde().isBefore(LocalDate.now())) {
+            throw new BloqueOcupadoExceptionFechaInvalida("La fecha de inicio no puede estar en el pasado");
+        }
+        if (dto.hasta().isBefore(dto.desde())) {
+            throw new BloqueOcupadoExceptionFechaInvalida("La fecha de fin no puede ser anterior a la de inicio");
+        }
+        if (dto.desde().plusDays(MAXIMO_DIAS_REPETICION).isBefore(dto.hasta())) {
+            throw new BloqueOcupadoExceptionFechaInvalida("Solo se puede repetir un rato durante unos seis meses");
+        }
+        if (dto.horaFin().equals(dto.horaInicio())) {
+            throw new BloqueOcupadoExceptionFechaInvalida("La hora de fin no puede ser igual a la de inicio");
+        }
+
+        // Si la hora de fin es anterior a la de inicio, es un turno de noche: acaba al día siguiente
+        boolean cruzaLaMedianoche = dto.horaFin().isBefore(dto.horaInicio());
+
+        List<TramoOcupado> tramos = new ArrayList<>();
+        LocalDate dia = dto.desde();
+        while (!dia.isAfter(dto.hasta())) {
+            if (dto.diasSemana().contains(dia.getDayOfWeek())) {
+                if (cruzaLaMedianoche) {
+                    // Un bloque es de un solo día: la noche se guarda en dos trozos
+                    tramos.add(new TramoOcupado(dia, dto.horaInicio(), FIN_DEL_DIA));
+                    if (!dto.horaFin().equals(LocalTime.MIDNIGHT)) {
+                        tramos.add(new TramoOcupado(dia.plusDays(1), LocalTime.MIDNIGHT, dto.horaFin()));
+                    }
+                } else {
+                    tramos.add(new TramoOcupado(dia, dto.horaInicio(), dto.horaFin()));
+                }
+            }
+            dia = dia.plusDays(1);
+        }
+
+        if (tramos.isEmpty()) {
+            throw new BloqueOcupadoExceptionFechaInvalida("Ninguno de los días elegidos cae entre esas fechas");
+        }
+
+        // Se guarda el motivo sin espacios de los lados; si no queda nada, no se guarda motivo
+        String motivo = dto.motivo();
+        if (motivo != null) {
+            motivo = motivo.trim();
+            if (motivo.isEmpty()) {
+                motivo = null;
+            }
+        }
+
+        List<BloqueOcupadoEntity> existentes = new ArrayList<>(
+                repository.findByCuidadorIdOrderByFechaAscHoraInicioAsc(perfil.getId()));
+        int creados = 0;
+        int duplicados = 0;
+        for (TramoOcupado tramo : tramos) {
+            if (yaExiste(existentes, tramo)) {
+                duplicados++;
+            } else {
+                BloqueOcupadoEntity nuevo = BloqueOcupadoEntity.builder()
+                        .cuidador(perfil)
+                        .fecha(tramo.fecha())
+                        .horaInicio(tramo.horaInicio())
+                        .horaFin(tramo.horaFin())
+                        .motivo(motivo)
+                        .build();
+                existentes.add(repository.save(nuevo));
+                creados++;
+            }
+        }
+        return new RepeticionBloquesDTOResponse(creados, duplicados);
     }
 
     // Un bloque es el mismo si tiene la misma fecha y las mismas horas

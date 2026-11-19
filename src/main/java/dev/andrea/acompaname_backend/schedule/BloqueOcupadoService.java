@@ -5,6 +5,8 @@ import java.util.List;
 import dev.andrea.acompaname_backend.schedule.dtos.BloqueOcupadoDTORequest;
 import dev.andrea.acompaname_backend.schedule.dtos.BloqueOcupadoDTOResponse;
 import dev.andrea.acompaname_backend.schedule.dtos.ImportacionCalendarioDTOResponse;
+import dev.andrea.acompaname_backend.schedule.dtos.RepeticionBloquesDTOResponse;
+import dev.andrea.acompaname_backend.schedule.dtos.RepetirBloquesDTORequest;
 
 public interface BloqueOcupadoService {
 
@@ -20,4 +22,8 @@ public interface BloqueOcupadoService {
     // Lee el texto de un archivo .ics y crea los bloques ocupados de la persona cuidadora logueada.
     // No crea los que ya existen ni los que están en el pasado, y devuelve un resumen
     ImportacionCalendarioDTOResponse importar(String contenido);
+
+    // Crea el mismo rato ocupado en todos los días elegidos de la semana entre dos fechas (por ejemplo,
+    // los turnos de mañana de lunes a viernes de un mes). No crea los que ya existen
+    RepeticionBloquesDTOResponse repetir(RepetirBloquesDTORequest dto);
 }
