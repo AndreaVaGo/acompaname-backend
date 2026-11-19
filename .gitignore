@@ -34,3 +34,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Resultados de las pruebas de carga ###
+load-tests/resultados/
