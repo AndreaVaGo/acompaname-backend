@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import dev.andrea.acompaname_backend.schedule.dtos.BloqueOcupadoDTORequest;
 import dev.andrea.acompaname_backend.schedule.dtos.BloqueOcupadoDTOResponse;
+import dev.andrea.acompaname_backend.schedule.dtos.ImportacionCalendarioDTOResponse;
+import dev.andrea.acompaname_backend.schedule.dtos.ImportarCalendarioDTORequest;
 import jakarta.validation.Valid;
 
 // El calendario propio de la persona cuidadora: los ratos en los que no puede trabajar
@@ -34,6 +36,13 @@ public class BloqueOcupadoController {
     @PostMapping("")
     public ResponseEntity<BloqueOcupadoDTOResponse> store(@Valid @RequestBody BloqueOcupadoDTORequest dto) {
         return ResponseEntity.status(201).body(service.crear(dto));
+    }
+
+    // Importa los ratos ocupados de un calendario externo (archivo .ics)
+    @PostMapping("/importar")
+    public ResponseEntity<ImportacionCalendarioDTOResponse> importar(
+            @Valid @RequestBody ImportarCalendarioDTORequest dto) {
+        return ResponseEntity.ok(service.importar(dto.contenido()));
     }
 
     @DeleteMapping("/{id}")
