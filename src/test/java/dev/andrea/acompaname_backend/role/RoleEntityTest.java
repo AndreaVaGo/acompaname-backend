@@ -69,6 +69,30 @@ public class RoleEntityTest {
     }
 
     @Test
+    void testLosUsuariosNoCuentanParaLaIgualdadNiElHashCode() {
+        // Si los usuarios entraran en equals/hashCode, Hibernate cargaría todos los usuarios del rol
+        RoleEntity role1 = new RoleEntity();
+        role1.setId(1L);
+        role1.setName("FAMILIA");
+        role1.setUsers(Set.of(UsuarioEntity.builder().email("ana@test.com").build()));
+        RoleEntity role2 = new RoleEntity();
+        role2.setId(1L);
+        role2.setName("FAMILIA");
+
+        assertThat(role1, is(equalTo(role2)));
+        assertThat(role1.hashCode(), is(equalTo(role2.hashCode())));
+    }
+
+    @Test
+    void testToStringNoIncluyeLosUsuarios() {
+        RoleEntity role = new RoleEntity();
+        role.setName("FAMILIA");
+        role.setUsers(Set.of(UsuarioEntity.builder().email("ana@test.com").build()));
+
+        assertThat(role.toString(), is(not(containsString("ana@test.com"))));
+    }
+
+    @Test
     void testToStringContieneElNombre() {
         RoleEntity role = new RoleEntity();
         role.setName("FAMILIA");
