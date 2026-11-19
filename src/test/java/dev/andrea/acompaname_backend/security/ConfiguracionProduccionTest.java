@@ -74,6 +74,14 @@ public class ConfiguracionProduccionTest {
     }
 
     @Test
+    void testElCaptchaEstaActivadoEnProduccionYLaClaveNoTieneValorPorDefecto() throws IOException {
+        Properties propiedades = cargarPropiedadesDeProduccion();
+
+        assertThat(propiedades.getProperty("captcha.enabled"), is(equalTo("${CAPTCHA_ENABLED:true}")));
+        assertThat(propiedades.getProperty("captcha.secret"), is(equalTo("${CAPTCHA_SECRET}")));
+    }
+
+    @Test
     void testLaDireccionDelFrontParaLosEnlacesNoTieneValorPorDefecto() throws IOException {
         Properties propiedades = cargarPropiedadesDeProduccion();
 
