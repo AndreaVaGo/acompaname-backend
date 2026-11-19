@@ -16,6 +16,13 @@ public interface ValoracionRepository extends JpaRepository<ValoracionEntity, Lo
 
     long countBySolicitudCuidadorId(Long cuidadorId);
 
+    // Media y número de valoraciones de TODOS los cuidadores en una sola consulta.
+    // Cada fila es: [id del cuidador, media, número de valoraciones]
+    // (los cuidadores sin valoraciones no salen)
+    @Query("SELECT v.solicitud.cuidador.id, AVG(v.puntuacion), COUNT(v) FROM ValoracionEntity v "
+            + "GROUP BY v.solicitud.cuidador.id")
+    List<Object[]> resumenPorCuidador();
+
     // Valoraciones de un cuidador, las más recientes primero
     List<ValoracionEntity> findBySolicitudCuidadorIdOrderByFechaDesc(Long cuidadorId);
 

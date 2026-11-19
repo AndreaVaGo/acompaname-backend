@@ -1,7 +1,9 @@
 package dev.andrea.acompaname_backend.caregiverprofile;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -50,21 +52,46 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
         }
     }
 
+    // Redondea la media a 1 decimal (si no hay media, se queda en null)
+    private Double redondearMedia(Double media) {
+        if (media == null) {
+            return null;
+        }
+        return Math.round(media * 10) / 10.0;
+    }
+
     // Convierte el perfil a DTO añadiendo la valoración media (1 decimal) y cuántas valoraciones tiene
     private PerfilCuidadorDTOResponse aDTO(PerfilCuidadorEntity perfil) {
-        Double media = valoracionRepository.mediaPorCuidador(perfil.getId());
-        if (media != null) {
-            media = Math.round(media * 10) / 10.0;
-        }
+        Double media = redondearMedia(valoracionRepository.mediaPorCuidador(perfil.getId()));
         Long numValoraciones = valoracionRepository.countBySolicitudCuidadorId(perfil.getId());
         return PerfilCuidadorMapper.toDTO(perfil, media, numValoraciones);
     }
 
+    // La lista hace siempre 2 consultas, sean 3 cuidadores o 3.000:
+    // una para los perfiles (con su usuario) y otra para las valoraciones de todos
     @Override
     public List<PerfilCuidadorDTOResponse> getEntities() {
-        return repository.findAll().stream()
-                .map(this::aDTO)
-                .collect(Collectors.toList());
+        List<PerfilCuidadorEntity> perfiles = repository.findAllConUsuario();
+
+        // Guardamos cada fila del resumen según el id del cuidador para encontrarla rápido
+        Map<Long, Object[]> resumenes = new HashMap<>();
+        for (Object[] fila : valoracionRepository.resumenPorCuidador()) {
+            Long cuidadorId = (Long) fila[0];
+            resumenes.put(cuidadorId, fila);
+        }
+
+        List<PerfilCuidadorDTOResponse> resultado = new ArrayList<>();
+        for (PerfilCuidadorEntity perfil : perfiles) {
+            Object[] fila = resumenes.get(perfil.getId());
+            Double media = null;
+            Long numValoraciones = 0L;
+            if (fila != null) {
+                media = redondearMedia((Double) fila[1]);
+                numValoraciones = (Long) fila[2];
+            }
+            resultado.add(PerfilCuidadorMapper.toDTO(perfil, media, numValoraciones));
+        }
+        return resultado;
     }
 
     @Override
