@@ -6,6 +6,9 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.globals.GrupoEdad;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
@@ -80,8 +83,11 @@ public class SolicitudEntity {
 
     // Personas que reciben el cuidado (entre 1 y 5). Se guardan en su propia tabla, en orden.
     // Las solicitudes antiguas no tienen lista: cuentan como una sola persona (nombrePaciente y edadPaciente).
-    // nombrePaciente y edadPaciente guardan siempre la primera persona de la lista
+    // nombrePaciente y edadPaciente guardan siempre la primera persona de la lista.
+    // SUBSELECT: al cargar una lista de solicitudes, las personas de TODAS se cargan en una sola consulta
+    // (sin esto, Hibernate haría una consulta por cada solicitud: problema N+1)
     @ElementCollection(fetch = FetchType.EAGER)
+    @Fetch(FetchMode.SUBSELECT)
     @CollectionTable(name = "solicitud_personas", joinColumns = @JoinColumn(name = "solicitud_id"))
     @OrderColumn(name = "orden")
     @Builder.Default
