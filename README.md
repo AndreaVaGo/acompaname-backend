@@ -2,415 +2,421 @@
 
 # 🤝 Acompáñame — Backend
 
-**Acompáñame** es una plataforma de marketplace que conecta a familias que necesitan cuidados para un ser querido con cuidadores profesionales verificados. Nace para cubrir el hueco entre la atención residencial a tiempo completo y las listas de espera de la atención formal, dando una alternativa flexible tanto a personas mayores como a familias que viven lejos de sus seres queridos.
+**Acompáñame** is a marketplace that connects families who need care for a loved one (because of illness or dependency, at any age) with professional caregivers. It fills the gap between full-time residential care and the waiting lists of formal care, giving families a flexible alternative, especially those who live far from their relatives.
 
-Este repositorio contiene la **API REST** del proyecto, desarrollada con **Spring Boot**. El frontend (Vue.js) vive en un repositorio independiente, enlazado más abajo.
+This repository contains the **REST API**, built with **Spring Boot**. The Vue.js front end lives in a separate repository (see [Project links](#-project-links)).
 
-Proyecto final del bootcamp de Desarrollo Web Full Stack (850h) en **Factoría F5 — Digital Academy**.
+Final project of the Full Stack Web Development bootcamp (850 h) at **Factoría F5 — Digital Academy**.
 
-![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-470-success)
+![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-1192-success)
 
 > [!TIP]
-> 📚 **Documentación completa en la [wiki del proyecto](https://github.com/AndreaVaGo/acompaname-backend/wiki).** Aquí está lo imprescindible para entender, arrancar y probar el backend; el detalle (arquitectura, modelo de datos, endpoints, seguridad, tests, diagramas y decisiones) está en la wiki.
+> 📚 **Full documentation is in the [project wiki](https://github.com/AndreaVaGo/acompaname-backend/wiki).** This README has what you need to understand, run and test the back end; the details (architecture, data model, endpoints, security, tests, diagrams and decisions) are in the wiki.
 
 ---
 
-## 📑 Tabla de contenidos
+## 📑 Table of contents
 
-- [Descripción del proyecto](#-descripción-del-proyecto)
-- [Tecnologías utilizadas](#-tecnologías-utilizadas)
-- [Instalación y puesta en marcha](#-instalación-y-puesta-en-marcha)
-- [Configuración](#-configuración)
-- [Arquitectura y patrones de diseño](#-arquitectura-y-patrones-de-diseño)
-- [Modelo de datos](#-modelo-de-datos)
-- [Endpoints de la API](#-endpoints-de-la-api)
-- [Panel de administración](#-panel-de-administración)
-- [Seguridad](#-seguridad)
+- [What the platform does](#-what-the-platform-does)
+- [Tech stack](#-tech-stack)
+- [Getting started](#-getting-started)
+- [Configuration](#-configuration)
+- [Architecture](#-architecture)
+- [Business rules](#-business-rules)
+- [API endpoints](#-api-endpoints)
+- [Security](#-security)
 - [Testing](#-testing)
-- [Diagramas técnicos](#-diagramas-técnicos)
-- [Diseño y gestión del proyecto](#-diseño-y-gestión-del-proyecto)
-- [Decisiones técnicas](#-decisiones-técnicas)
-- [Limitaciones conocidas](#-limitaciones-conocidas)
-- [Roadmap / Mejoras futuras](#-roadmap--mejoras-futuras)
-- [Enlaces del proyecto](#-enlaces-del-proyecto)
-- [Autoría](#-autoría)
+- [Load tests](#-load-tests)
+- [Production profile](#-production-profile)
+- [Design, planning and decisions](#-design-planning-and-decisions)
+- [Known limitations](#-known-limitations)
+- [Roadmap](#-roadmap)
+- [Project links](#-project-links)
+- [Credits](#-credits)
+- [Author](#-author)
 
 ---
 
-## 📖 Descripción del proyecto
+## 📖 What the platform does
 
-**Acompáñame** resuelve un problema real: encontrar apoyo puntual y de confianza para el cuidado de personas mayores o dependientes, sin necesidad de contratar servicios residenciales completos.
+**Families** can:
+- 📝 Sign up, recover their password and manage their account
+- 🔎 Search caregiver profiles (filtering by age group and sorting by distance)
+- 📋 Create service requests for one or several people (up to 5), each with name, age and age group
+- 💬 Chat with the caregiver about a request
+- 💳 See the amount to pay and pay it (simulated payment)
+- ⭐ Rate the service once it is completed
 
-La plataforma permite a las **familias**:
-- 📝 Registrarse y gestionar su cuenta
-- 🔎 Buscar y consultar perfiles de cuidadores
-- 📋 Crear solicitudes de servicio detallando el tipo de cuidado necesario
-- 💳 Pagar el servicio (pago simulado)
-- ⭐ Valorar el servicio recibido una vez completado
+**Caregivers** can:
+- 🧑‍⚕️ Create a professional profile (specialty, experience, hourly rate, extra-person surcharge, age groups they care for, availability and photo)
+- 📥 Receive requests and accept, reject or complete them
+- 🗓️ Keep a calendar of busy time slots (one by one, repeated, or imported from an `.ics` file) so families only see them when they are free
 
-A los **cuidadores**:
-- 🧑‍⚕️ Registrarse y crear su perfil profesional (especialidad, experiencia, tarifa, disponibilidad y foto)
-- 📥 Consultar y gestionar las solicitudes que reciben
-- ✅ Aceptar, rechazar o marcar como completadas las solicitudes
-
-Y al **administrador**:
-- 📊 Ver un resumen de la actividad (familias, cuidadores, solicitudes, ingresos y valoración media) y los avisos que requieren atención
-- 🚫 Bloquear y desbloquear cuentas de usuario
-- 🗑️ Eliminar valoraciones inadecuadas
+**Administrators** can:
+- 📊 See activity statistics (families, caregivers, requests, income, average rating), alerts and payment analytics
+- 🚫 Block and unblock accounts
+- 🗑️ Delete inappropriate reviews
+- 💡 Read the suggestions sent by users
 
 ---
 
-## 🛠 Tecnologías utilizadas
+## 🛠 Tech stack
 
-| Categoría | Tecnología |
+| Category | Technology |
 |---|---|
-| ☕ Lenguaje | Java 21 |
+| ☕ Language | Java 21 |
 | 🍃 Framework | Spring Boot 4.1.1 |
-| 🔐 Seguridad | Spring Security (autenticación Basic Auth + roles) |
-| 🗃️ Persistencia | Spring Data JPA / Hibernate |
-| 🐬 Base de datos | MySQL 8.0 (dockerizada) |
-| 🔨 Build tool | Maven |
-| ✂️ Menos código repetido (getters, setters, constructores) | Lombok |
-| 🧪 Testing | JUnit 5, Mockito, MockMvc, Testcontainers |
-| 🐳 Contenerización | Docker / Docker Compose |
-| 🌿 Control de versiones | Git / GitHub |
+| 🔐 Security | Spring Security, JWT (OAuth2 resource server), BCrypt |
+| 🗃️ Persistence | Spring Data JPA / Hibernate |
+| 🐬 Database | MySQL 8.0 (Docker) |
+| 🔨 Build | Maven (wrapper included) |
+| ✂️ Less boilerplate | Lombok |
+| 🧪 Testing | JUnit 5, Mockito, MockMvc, Testcontainers, JaCoCo |
+| 📈 Load testing | k6 (run with Docker) |
+| 🛡️ Bot protection | Cloudflare Turnstile (CAPTCHA) |
+| ✉️ Email | Spring Mail (SMTP) |
+| 🌍 Geocoding | OpenStreetMap Nominatim (no API key) |
+| 🐳 Containers | Docker / Docker Compose |
 
 ---
 
-## 🚀 Instalación y puesta en marcha
+## 🚀 Getting started
 
-### Requisitos previos
+### Requirements
 
 - Java 21
-- Maven (o usar el wrapper <mark>./mvnw</mark> incluido)
-- Docker y Docker Compose
+- Maven (or the included wrapper `./mvnw`)
+- Docker and Docker Compose
 - Git
 
 > [!IMPORTANT]
-> Docker tiene que estar en marcha antes de arrancar la aplicación y de ejecutar los tests: los necesitan la base de datos y los tests de integración.
+> Docker must be running before you start the application or run the tests: both need the database (the integration tests start their own MySQL with Testcontainers).
 
-### Pasos
+### Steps
 
-1. **Clona el repositorio**
+1. **Clone the repository**
 ```bash
-   git clone https://github.com/AndreaVaGo/acompaname-backend.git
-   cd acompaname-backend
+git clone https://github.com/AndreaVaGo/acompaname-backend.git
+cd acompaname-backend
 ```
 
-2. **Levanta la base de datos con Docker Compose**
+2. **Start the database**
 ```bash
-   docker compose up -d
+docker compose up -d
 ```
-   Esto crea un contenedor MySQL (<mark>acompaname-mysql</mark>) con la base de datos <mark>acompaname_db</mark>, disponible en el puerto <mark>3306</mark>.
+This creates a MySQL container (`acompaname-mysql`) with the database `acompaname_db` on port `3306`.
 
-3. **Arranca la aplicación**
+3. **Run the application**
 ```bash
-   ./mvnw spring-boot:run
+./mvnw spring-boot:run
 ```
-   La API quedará disponible en <mark>http://localhost:8080/api/v1</mark>
+The API is available at `http://localhost:8080/api/v1`.
 
-   Al arrancar, la aplicación crea sola los roles <mark>FAMILIA</mark>, <mark>CUIDADOR</mark> y <mark>ADMIN</mark> si no existen (clase <mark>RoleInitializer</mark>). Así el registro funciona desde la primera vez, con una base de datos nueva, sin insertar nada a mano.
+On startup the application creates the roles `FAMILIA`, `CUIDADOR` and `ADMIN` if they do not exist (`RoleInitializer`), so sign-up works from the first run on an empty database.
 
-   Si quieres que se cree también el **usuario administrador**, define antes las variables <mark>ADMIN_EMAIL</mark> y <mark>ADMIN_PASSWORD</mark> (ver [Panel de administración](#-panel-de-administración)).
-
-   **Datos de ejemplo (solo desarrollo, opcional).** Si arrancas con el perfil <mark>dev</mark>, se crean una familia, dos personas cuidadoras con perfil, cuatro solicitudes (una de cada estado) y dos pagos, para probar la app sin registrar usuarios a mano. No se duplican al reiniciar y nunca se crean en producción ni en los tests.
+4. **(Optional) Create the administrator.** Define `ADMIN_EMAIL` and `ADMIN_PASSWORD` before starting; if they are empty, no administrator is created.
 ```bash
-   SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
+# Git Bash / Linux / macOS
+export ADMIN_EMAIL=admin@example.com
+export ADMIN_PASSWORD=choose-a-password
+./mvnw spring-boot:run
 ```
-   Todos entran con la contraseña <mark>Password123!</mark>: <mark>familia@test.com</mark> (familia), <mark>cuidador@test.com</mark> y <mark>cuidadora@test.com</mark> (personas cuidadoras).
+```powershell
+# PowerShell
+$env:ADMIN_EMAIL="admin@example.com"
+$env:ADMIN_PASSWORD="choose-a-password"
+./mvnw spring-boot:run
+```
 
-4. **Ejecuta los tests** (opcional, pero recomendado; los de integración necesitan la base de datos del paso 2 arrancada con <mark>docker compose up -d</mark>)
+5. **(Optional) Sample data for development.** With the `dev` profile the application creates one family, two caregivers with profiles, requests in several states and some payments. Nothing is duplicated on restart, and it never runs in production or in the tests.
 ```bash
-   ./mvnw test
+SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
+```
+Test users, all with password `Password123!`: `familia@test.com` (family), `cuidador@test.com` and `cuidadora@test.com` (caregivers).
+
+6. **Run the tests**
+```bash
+./mvnw test
 ```
 
 ---
 
-## 🔐 Configuración
+## 🔐 Configuration
 
-La conexión a la base de datos se lee de variables de entorno. Si no existen, se usan los valores de desarrollo local, así que el proyecto arranca sin configurar nada.
-
-| Variable | Valor por defecto | Para qué sirve |
-|---|---|---|
-| <mark>DB_HOST</mark> | <mark>localhost</mark> | Servidor de la base de datos |
-| <mark>DB_PORT</mark> | <mark>3306</mark> | Puerto |
-| <mark>DB_NAME</mark> | <mark>acompaname_db</mark> | Nombre de la base de datos |
-| <mark>DB_USER</mark> | <mark>acompaname_user</mark> | Usuario |
-| <mark>DB_PASSWORD</mark> | <mark>acompaname_pass</mark> | Contraseña del usuario |
-| <mark>DB_ROOT_PASSWORD</mark> | <mark>root</mark> | Contraseña root (solo la usa Docker Compose) |
-| <mark>CORS_ORIGINS</mark> | <mark>http://localhost:5173</mark> | Dirección del frontend que puede llamar a la API |
-| <mark>JPA_DDL_AUTO</mark> | <mark>update</mark> | Cómo Hibernate gestiona las tablas (en producción se pondría <mark>validate</mark>) |
-| <mark>SHOW_SQL</mark> | <mark>false</mark> | Si Hibernate escribe en la consola el SQL que ejecuta |
-| <mark>ADMIN_EMAIL</mark> | _(vacío)_ | Email del administrador que se crea al arrancar. Si está vacío, **no se crea ningún administrador** |
-| <mark>ADMIN_PASSWORD</mark> | _(vacío)_ | Contraseña del administrador (se guarda con hash BCrypt) |
-
-Otros ajustes:
-
-| Ajuste | Valor |
-|---|---|
-| Contenedor | <mark>acompaname-mysql</mark> (mysql:8.0) |
-| Volumen | <mark>acompaname_data</mark> |
-| Prefijo de la API (<mark>api-endpoint</mark>) | <mark>api/v1</mark> |
-| Origen CORS permitido (<mark>cors.allowed-origins</mark>) | <mark>http://localhost:5173</mark> por defecto; se cambia con la variable de entorno <mark>CORS_ORIGINS</mark> |
-
-> [!TIP]
-> Para usar otros valores de la base de datos, copia <mark>.env.example</mark> como <mark>.env</mark> en la raíz y cámbialos. Docker Compose lo lee solo. El archivo <mark>.env</mark> está en el <mark>.gitignore</mark>, así que no se sube a GitHub.
+Everything is read from environment variables. If a variable is missing, a local development value is used, so the project starts with no setup. Copy `.env.example` to `.env` to change the database values (Docker Compose reads it; the file is in `.gitignore`).
 
 ```bash
 cp .env.example .env
 ```
 
 > [!NOTE]
-> El archivo <mark>.env</mark> lo lee **Docker Compose**, no Spring Boot. Por eso <mark>ADMIN_EMAIL</mark> y <mark>ADMIN_PASSWORD</mark> se definen como variables de entorno en la terminal desde la que se arranca la aplicación (ver [Panel de administración](#-panel-de-administración)).
+> `.env` is read by **Docker Compose**, not by Spring Boot. Variables for the application (`ADMIN_EMAIL`, `JWT_SECRET`, `CAPTCHA_*`…) must be defined in the terminal that starts it, or in the hosting platform.
+
+| Variable | Default | What it is for |
+|---|---|---|
+| `DB_HOST`, `DB_PORT`, `DB_NAME` | `localhost`, `3306`, `acompaname_db` | Database location |
+| `DB_USER`, `DB_PASSWORD` | `acompaname_user`, `acompaname_pass` | Database credentials |
+| `DB_ROOT_PASSWORD` | `root` | MySQL root password (Docker Compose only) |
+| `JPA_DDL_AUTO` | `update` | How Hibernate handles tables (`validate` in production) |
+| `SHOW_SQL` | `false` | Print the SQL Hibernate runs |
+| `CORS_ORIGINS` | `http://localhost:5173` | Front-end origin(s) allowed to call the API (comma separated) |
+| `JWT_SECRET` | development key | Key that signs the login tokens (at least 32 characters) |
+| `JWT_EXPIRATION_MINUTES` | `120` | Token lifetime |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | _(empty)_ | Administrator created at startup; empty means none |
+| `RATE_LIMIT_MAX_REQUESTS`, `RATE_LIMIT_WINDOW_SECONDS` | `5`, `60` | Login and sign-up limit per IP address |
+| `CAPTCHA_ENABLED` | `false` (`true` in prod) | Require a Turnstile token on login and sign-up |
+| `CAPTCHA_SECRET` | _(empty)_ | Turnstile secret key (required when the CAPTCHA is enabled) |
+| `FOTO_MAX_BYTES` | `300000` | Maximum size of a profile photo (JPG, PNG or WebP) |
+| `MAIL_ENABLED` | `false` (`true` in prod) | `false` writes the emails to the log instead of sending them |
+| `MAIL_FROM`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USER`, `MAIL_PASSWORD` | local values | SMTP settings |
+| `FRONTEND_URL` | `http://localhost:5173` | Used to build the link in the password-reset email |
+| `PASSWORD_RESET_MINUTES` | `60` | Validity of the password-reset link |
+| `PAGOS_RECARGO_PERSONA_EXTRA` | `0.25` | Default surcharge per extra person (25 %) |
+| `GEOCODING_ENABLED` | `true` | `false` stops calls to Nominatim (distance search finds nothing) |
+| `FORWARD_HEADERS_STRATEGY` | `none` (`native` in prod) | Read the real client IP behind a reverse proxy |
 
 > [!WARNING]
-> Los valores por defecto son **solo para desarrollo local**. En un despliegue real hay que definir otras contraseñas en el entorno.
+> The default values are **for local development only**. In a real deployment every secret must be new and different (see [Production profile](#-production-profile)).
+
+### CAPTCHA (Cloudflare Turnstile)
+
+The CAPTCHA protects the login and the sign-up. It is off by default (development, tests and load tests). When `CAPTCHA_ENABLED=true`, the back end rejects (`400`) those two requests unless the body carries a valid `captchaToken`; it checks the token with Cloudflare, tokens are single-use, and if Cloudflare cannot be reached the request is rejected (fail closed).
+
+To try it without a Cloudflare account, use Cloudflare's test keys: front-end site key `1x00000000000000000000AA`, and as secret `1x0000000000000000000000000000000AA` (always passes) or `2x0000000000000000000000000000000AA` (always fails). The secret key never goes in the code.
 
 ---
 
-## 🏗 Arquitectura y patrones de diseño
+## 🏗 Architecture
 
-El backend sigue una **arquitectura en capas** clásica de Spring Boot (<mark>Controller</mark> → <mark>Service</mark> → <mark>Repository</mark> → <mark>Entity</mark>), con DTOs y mappers entre el controlador y las entidades, y un <mark>GlobalExceptionHandler</mark> que convierte las excepciones en códigos HTTP claros.
+A classic **layered architecture** (`Controller` → `Service` → `Repository` → `Entity`) with DTOs and mappers between the controller and the entities, and a `GlobalExceptionHandler` that turns exceptions into clear HTTP codes. Code is organised by feature, one package per area:
+
+| Package | Responsibility |
+|---|---|
+| `auth`, `security`, `captcha` | Login, JWT, rate limiting, CAPTCHA |
+| `user`, `role`, `passwordreset` | Accounts, roles, password recovery |
+| `caregiverprofile`, `geolocation` | Caregiver profiles, photo validation, distance search |
+| `servicerequest` | Requests, states, people to care for |
+| `payment` | Payments and amount calculation |
+| `review`, `chat`, `suggestion` | Ratings, per-request chat, user suggestions |
+| `schedule` | Caregiver busy time slots (manual, repeated, `.ics` import) |
+| `admin` | Statistics, alerts, moderation, payment analytics |
+| `mail`, `devdata`, `globals`, `generics` | Email, sample data, shared enums and exception handler |
 
 ```
-Cliente (HTTP)
-      │
-      ▼
- Controller   ──►  recibe la petición, valida el DTO de entrada, delega en el Service
-      │
-      ▼
-   Service    ──►  contiene la lógica de negocio; interfaz + implementación
-      │
-      ▼
-  Repository  ──►  acceso a datos (Spring Data JPA)
-      │
-      ▼
-   Entity     ──►  representación de las tablas en base de datos
+HTTP client → Controller (validates the input DTO) → Service (business rules) → Repository (Spring Data JPA) → Entity (tables)
 ```
 
-👉 Estructura de paquetes, patrones y detalle de cada capa: [Arquitectura y patrones](https://github.com/AndreaVaGo/acompaname-backend/wiki/Arquitectura-y-patrones).
+👉 Package structure and patterns: [Architecture and patterns](https://github.com/AndreaVaGo/acompaname-backend/wiki/Arquitectura-y-patrones). Entity-relationship and class diagrams: [Data model](https://github.com/AndreaVaGo/acompaname-backend/wiki/Modelo-de-datos).
 
 ---
 
-## 🗄 Modelo de datos
+## 📏 Business rules
 
-Seis entidades: <mark>Usuario</mark>, <mark>Role</mark>, <mark>PerfilCuidador</mark>, <mark>Solicitud</mark>, <mark>Pago</mark> y <mark>Valoracion</mark>. Un usuario tiene uno o varios roles (<mark>FAMILIA</mark>, <mark>CUIDADOR</mark> o <mark>ADMIN</mark>) y un campo <mark>activo</mark> que permite bloquear su cuenta; un usuario con rol <mark>CUIDADOR</mark> tiene un perfil; una familia crea solicitudes para un cuidador; cada solicitud puede tener un pago y una valoración.
+- **Request states:** `PENDIENTE` → `ACEPTADA` or `RECHAZADA`; `ACEPTADA` → `COMPLETADA`. Any other change returns `409`. The rules live in one place (`EstadoSolicitud`).
+- **Editing:** a family can change or delete a request only while it is `PENDIENTE`.
+- **People and age groups:** a request has 1 to 5 people, each with name, age and an age group (`BEBES`, `NINOS`, `ADOLESCENTES`, `ADULTOS`, `MAYORES`, `DISCAPACIDAD_DEPENDENCIA`). If the caregiver has marked age groups in their profile, they must cover **all** the groups of the request (`400` otherwise). No groups marked means no restriction.
+- **No double booking:** accepting a request is rejected (`409`) if it overlaps another accepted request or one of the caregiver's busy slots. Slots that only touch do not conflict.
+- **Payment amount** (always calculated by the server, never sent by the client), created when the caregiver completes the request:
 
-👉 Diagramas entidad-relación y de clases: [Modelo de datos](https://github.com/AndreaVaGo/acompaname-backend/wiki/Modelo-de-datos).
+  `amount = hours × hourly rate × (1 + surcharge × extra people)`
+
+  The first person pays the full rate; each extra person adds a surcharge (the caregiver's own percentage, or 25 % by default). A started hour counts as a whole hour, minimum one. The hourly rate includes travel.
+- **Ratings:** only a `COMPLETADA` request can be rated, and only once per request (`409` otherwise).
+- **Photos:** JPG, PNG or WebP, up to 300 KB after decoding, stored as Base64 text.
+- **Emails** (new/accepted/rejected/completed request, payment received, new chat message, password reset) never include names of cared-for people or addresses. If an email fails, it is only logged: the status change or the payment never fails because of an email.
 
 ---
 
-## 📡 Endpoints de la API
+## 📡 API endpoints
 
-Todos los endpoints tienen como prefijo base <mark>/api/v1</mark>.
+Base prefix: `/api/v1`. The token goes in `Authorization: Bearer <token>`. 🔓 = public.
 
-| Recurso | Ruta base | Qué permite |
+| Area | Endpoints | Who |
 |---|---|---|
-| 🔑 Autenticación | <mark>/login</mark> | Iniciar sesión (Basic Auth) |
-| 👤 Usuarios | <mark>/usuarios</mark> | Registro (público); ver, editar y borrar solo el propio usuario |
-| 🎭 Roles | <mark>/roles</mark> | Listar los roles (público) |
-| 🧑‍⚕️ Cuidadores | <mark>/cuidadores</mark> | Listar y ver perfiles (público); crear, editar y borrar solo el rol <mark>CUIDADOR</mark> |
-| 📋 Solicitudes | <mark>/solicitudes</mark> | Crear, editar y borrar solo la <mark>FAMILIA</mark>; cambiar estado; cuidadores ocupados (público, solo ids) |
-| ⭐ Valoraciones | <mark>/valoraciones</mark> | Crear y gestionar las propias; valoraciones públicas de un cuidador |
-| 💳 Pagos | <mark>/pagos</mark> | Solo la familia de la solicitud crea, edita, borra y paga |
-| 🛡️ Administración | <mark>/admin</mark> | Solo el rol <mark>ADMIN</mark>: estadísticas, avisos, listados, bloquear usuarios y borrar valoraciones |
+| 🔑 Auth | `POST /login` 🔓 | everyone |
+| 🔁 Password recovery | `POST /olvide-password` 🔓, `POST /restablecer-password` 🔓 | everyone |
+| 👤 Users | `POST /usuarios` 🔓 (sign-up); `GET /usuarios/{id}`; `DELETE /usuarios/{id}`; `PATCH /usuarios/{id}/password`; `PATCH /usuarios/{id}/contacto` | owner only |
+| 🎭 Roles | `GET /roles` 🔓 | everyone |
+| 🧑‍⚕️ Caregivers | `GET /cuidadores` 🔓, `GET /cuidadores/{id}` 🔓, `GET /cuidadores/cerca?lugar=` 🔓 (distance search), `GET /cuidadores/mi-perfil`; `POST`, `PUT /{id}`, `DELETE /{id}` | `CUIDADOR` (own profile) |
+| 📋 Requests | `POST /solicitudes`, `PUT /{id}`, `DELETE /{id}`; `GET /solicitudes/mis-solicitudes`, `GET /{id}`; `PATCH /{id}/estado`; `GET /solicitudes/cuidadores-ocupados` 🔓 (ids only) | `FAMILIA` creates, edits and deletes; the caregiver changes the state |
+| 💳 Payments | `GET /pagos`, `GET /pagos/{id}`, `PATCH /pagos/{id}/pagar` | the family of the request pays |
+| ⭐ Ratings | `GET /valoraciones/cuidador/{id}` 🔓; `POST`, `PUT /{id}`, `DELETE /{id}` | author only |
+| 💬 Chat | `GET`/`POST /solicitudes/{id}/mensajes`, `GET /mensajes/no-leidos` | the family and the caregiver of the request |
+| 🗓️ Busy slots | `GET`, `POST`, `DELETE /bloques-ocupados/{id}`, `POST /bloques-ocupados/repetir`, `POST /bloques-ocupados/importar` | `CUIDADOR` |
+| 💡 Suggestions | `POST /sugerencias` | `FAMILIA`, `CUIDADOR` |
+| 🛡️ Admin | `/admin/estadisticas`, `/admin/avisos`, `/admin/cuidadores/mejor-valorados`, `/admin/valoraciones/ultimas`, `DELETE /admin/valoraciones/{id}`, `/admin/usuarios`, `PATCH /admin/usuarios/{id}/activo`, `/admin/solicitudes?estado=`, `/admin/pagos`, `/admin/pagos/resumen`, `/admin/sugerencias` | `ADMIN` |
 
-👉 Todos los endpoints con método, descripción y nivel de acceso, más un ejemplo de petición: [Endpoints de la API](https://github.com/AndreaVaGo/acompaname-backend/wiki/Endpoints-de-la-API).
+The administrator **observes and moderates**: they block accounts and delete reviews, but cannot edit requests, payments or users, and cannot impersonate anyone.
 
----
+Typical errors: `400` (invalid data or CAPTCHA), `401` (bad credentials or blocked account), `403` (resource of another user or wrong role), `404`, `409` (state change not allowed, overlap, duplicates) and `429` (too many attempts).
 
-## 🛡 Panel de administración
-
-El **administrador observa y modera**: ve estadísticas y listados de toda la plataforma, bloquea o desbloquea cuentas y elimina valoraciones inadecuadas. No edita ni borra solicitudes, pagos ni usuarios, y no puede hacerse pasar por otra cuenta.
-
-### Crear el administrador
-
-El administrador se crea al arrancar la aplicación (clase <mark>AdminInitializer</mark>) a partir de dos variables de entorno. Si no se definen, no se crea ninguno, así que el repositorio no contiene ninguna credencial de administrador.
-
-```bash
-# Git Bash / Linux / macOS
-export ADMIN_EMAIL=admin@acompaname.com
-export ADMIN_PASSWORD=elige-una-contraseña
-./mvnw spring-boot:run
-```
-
-```powershell
-# PowerShell
-$env:ADMIN_EMAIL="admin@acompaname.com"
-$env:ADMIN_PASSWORD="elige-una-contraseña"
-./mvnw spring-boot:run
-```
-
-Si el administrador ya existe, no se vuelve a crear. Después se entra con ese email y esa contraseña desde la pantalla de login del frontend, que lleva directamente al panel (<mark>/admin</mark>).
-
-### Endpoints del administrador
-
-Todos cuelgan de <mark>/api/v1/admin</mark> y exigen el rol <mark>ADMIN</mark> (cualquier otro usuario recibe <mark>403</mark>).
-
-| Método | Ruta | Qué hace |
-|---|---|---|
-| <mark>GET</mark> | <mark>/estadisticas</mark> | Totales de familias, cuidadores y solicitudes por estado y tipo, ingresos cobrados y pendientes, valoración media y tiempo medio hasta aceptar |
-| <mark>GET</mark> | <mark>/avisos</mark> | Cosas que requieren atención (por ejemplo, solicitudes pendientes) |
-| <mark>GET</mark> | <mark>/cuidadores/mejor-valorados</mark> | Cuidadores con mejor nota media |
-| <mark>GET</mark> | <mark>/valoraciones/ultimas</mark> | Últimas valoraciones de la plataforma |
-| <mark>DELETE</mark> | <mark>/valoraciones/{id}</mark> | Elimina una valoración (<mark>204</mark>) |
-| <mark>GET</mark> | <mark>/usuarios</mark> | Lista de usuarios con su rol y si están activos |
-| <mark>PATCH</mark> | <mark>/usuarios/{id}/activo</mark> | Bloquea (<mark>activo: false</mark>) o desbloquea (<mark>activo: true</mark>) una cuenta |
-| <mark>GET</mark> | <mark>/solicitudes?estado=</mark> | Lista de solicitudes, con filtro opcional por estado |
-| <mark>GET</mark> | <mark>/pagos/resumen</mark> | Análisis de pagos: cobrado y pendiente, número de pagos por estado, importe medio, porcentaje cobrado, pagos sin cobrar más de 7 días, importes por tipo de cuidado y por mes (últimos seis) y los cuidadores que más han cobrado |
-| <mark>GET</mark> | <mark>/pagos?estado=</mark> | Lista de pagos con familia, cuidador, tipo de cuidado, importe, fecha y días desde su creación, con filtro opcional por estado |
+👉 Every endpoint with method, access level and a request example: [API endpoints](https://github.com/AndreaVaGo/acompaname-backend/wiki/Endpoints-de-la-API).
 
 ---
 
-## 🔒 Seguridad
+## 🔒 Security
 
-- 🔑 **Autenticación:** Spring Security con HTTP Basic Auth (email + contraseña).
-- 🔐 **Contraseñas:** guardadas con hash <mark>BCrypt</mark>; nunca se guardan ni se devuelven en texto plano.
-- 🎭 **Roles:** <mark>FAMILIA</mark>, <mark>CUIDADOR</mark> y <mark>ADMIN</mark> controlan qué endpoints puede usar cada usuario. Todo lo que cuelga de <mark>/admin</mark> es solo para <mark>ADMIN</mark>.
-- 🚫 **Cuentas bloqueadas:** un usuario con <mark>activo = false</mark> no puede iniciar sesión (<mark>401</mark>). Como Basic Auth comprueba las credenciales en cada petición, el bloqueo se aplica al instante. El administrador no puede bloquear su propia cuenta.
-- 🛡️ **Propietario:** los servicios comprueban que el recurso es del usuario que ha iniciado sesión y, si no, devuelven <mark>403</mark>; así nadie puede ver ni modificar datos ajenos probando ids.
-- 🌐 **CORS:** solo se permite el origen del frontend (propiedad <mark>cors.allowed-origins</mark>, variable de entorno <mark>CORS_ORIGINS</mark>).
-- 🔓 **Rutas públicas:** solo las que no exponen datos privados (registro, roles, listado y perfil de cuidadores, sus valoraciones públicas y los ids de cuidadores ocupados).
+- 🔑 **Authentication:** login returns a **JWT** (signed with `JWT_SECRET`, lifetime `JWT_EXPIRATION_MINUTES`). The API is stateless: every request carries its token, and the user is loaded from the database each time, so blocking an account takes effect immediately.
+- 🔐 **Passwords:** stored with **BCrypt**, never returned; a strong-password rule is enforced at sign-up and on change.
+- 🎭 **Roles:** `FAMILIA`, `CUIDADOR` and `ADMIN` decide which endpoints each user can call. Everything under `/admin` is for `ADMIN` only.
+- 🛡️ **Ownership:** services check that the resource belongs to the logged-in user (`403` otherwise), so nobody can read or change other people's data by guessing ids. Input DTOs cannot set sensitive fields (role, state, amount, owner).
+- 🚦 **Rate limiting:** login and sign-up are limited per IP (5 per minute by default, `429` beyond that). Failed logins leave a warning in the log with no email or password.
+- 🤖 **CAPTCHA:** Cloudflare Turnstile on login and sign-up (see [Configuration](#captcha-cloudflare-turnstile)).
+- 🚫 **Blocked accounts** get the same `401` as a wrong password, so the API does not reveal which emails exist.
+- 🔁 **Password recovery:** single-use, expiring tokens sent by email; the response is the same whether or not the email exists.
+- 🌐 **CORS:** only the front-end origin is allowed.
+- 🧱 **Headers:** `Content-Security-Policy: default-src 'none'`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options`, `X-Frame-Options` and HSTS over HTTPS.
+- 🖼️ **Photos** are validated by size and by real image type, not by file name.
+- 🧯 **Errors:** the production profile never exposes messages, stack traces or SQL.
 
-> [!NOTE]
-> **Próxima mejora:** migrar de Basic Auth a autenticación con **JWT**.
-
-👉 Detalle completo: [Seguridad](https://github.com/AndreaVaGo/acompaname-backend/wiki/Seguridad).
+👉 More detail: [Security](https://github.com/AndreaVaGo/acompaname-backend/wiki/Seguridad).
 
 ---
 
 ## 🧪 Testing
 
-El proyecto cuenta con **470 tests** que cubren la lógica de negocio, la capa HTTP, la seguridad y la integración con una base de datos real:
+The suite has **1,192 tests** (last full run) covering business logic, the HTTP layer, security and integration with a real database:
 
-| Tipo | Qué comprueba |
+| Type | What it checks |
 |---|---|
-| 🧩 Servicios (unitarios, con Mockito) | La lógica de negocio de cada módulo, incluidos los errores, la privacidad de las valoraciones y la de la dirección |
-| 🌐 Controladores (MockMvc) | Códigos de estado y JSON de cada endpoint |
-| 🧱 Entidades (unitarios) | Constructores, getters y setters de las seis entidades |
-| 🐳 Integración (Testcontainers + seguridad) | Repositorios contra MySQL real y reglas de acceso con peticiones reales |
-| 🛡️ Administración | Servicio y controlador del panel, seguridad de <mark>/admin</mark> (solo <mark>ADMIN</mark>), bloqueo de usuarios y creación del administrador al arrancar contra MySQL real |
-| 🛡️ Excepciones y seguridad (unitarios) | Códigos de error y datos del usuario que inicia sesión |
-| 🚀 Arranque de la aplicación | Que el contexto de Spring carga |
+| 🧩 Services (Mockito) | Business rules and errors of each module |
+| 🌐 Controllers (MockMvc) | Status codes and JSON of every endpoint |
+| 🧱 Entities, mappers and DTOs | Constructors, accessors and conversions |
+| 🐳 Integration (Testcontainers) | Repositories and full requests against a real MySQL, including access rules and ownership |
+| 🛡️ Security | Roles, blocked accounts, rate limiting, CAPTCHA enabled/disabled, production profile |
+| 🧯 Exceptions | Every error is translated to the right HTTP code |
 
 ```bash
 ./mvnw test
 ```
 
-Mientras desarrollas no hace falta pasar toda la batería (es lenta porque algunos tests arrancan MySQL con Docker). Puedes lanzar solo un grupo por nombre de clase, o un único test:
+Running everything is slow because some tests start MySQL with Docker. While developing, run a group or a single test:
 
 ```bash
 ./mvnw test -Dtest='Solicitud*Test'
 ./mvnw test -Dtest=SolicitudServiceImplHorasTest
-./mvnw test -Dtest=SolicitudServiceImplHorasTest#nombreDelMetodo
+./mvnw test -Dtest=SolicitudServiceImplHorasTest#methodName
 ```
 
-Los tests de integración comparten dos contenedores MySQL (uno para los de repositorio y otro para los de la aplicación completa, en <mark>src/test/java/.../support</mark>), así que Docker solo arranca dos bases de datos en toda la ejecución. Lanza la batería completa una vez antes de hacer merge.
+The integration tests share two MySQL containers (one for repository tests and one for full-application tests, in `src/test/java/.../support`), so Docker starts only two databases per run. Run the full suite once before merging.
 
-La cobertura se mide con **JaCoCo**: **96 % de instrucciones** y **95 % de ramas** (el mínimo pedido era el 70 %).
+Coverage is measured with **JaCoCo**: 96 % of instructions and 95 % of branches at the last measurement (the required minimum was 70 %).
 
-![Resultado de los tests del backend](docs/screenshots/tests-backend.png)
-![Cobertura de los tests del backend](docs/screenshots/cobertura-backend.png)
+![Back-end test results](docs/screenshots/tests-backend.png)
+![Back-end test coverage](docs/screenshots/cobertura-backend.png)
 
-👉 Qué prueba cada grupo de tests y los casos límite (404, 403, 409, 400 y 401): [Testing](https://github.com/AndreaVaGo/acompaname-backend/wiki/Testing).
-
----
-
-## 📊 Diagramas técnicos
-
-Casos de uso, diagramas de secuencia (registro y login, solicitar un servicio) y modelo de Chen, todos en Mermaid y visibles directamente en GitHub.
-
-👉 [Diagramas técnicos](https://github.com/AndreaVaGo/acompaname-backend/wiki/Diagramas-tecnicos)
+👉 What each group of tests checks, including edge cases: [Testing](https://github.com/AndreaVaGo/acompaname-backend/wiki/Testing).
 
 ---
 
-## 🎨 Diseño y gestión del proyecto
+## 📈 Load tests
 
-Proceso de diseño: bocetos → wireframes → mockups → prototipo, para móvil, tablet y escritorio. El proyecto se ha planificado en **JIRA** (épicas, historias de usuario con criterios de aceptación y tareas técnicas, organizadas en sprints).
+The `load-tests/` folder has [k6](https://k6.io) scripts for the main scenarios (public caregiver search, login, and create/list/delete requests). Run them **only on your own machine**, never against a published site. How to run them, with or without k6 installed, is in [`load-tests/README.md`](load-tests/README.md).
+
+Results on a development laptop (up to 100 virtual users, 0 % errors):
+
+| Scenario | Before | After | Fix |
+|---|---|---|---|
+| Caregiver search (p95) | 2.76 s | 241 ms | N+1 queries replaced by `JOIN FETCH` and grouped queries |
+| Create / list / delete requests (p95) | 23.5 s | 1.15 s | N+1 removed; the people of each request load with `@Fetch(SUBSELECT)` |
+| Login | — | ~30 logins per second | Not a bug: BCrypt is slow on purpose |
+
+The request test fails above a p95 of 1.5 s. The login limit (5 per minute per IP) would cut the load on purpose, so raise `RATE_LIMIT_MAX_REQUESTS` only during the test and turn it back afterwards.
+
+> [!NOTE]
+> The lists (`mis-solicitudes`, caregivers) return every record, and photos travel as Base64 inside them. With one family accumulating more than 1,600 requests the response was hundreds of MB. Pagination and storing photos as files are on the [roadmap](#-roadmap).
+
+---
+
+## 🚀 Production profile
+
+Activated with `SPRING_PROFILES_ACTIVE=prod`. It has **no default values** for secrets: if `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`, `CAPTCHA_SECRET`, `MAIL_*` or `FRONTEND_URL` is missing, the application does not start, so development keys are never used by mistake. It also:
+
+- sets `ddl-auto=validate` (Hibernate only checks the tables; the **first** time, with an empty database, start once with `JPA_DDL_AUTO=update` and remove it afterwards),
+- hides error messages, stack traces and SQL, and logs at `INFO`,
+- enables the CAPTCHA and real SMTP email,
+- reads the real client IP from `X-Forwarded-For` only when it comes from a trusted proxy (`FORWARD_HEADERS_STRATEGY=native`), so the rate limit counts per person and not per proxy.
+
+---
+
+## 🎨 Design, planning and decisions
+
+The design went from sketches to wireframes, mockups and a prototype, for mobile, tablet and desktop. The project was planned in **JIRA** (epics, user stories with acceptance criteria and technical tasks, organised in sprints).
 
 - 🎨 **Figma:** https://www.figma.com/design/iNrrCJOe6CkQXTxhGzK7rj/Acomp%C3%A1%C3%B1ame
-- 💜 **Prototipo en Lovable:** https://care-connection-hub-18.lovable.app
-- 📊 **Tablero de JIRA:** https://saludosalamanecer-1780468848301.atlassian.net/jira/software/projects/ACOM/boards/34/timeline?rangeMode=MONTHS
+- 💜 **Lovable prototype:** https://care-connection-hub-18.lovable.app
+- 📊 **JIRA board:** https://saludosalamanecer-1780468848301.atlassian.net/jira/software/projects/ACOM/boards/34/timeline?rangeMode=MONTHS
 
-| <ins>Landing</ins> | <ins>Buscar</ins> | <ins>Perfil del cuidador</ins> |
-|---|---|---|
-| ![Landing](docs/design/01-landing_escritorio.png) | ![Buscar](docs/design/04-buscar_escritorio.png) | ![Perfil](docs/design/05-perfil-cuidador_escritorio.png) |
+📄 Process and problems found: [docs/decisiones-tecnicas.pdf](docs/decisiones-tecnicas.pdf) (in Spanish). Some of the main decisions:
 
-👉 Más detalle: [Diseño y gestión](https://github.com/AndreaVaGo/acompaname-backend/wiki/Diseno-y-gestion).
+- ✅ **Roles in their own table** (`@ManyToMany`) instead of an enum, following the Spring Security standard.
+- ✅ **DTOs on every input and output**, so entities (and passwords) are never exposed and *mass assignment* is avoided.
+- ✅ **Per-entity exceptions + one `GlobalExceptionHandler`**, with clear `400`, `403`, `404`, `409` and `429` codes.
+- ✅ **Ownership checked in the service**, even if the id of another user's resource is known.
+- ✅ **Rules in one place:** request state transitions in `EstadoSolicitud`, age groups in the `GrupoEdad` enum, the amount in `CalculoDeImporte`.
+- ✅ **Amounts calculated by the server**, never accepted from the client.
+- ✅ **Optional collaborators behind an interface** (email, CAPTCHA, geocoding), with a disabled implementation for development and tests.
+- ✅ **Real-MySQL integration tests (Testcontainers)** for what mocks cannot catch, such as Hibernate session problems at startup.
+- ✅ **Administrator created from environment variables**, with no credentials in the code or the repository.
 
----
-
-## 🧭 Decisiones técnicas
-
-📄 Documento completo con el proceso y los problemas encontrados: [docs/decisiones-tecnicas.pdf](docs/decisiones-tecnicas.pdf)
-
-Algunas de las decisiones principales:
-
-- ✅ **Roles en tabla propia** (<mark>@ManyToMany</mark>) en vez de un enum, siguiendo el patrón estándar de Spring Security.
-- ✅ **DTOs en cada capa de entrada y salida**, para no exponer entidades (ni la contraseña) y evitar *mass assignment*.
-- ✅ **Excepciones por entidad + <mark>GlobalExceptionHandler</mark> centralizado**, con códigos <mark>400</mark>, <mark>403</mark>, <mark>404</mark> y <mark>409</mark> claros.
-- ✅ **Comprobar en el Service que el recurso es del usuario**, aunque conozca el id de otro.
-- ✅ **Testcontainers** para los tests de integración, con el mismo MySQL que usa la aplicación.
-- ✅ **Filtrar las valoraciones en el servidor**, no en el frontend.
-- ✅ **Administrador que observa y modera:** solo bloquea cuentas y borra valoraciones; no edita solicitudes ni pagos ni suplanta a nadie.
-- ✅ **El administrador se crea desde variables de entorno**, sin dejar ninguna credencial en el código ni en el repositorio.
-- ✅ **Cuentas bloqueadas con el mismo 401 que una contraseña mala**, para no revelar qué emails existen.
-- ✅ **Un test de integración con MySQL real para el arranque del administrador:** los tests con repositorios simulados no detectaron un fallo de sesión de Hibernate que solo aparecía al arrancar de verdad; se corrigió con <mark>@Transactional</mark> y se dejó el test que lo vigila.
-
-👉 Todas las decisiones con su motivo: [Decisiones y roadmap](https://github.com/AndreaVaGo/acompaname-backend/wiki/Decisiones-y-roadmap).
+👉 All decisions with their reasons: [Decisions and roadmap](https://github.com/AndreaVaGo/acompaname-backend/wiki/Decisiones-y-roadmap).
 
 ---
 
-## ⚠️ Limitaciones conocidas
+## ⚠️ Known limitations
 
 > [!WARNING]
-> De forma transparente, estas son las áreas identificadas como pendientes de mejora en la versión actual.
+> Areas identified as pending, listed openly.
 
-- 🔑 **Autenticación mediante Basic Auth**, no JWT. La migración a JWT está prevista como siguiente paso.
-- 🗝️ **Credenciales por defecto de desarrollo:** se pueden cambiar con variables de entorno, pero los valores por defecto siguen en <mark>application.properties</mark> y <mark>docker-compose.yml</mark>.
-- 💳 **Pagos simulados:** no hay pasarela de pago real. El pago se crea cuando el cuidador marca la solicitud como completada y se marca como pagado con <mark>PATCH /pagos/{id}/pagar</mark>.
-- 🪪 **Basic Auth envía las credenciales en cada petición:** es sencillo pero menos seguro que un token; por eso JWT es la siguiente mejora.
-- 🚧 **Sin límite de intentos de login** (falta proteger la aplicación de quien pruebe contraseñas una y otra vez).
-- 🐢 **Algunas consultas cargan todos los registros y filtran en Java** (<mark>findAll()</mark>), por ejemplo la de los cuidadores ocupados. Con pocos datos no se nota; con muchos habría que pasarlas a consultas del repositorio.
-- 🕘 **Las reservas son por días completos, no por horas.** Si un cuidador tiene un servicio aceptado de 9 a 12, la aplicación lo considera ocupado todo ese día. La mejora sería añadir hora de inicio y de fin a la solicitud y que el solapamiento se compruebe también por horas.
-- 🛡️ **Un único administrador**, creado desde variables de entorno: no hay pantalla para crear más administradores.
-- 🔒 **El bloqueo de una cuenta no dice el motivo:** quien está bloqueado recibe el mismo 401 que con una contraseña incorrecta. Es intencionado por privacidad, pero la persona bloqueada no sabe por qué.
+- 💳 **Simulated payments:** there is no payment gateway. The payment is created when the caregiver completes the request and is marked as paid with `PATCH /pagos/{id}/pagar`.
+- 📃 **Lists are not paginated:** some endpoints return every record (see [Load tests](#-load-tests)).
+- 🖼️ **Photos are stored as Base64 text** in the database, reduced to at most 300 KB, which makes caregiver lists heavy.
+- 🔐 **No two-factor authentication** yet.
+- 🛡️ **A single administrator**, created from environment variables; there is no screen to create more.
+- 🔒 **A blocked account is not told why:** it gets the same `401` as a wrong password. This is intentional for privacy.
+- 🗝️ **Development defaults** remain in `application.properties` and `docker-compose.yml`; the production profile has none.
 
 ---
 
-## 🗺 Roadmap / Mejoras futuras
+## 🗺 Roadmap
 
 > [!TIP]
-> Funcionalidades identificadas como **Fase 2**, fuera del alcance del MVP entregado.
+> Phase 2 features, outside the delivered scope.
 
-- 🔑 Autenticación mediante JWT
-- 💳 Pasarela de pago real (por ejemplo Stripe en modo test)
-- 📍 Geolocalización de cuidadores en tiempo real
-- 💬 Videollamadas y chat en tiempo real
-- 🔔 Notificaciones push
-- 📄 Generación de informes en PDF
-- 🔍 Filtros de búsqueda avanzados (especialidad, tarifa, disponibilidad)
-- 🖼️ Guardar las fotos de perfil como archivos en un almacenamiento externo (ahora se guardan reducidas, como texto)
-- ☁️ Despliegue (imagen Docker y base de datos en la nube)
+- 💳 Real payment gateway (Stripe, test mode first) and a platform fee
+- 📃 Pagination of the lists
+- 🖼️ Store profile photos as files in external storage
+- 🔐 Two-factor authentication
+- 📱 Installable web app (PWA)
+- 📄 PDF reports
+- ☁️ Deployment (Docker images and a cloud database)
 
 ---
 
-## 🔗 Enlaces del proyecto
+## 🔗 Project links
 
-| Recurso | Enlace |
+| Resource | Link |
 |---|---|
-| 🍃 Repositorio Backend | [github.com/AndreaVaGo/acompaname-backend](https://github.com/AndreaVaGo/acompaname-backend) |
-| 🖥️ Repositorio Frontend | [github.com/AndreaVaGo/acompaname-frontend](https://github.com/AndreaVaGo/acompaname-frontend) |
-| 🎤 Presentación | [docs/presentacion.pdf](docs/presentacion.pdf) |
-| 📊 Tablero JIRA | https://saludosalamanecer-1780468848301.atlassian.net/jira/software/projects/ACOM/boards/34/timeline?rangeMode=MONTHS |
-| 🎨 Diseño en Figma | https://www.figma.com/design/iNrrCJOe6CkQXTxhGzK7rj/Acomp%C3%A1%C3%B1ame |
-| 💜 Prototipo Lovable | https://care-connection-hub-18.lovable.app |
+| 🍃 Back-end repository | [github.com/AndreaVaGo/acompaname-backend](https://github.com/AndreaVaGo/acompaname-backend) |
+| 🖥️ Front-end repository | [github.com/AndreaVaGo/acompaname-frontend](https://github.com/AndreaVaGo/acompaname-frontend) |
+| 📚 Wiki | [github.com/AndreaVaGo/acompaname-backend/wiki](https://github.com/AndreaVaGo/acompaname-backend/wiki) |
+| 🎤 Presentation | [docs/presentacion.pdf](docs/presentacion.pdf) |
+| 📊 JIRA board | https://saludosalamanecer-1780468848301.atlassian.net/jira/software/projects/ACOM/boards/34/timeline?rangeMode=MONTHS |
+| 🎨 Figma design | https://www.figma.com/design/iNrrCJOe6CkQXTxhGzK7rj/Acomp%C3%A1%C3%B1ame |
+| 💜 Lovable prototype | https://care-connection-hub-18.lovable.app |
 
 ---
 
-## 👩‍💻 Autoría
+## 🙏 Credits
 
-Proyecto desarrollado por **Andrea Vallina González** como Proyecto Final del bootcamp de Desarrollo Web Full Stack en **Factoría F5 — Digital Academy**.
+- Login and sign-up photo (front end): [Woman and man holding hands](https://unsplash.com/es/fotos/mujer-y-hombre-tomados-de-la-mano-0EVKn3-5JSU) by Roman Kraft on [Unsplash](https://unsplash.com), used under the Unsplash License.
+- Bot protection by [Cloudflare Turnstile](https://www.cloudflare.com/products/turnstile/); location search by [OpenStreetMap Nominatim](https://nominatim.org) (© OpenStreetMap contributors).
+
+---
+
+## 👩‍💻 Author
+
+Developed by **Andrea Vallina González** as the final project of the Full Stack Web Development bootcamp at **Factoría F5 — Digital Academy**.
 
 - 🐙 GitHub: [@AndreaVaGo](https://github.com/AndreaVaGo)
 - 💼 LinkedIn: [Andrea Vallina González](https://www.linkedin.com/in/andrea-vallina-gonzalez/)
