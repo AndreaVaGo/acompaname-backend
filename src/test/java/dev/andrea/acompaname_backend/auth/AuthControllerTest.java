@@ -56,6 +56,8 @@ public class AuthControllerTest {
     private LimitadorDePeticiones limitador;
     @MockitoBean
     private VerificadorCaptcha verificadorCaptcha;
+    @MockitoBean
+    private DosPasosService dosPasosService;
 
     // Hace que el AuthenticationManager acepte el login y devuelva a esa persona
     private void simularLoginCorrecto(Long id, String email, String nombreRol) {
@@ -247,5 +249,128 @@ public class AuthControllerTest {
         hacerLogin("", "1234");
 
         Mockito.verifyNoInteractions(verificadorCaptcha);
+    }
+
+    // ---------- Inicio de sesión en dos pasos ----------
+
+    // Hace que el login sea correcto con una persona que tiene el segundo paso activado
+    private UsuarioEntity simularLoginConDosPasos() {
+        RoleEntity rol = new RoleEntity();
+        rol.setId(1L);
+        rol.setName("FAMILIA");
+        UsuarioEntity usuario = new UsuarioEntity(5L, "Ana", "ana@test.com", "600111222", "1234", Set.of(rol));
+        usuario.setDosPasos(true);
+        SecurityUser securityUser = new SecurityUser(usuario);
+        Authentication auth = new UsernamePasswordAuthenticationToken(securityUser, null,
+                securityUser.getAuthorities());
+        Mockito.when(authenticationManager.authenticate(ArgumentMatchers.any(Authentication.class)))
+                .thenReturn(auth);
+        return usuario;
+    }
+
+    private MockHttpServletResponse hacerVerificacion(String desafio, String codigo) throws Exception {
+        String cuerpo = mapper.writeValueAsString(new VerificarCodigoDTORequest(desafio, codigo));
+        return mockMvc.perform(post("/api/v1/login/verificar")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(cuerpo))
+                .andReturn()
+                .getResponse();
+    }
+
+    @Test
+    void testConDosPasosElLoginDa202ConElDesafioYSinToken() throws Exception {
+        UsuarioEntity usuario = simularLoginConDosPasos();
+        Mockito.when(dosPasosService.iniciar(usuario)).thenReturn("desafio-de-prueba");
+
+        MockHttpServletResponse response = hacerLogin("ana@test.com", "1234");
+
+        assertThat(response.getStatus(), is(equalTo(202)));
+        assertThat(response.getContentAsString(),
+                is(equalTo(mapper.writeValueAsString(new DosPasosDTOResponse(true, "desafio-de-prueba")))));
+        assertThat(response.getContentAsString(), not(containsString("token")));
+        Mockito.verifyNoInteractions(jwtService);
+    }
+
+    @Test
+    void testSinDosPasosElLoginNoMandaNingunCodigo() throws Exception {
+        simularLoginCorrecto(5L, "ana@test.com", "FAMILIA");
+
+        hacerLogin("ana@test.com", "1234");
+
+        Mockito.verifyNoInteractions(dosPasosService);
+    }
+
+    @Test
+    void testSiFallaLaContrasenaNoSeMandaNingunCodigo() throws Exception {
+        Mockito.when(authenticationManager.authenticate(ArgumentMatchers.any(Authentication.class)))
+                .thenThrow(new BadCredentialsException("Credenciales incorrectas"));
+
+        hacerLogin("ana@test.com", "mala");
+
+        Mockito.verifyNoInteractions(dosPasosService);
+    }
+
+    @Test
+    void testVerificarConCodigoCorrectoDevuelveElToken() throws Exception {
+        RoleEntity rol = new RoleEntity();
+        rol.setId(1L);
+        rol.setName("CUIDADOR");
+        UsuarioEntity usuario = new UsuarioEntity(8L, "Pepe", "pepe@test.com", "600111222", "1234", Set.of(rol));
+        Mockito.when(dosPasosService.verificar("desafio", "123456")).thenReturn(usuario);
+        Mockito.when(jwtService.crearToken(usuario)).thenReturn("token-de-prueba");
+
+        MockHttpServletResponse response = hacerVerificacion("desafio", "123456");
+
+        assertThat(response.getStatus(), is(equalTo(200)));
+        assertThat(response.getContentAsString(), is(equalTo(mapper.writeValueAsString(
+                new AuthDTOResponse(8L, "Logged", "pepe@test.com", "CUIDADOR", "token-de-prueba")))));
+    }
+
+    @Test
+    void testVerificarConCodigoIncorrectoDa400SinToken() throws Exception {
+        Mockito.when(dosPasosService.verificar("desafio", "000000")).thenThrow(new CodigoInvalidoException());
+
+        MockHttpServletResponse response = hacerVerificacion("desafio", "000000");
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        assertThat(response.getContentAsString(), containsString("El código no es válido"));
+        Mockito.verifyNoInteractions(jwtService);
+    }
+
+    @Test
+    void testVerificarSinCodigoDa400YNoSeComprueba() throws Exception {
+        MockHttpServletResponse response = hacerVerificacion("desafio", "");
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        Mockito.verifyNoInteractions(dosPasosService);
+    }
+
+    @Test
+    void testVerificarSinDesafioDa400YNoSeComprueba() throws Exception {
+        MockHttpServletResponse response = hacerVerificacion("", "123456");
+
+        assertThat(response.getStatus(), is(equalTo(400)));
+        Mockito.verifyNoInteractions(dosPasosService);
+    }
+
+    @Test
+    void testVerificarPreguntaAlLimitadorConLaDireccionIP() throws Exception {
+        Mockito.when(dosPasosService.verificar("desafio", "123456")).thenThrow(new CodigoInvalidoException());
+
+        hacerVerificacion("desafio", "123456");
+
+        Mockito.verify(limitador).comprobar("verificar:127.0.0.1");
+    }
+
+    @Test
+    void testVerificarConDemasiadosIntentosDa429YNoSeComprueba() throws Exception {
+        Mockito.doThrow(new DemasiadasPeticionesException(
+                "Demasiados intentos. Espera un minuto y vuelve a intentarlo."))
+                .when(limitador).comprobar(ArgumentMatchers.anyString());
+
+        MockHttpServletResponse response = hacerVerificacion("desafio", "123456");
+
+        assertThat(response.getStatus(), is(equalTo(429)));
+        Mockito.verifyNoInteractions(dosPasosService);
     }
 }

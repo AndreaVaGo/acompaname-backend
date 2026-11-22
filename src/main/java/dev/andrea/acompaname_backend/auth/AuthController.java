@@ -31,17 +31,20 @@ public class AuthController {
     private final JwtService jwtService;
     private final LimitadorDePeticiones limitador;
     private final VerificadorCaptcha verificadorCaptcha;
+    private final DosPasosService dosPasosService;
 
     public AuthController(AuthenticationManager authenticationManager, JwtService jwtService,
-            LimitadorDePeticiones limitador, VerificadorCaptcha verificadorCaptcha) {
+            LimitadorDePeticiones limitador, VerificadorCaptcha verificadorCaptcha,
+            DosPasosService dosPasosService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.limitador = limitador;
         this.verificadorCaptcha = verificadorCaptcha;
+        this.dosPasosService = dosPasosService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthDTOResponse> login(@Valid @RequestBody LoginDTORequest request,
+    public ResponseEntity<?> login(@Valid @RequestBody LoginDTORequest request,
             HttpServletRequest peticion) {
         // Antes de comprobar nada, se mira que esta dirección IP no haya hecho demasiados intentos
         limitador.comprobar("login:" + peticion.getRemoteAddr());
@@ -63,7 +66,30 @@ public class AuthController {
 
         SecurityUser securityUser = (SecurityUser) auth.getPrincipal();
         UsuarioEntity usuario = securityUser.getUsuario();
+
+        // Si tiene el segundo paso activado, todavía no se le da el token: se le manda un código por correo
+        // y se responde 202 con el "desafío" que tendrá que enviar a /login/verificar junto con el código
+        if (usuario.isDosPasos()) {
+            String desafio = dosPasosService.iniciar(usuario);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(new DosPasosDTOResponse(true, desafio));
+        }
+
         String rol = auth.getAuthorities().iterator().next().getAuthority();
+        String token = jwtService.crearToken(usuario);
+
+        AuthDTOResponse respuesta = new AuthDTOResponse(usuario.getId(), "Logged", usuario.getEmail(), rol, token);
+        return ResponseEntity.ok().body(respuesta);
+    }
+
+    // Segundo paso del login: se comprueba el código que llegó por correo y, si vale, se da el token
+    @PostMapping("/login/verificar")
+    public ResponseEntity<AuthDTOResponse> verificar(@Valid @RequestBody VerificarCodigoDTORequest request,
+            HttpServletRequest peticion) {
+        // Aunque el código solo tiene 6 cifras, cada desafío tiene pocos intentos y cada IP, un límite
+        limitador.comprobar("verificar:" + peticion.getRemoteAddr());
+
+        UsuarioEntity usuario = dosPasosService.verificar(request.desafio(), request.codigo());
+        String rol = usuario.getRoles().iterator().next().getName();
         String token = jwtService.crearToken(usuario);
 
         AuthDTOResponse respuesta = new AuthDTOResponse(usuario.getId(), "Logged", usuario.getEmail(), rol, token);
