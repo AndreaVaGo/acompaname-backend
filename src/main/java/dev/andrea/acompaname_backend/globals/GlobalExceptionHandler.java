@@ -24,6 +24,7 @@ import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorE
 import dev.andrea.acompaname_backend.passwordreset.TokenRecuperacionInvalidoException;
 import dev.andrea.acompaname_backend.auth.CodigoInvalidoException;
 import dev.andrea.acompaname_backend.auth.DosPasosException;
+import dev.andrea.acompaname_backend.verificacion.VerificacionException;
 import dev.andrea.acompaname_backend.captcha.CaptchaInvalidoException;
 import dev.andrea.acompaname_backend.security.DemasiadasPeticionesException;
 import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionAccesoDenegado;
@@ -230,6 +231,12 @@ public class GlobalExceptionHandler {
     // No se ha podido activar o desactivar el segundo paso (por ejemplo, la contraseña no es correcta)
     @ExceptionHandler(DosPasosException.class)
     public ResponseEntity<String> handleDosPasos(DosPasosException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    }
+
+    // La verificación no se puede hacer (ya está comprobada, ya está revisada o no existe)
+    @ExceptionHandler(VerificacionException.class)
+    public ResponseEntity<String> handleVerificacion(VerificacionException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
 
