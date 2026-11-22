@@ -99,4 +99,34 @@ public class UsuarioEntityTest {
 
         assertThat(usuario.getRoles().size(), is(equalTo(2)));
     }
+
+    @Test
+    void testUsuarioNuevoNoTieneElSegundoPasoActivado() {
+        assertThat(new UsuarioEntity().isDosPasos(), is(false));
+        assertThat(new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234", Set.of()).isDosPasos(),
+                is(false));
+    }
+
+    @Test
+    void testSeVePuedeActivarElSegundoPaso() {
+        UsuarioEntity usuario = new UsuarioEntity();
+
+        usuario.setDosPasos(true);
+
+        assertThat(usuario.isDosPasos(), is(true));
+    }
+
+    @Test
+    void testElConstructorConActivoDejaElSegundoPasoDesactivado() {
+        UsuarioEntity usuario = new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234", Set.of(), false);
+
+        assertThat(usuario.isActivo(), is(false));
+        assertThat(usuario.isDosPasos(), is(false));
+    }
+
+    @Test
+    void testElBuilderDejaElSegundoPasoDesactivadoPorDefecto() {
+        assertThat(UsuarioEntity.builder().build().isDosPasos(), is(false));
+        assertThat(UsuarioEntity.builder().dosPasos(true).build().isDosPasos(), is(true));
+    }
 }

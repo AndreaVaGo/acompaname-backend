@@ -44,6 +44,18 @@ public class UsuarioEntity {
     @Column(nullable = false, columnDefinition = "boolean default true")
     private boolean activo = true;
 
+    // Si es true, al iniciar sesión se pide también un código de 6 cifras que llega al correo.
+    // El "default false" deja sin segundo paso a los usuarios que ya existían en la base de datos
+    @Builder.Default
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean dosPasos = false;
+
+    // Constructor sin dosPasos (queda desactivado), para no romper el código que ya existía
+    public UsuarioEntity(Long id, String nombre, String email, String telefono, String password,
+            Set<RoleEntity> roles, boolean activo) {
+        this(id, nombre, email, telefono, password, roles, activo, false);
+    }
+
     // Constructor sin activo (queda activo), para no romper el código que ya existía
     public UsuarioEntity(Long id, String nombre, String email, String telefono, String password,
             Set<RoleEntity> roles) {
