@@ -22,6 +22,8 @@ import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorE
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionFotoInvalida;
 import dev.andrea.acompaname_backend.caregiverprofile.exceptions.PerfilCuidadorExceptionNotFound;
 import dev.andrea.acompaname_backend.passwordreset.TokenRecuperacionInvalidoException;
+import dev.andrea.acompaname_backend.auth.CodigoInvalidoException;
+import dev.andrea.acompaname_backend.auth.DosPasosException;
 import dev.andrea.acompaname_backend.captcha.CaptchaInvalidoException;
 import dev.andrea.acompaname_backend.security.DemasiadasPeticionesException;
 import dev.andrea.acompaname_backend.schedule.exceptions.BloqueOcupadoExceptionAccesoDenegado;
@@ -216,6 +218,18 @@ public class GlobalExceptionHandler {
     // El enlace de recuperar la contraseña no existe, ya se usó o ha caducado
     @ExceptionHandler(TokenRecuperacionInvalidoException.class)
     public ResponseEntity<String> handleTokenRecuperacionInvalido(TokenRecuperacionInvalidoException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    }
+
+    // El código del segundo paso del login no vale (incorrecto, caducado, ya usado o con demasiados fallos)
+    @ExceptionHandler(CodigoInvalidoException.class)
+    public ResponseEntity<String> handleCodigoInvalido(CodigoInvalidoException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+    }
+
+    // No se ha podido activar o desactivar el segundo paso (por ejemplo, la contraseña no es correcta)
+    @ExceptionHandler(DosPasosException.class)
+    public ResponseEntity<String> handleDosPasos(DosPasosException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
     }
 
