@@ -48,6 +48,10 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/login/verificar").permitAll()
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/olvide-password").permitAll()
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/restablecer-password").permitAll()
+                        // Qué cuidadores tienen algo verificado: solo "sí/no", se ve sin iniciar sesión
+                        .requestMatchers(HttpMethod.GET, "/" + endpoint + "/verificaciones/publicas").permitAll()
+                        // Enviar pruebas y ver las propias es solo de las personas cuidadoras
+                        .requestMatchers("/" + endpoint + "/verificaciones/**").hasAuthority("CUIDADOR")
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores/mi-perfil").authenticated()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores").permitAll()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores/*").permitAll()
