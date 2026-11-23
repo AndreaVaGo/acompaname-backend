@@ -3,6 +3,7 @@ package dev.andrea.acompaname_backend.admin;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,10 +29,13 @@ import dev.andrea.acompaname_backend.role.RoleEntity;
 import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
+import dev.andrea.acompaname_backend.suggestion.SugerenciaRepository;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
+import dev.andrea.acompaname_backend.verificacion.EstadoVerificacion;
+import dev.andrea.acompaname_backend.verificacion.VerificacionRepository;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -41,15 +45,20 @@ public class AdminServiceImpl implements AdminService {
     private final SolicitudRepository solicitudRepository;
     private final PagoRepository pagoRepository;
     private final ValoracionRepository valoracionRepository;
+    private final VerificacionRepository verificacionRepository;
+    private final SugerenciaRepository sugerenciaRepository;
 
     public AdminServiceImpl(UsuarioRepository usuarioRepository, PerfilCuidadorRepository perfilCuidadorRepository,
             SolicitudRepository solicitudRepository, PagoRepository pagoRepository,
-            ValoracionRepository valoracionRepository) {
+            ValoracionRepository valoracionRepository, VerificacionRepository verificacionRepository,
+            SugerenciaRepository sugerenciaRepository) {
         this.usuarioRepository = usuarioRepository;
         this.perfilCuidadorRepository = perfilCuidadorRepository;
         this.solicitudRepository = solicitudRepository;
         this.pagoRepository = pagoRepository;
         this.valoracionRepository = valoracionRepository;
+        this.verificacionRepository = verificacionRepository;
+        this.sugerenciaRepository = sugerenciaRepository;
     }
 
     // Redondea a un decimal (por ejemplo 4.26 pasa a 4.3)
@@ -144,7 +153,12 @@ public class AdminServiceImpl implements AdminService {
         // Pagos pendientes creados hace más de una semana
         long pagosSinCobrar = pagoRepository.countByEstadoAndFechaBefore(EstadoPago.PENDIENTE, hoy.minusDays(7));
 
-        return new AvisosDTOResponse(proximas, vencidas, pagosSinCobrar);
+        // Titulaciones o antecedentes que una persona cuidadora ha enviado y nadie ha revisado
+        long verificaciones = verificacionRepository.countByEstado(EstadoVerificacion.PENDIENTE);
+        // Sugerencias recibidas en los últimos 7 días
+        long sugerencias = sugerenciaRepository.countByFechaAfter(LocalDateTime.now().minusDays(7));
+
+        return new AvisosDTOResponse(proximas, vencidas, pagosSinCobrar, verificaciones, sugerencias);
     }
 
     @Override
