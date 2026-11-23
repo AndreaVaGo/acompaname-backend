@@ -28,7 +28,9 @@ import dev.andrea.acompaname_backend.review.exceptions.ValoracionExceptionNotFou
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
+import dev.andrea.acompaname_backend.suggestion.SugerenciaRepository;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
+import dev.andrea.acompaname_backend.verificacion.VerificacionRepository;
 
 // Tests de las valoraciones en el panel de administración: ver las últimas y borrar una
 @ExtendWith(MockitoExtension.class)
@@ -43,13 +45,17 @@ public class AdminServiceImplValoracionesTest {
     private PagoRepository pagoRepository;
     @Mock
     private ValoracionRepository valoracionRepository;
+    @Mock
+    private VerificacionRepository verificacionRepository;
+    @Mock
+    private SugerenciaRepository sugerenciaRepository;
 
     private AdminServiceImpl service;
 
     @BeforeEach
     void setUp() {
         service = new AdminServiceImpl(usuarioRepository, perfilCuidadorRepository, solicitudRepository,
-                pagoRepository, valoracionRepository);
+                pagoRepository, valoracionRepository, verificacionRepository, sugerenciaRepository);
     }
 
     // Valoración de la familia al cuidador, con los nombres que se ven en el panel

@@ -34,7 +34,9 @@ import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
+import dev.andrea.acompaname_backend.suggestion.SugerenciaRepository;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
+import dev.andrea.acompaname_backend.verificacion.VerificacionRepository;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionAccesoDenegado;
 import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
 
@@ -51,13 +53,17 @@ public class AdminServiceImplUsuariosTest {
     private PagoRepository pagoRepository;
     @Mock
     private ValoracionRepository valoracionRepository;
+    @Mock
+    private VerificacionRepository verificacionRepository;
+    @Mock
+    private SugerenciaRepository sugerenciaRepository;
 
     private AdminServiceImpl service;
 
     @BeforeEach
     void setUp() {
         service = new AdminServiceImpl(usuarioRepository, perfilCuidadorRepository, solicitudRepository,
-                pagoRepository, valoracionRepository);
+                pagoRepository, valoracionRepository, verificacionRepository, sugerenciaRepository);
         // Simulamos que el administrador ha iniciado sesión
         SecurityContextHolder.getContext()
                 .setAuthentication(new UsernamePasswordAuthenticationToken("admin@acompaname.com", null));

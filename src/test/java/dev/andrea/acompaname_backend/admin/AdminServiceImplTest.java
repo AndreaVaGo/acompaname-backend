@@ -24,7 +24,9 @@ import dev.andrea.acompaname_backend.review.ValoracionRepository;
 import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudEntity;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
+import dev.andrea.acompaname_backend.suggestion.SugerenciaRepository;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
+import dev.andrea.acompaname_backend.verificacion.VerificacionRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class AdminServiceImplTest {
@@ -38,13 +40,17 @@ public class AdminServiceImplTest {
     private PagoRepository pagoRepository;
     @Mock
     private ValoracionRepository valoracionRepository;
+    @Mock
+    private VerificacionRepository verificacionRepository;
+    @Mock
+    private SugerenciaRepository sugerenciaRepository;
 
     private AdminServiceImpl service;
 
     @BeforeEach
     void setUp() {
         service = new AdminServiceImpl(usuarioRepository, perfilCuidadorRepository, solicitudRepository,
-                pagoRepository, valoracionRepository);
+                pagoRepository, valoracionRepository, verificacionRepository, sugerenciaRepository);
     }
 
     // Solicitud creada y aceptada en las horas indicadas del 10 de noviembre
