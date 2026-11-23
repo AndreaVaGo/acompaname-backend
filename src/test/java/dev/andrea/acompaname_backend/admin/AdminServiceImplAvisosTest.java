@@ -4,14 +4,19 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -25,7 +30,10 @@ import dev.andrea.acompaname_backend.review.ValoracionRepository;
 import dev.andrea.acompaname_backend.servicerequest.EstadoSolicitud;
 import dev.andrea.acompaname_backend.servicerequest.SolicitudRepository;
 import dev.andrea.acompaname_backend.user.UsuarioEntity;
+import dev.andrea.acompaname_backend.suggestion.SugerenciaRepository;
 import dev.andrea.acompaname_backend.user.UsuarioRepository;
+import dev.andrea.acompaname_backend.verificacion.EstadoVerificacion;
+import dev.andrea.acompaname_backend.verificacion.VerificacionRepository;
 
 // Tests de los avisos y de los cuidadores mejor valorados del panel de administración
 @ExtendWith(MockitoExtension.class)
@@ -40,13 +48,17 @@ public class AdminServiceImplAvisosTest {
     private PagoRepository pagoRepository;
     @Mock
     private ValoracionRepository valoracionRepository;
+    @Mock
+    private VerificacionRepository verificacionRepository;
+    @Mock
+    private SugerenciaRepository sugerenciaRepository;
 
     private AdminServiceImpl service;
 
     @BeforeEach
     void setUp() {
         service = new AdminServiceImpl(usuarioRepository, perfilCuidadorRepository, solicitudRepository,
-                pagoRepository, valoracionRepository);
+                pagoRepository, valoracionRepository, verificacionRepository, sugerenciaRepository);
     }
 
     private PerfilCuidadorEntity perfil(Long id, String nombre) {
@@ -65,6 +77,8 @@ public class AdminServiceImplAvisosTest {
         assertThat(resultado.pendientesProximas48Horas(), is(equalTo(0L)));
         assertThat(resultado.pendientesVencidas(), is(equalTo(0L)));
         assertThat(resultado.pagosSinCobrarMasDeUnaSemana(), is(equalTo(0L)));
+        assertThat(resultado.verificacionesPendientes(), is(equalTo(0L)));
+        assertThat(resultado.sugerenciasUltimaSemana(), is(equalTo(0L)));
     }
 
     @Test
@@ -82,6 +96,35 @@ public class AdminServiceImplAvisosTest {
         assertThat(resultado.pendientesProximas48Horas(), is(equalTo(3L)));
         assertThat(resultado.pendientesVencidas(), is(equalTo(1L)));
         assertThat(resultado.pagosSinCobrarMasDeUnaSemana(), is(equalTo(2L)));
+    }
+
+    @Test
+    void testLosAvisosCuentanLasVerificacionesPendientes() {
+        when(verificacionRepository.countByEstado(EstadoVerificacion.PENDIENTE)).thenReturn(4L);
+
+        AvisosDTOResponse resultado = service.avisos();
+
+        assertThat(resultado.verificacionesPendientes(), is(equalTo(4L)));
+    }
+
+    @Test
+    void testLosAvisosCuentanLasSugerenciasDeLaUltimaSemana() {
+        when(sugerenciaRepository.countByFechaAfter(any(LocalDateTime.class))).thenReturn(5L);
+
+        AvisosDTOResponse resultado = service.avisos();
+
+        assertThat(resultado.sugerenciasUltimaSemana(), is(equalTo(5L)));
+    }
+
+    @Test
+    void testLasSugerenciasSeCuentanDesdeHaceSieteDias() {
+        ArgumentCaptor<LocalDateTime> desde = ArgumentCaptor.forClass(LocalDateTime.class);
+
+        service.avisos();
+
+        verify(sugerenciaRepository).countByFechaAfter(desde.capture());
+        LocalDateTime esperado = LocalDateTime.now().minusDays(7);
+        assertThat(Duration.between(desde.getValue(), esperado).abs().toMinutes() < 1, is(true));
     }
 
     @Test
