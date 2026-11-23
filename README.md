@@ -8,7 +8,7 @@ This repository contains the **REST API**, built with **Spring Boot**. The Vue.j
 
 Final project of the Full Stack Web Development bootcamp (850 h) at **Factoría F5 — Digital Academy**.
 
-![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-1192-success)
+![Java](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F) ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1) ![Docker](https://img.shields.io/badge/Docker-compose-2496ED) ![Tests](https://img.shields.io/badge/tests-1277-success)
 
 > [!TIP]
 > 📚 **Full documentation is in the [project wiki](https://github.com/AndreaVaGo/acompaname-backend/wiki).** This README has what you need to understand, run and test the back end; the details (architecture, data model, endpoints, security, tests, diagrams and decisions) are in the wiki.
@@ -275,7 +275,7 @@ Typical errors: `400` (invalid data or CAPTCHA), `401` (bad credentials or block
 
 ## 🧪 Testing
 
-The suite has **1,192 tests** (last full run) covering business logic, the HTTP layer, security and integration with a real database:
+The suite has **1,277 tests** (last full run) covering business logic, the HTTP layer, security and integration with a real database:
 
 | Type | What it checks |
 |---|---|
@@ -300,7 +300,7 @@ Running everything is slow because some tests start MySQL with Docker. While dev
 
 The integration tests share two MySQL containers (one for repository tests and one for full-application tests, in `src/test/java/.../support`), so Docker starts only two databases per run. Run the full suite once before merging.
 
-Coverage is measured with **JaCoCo**: 96 % of instructions and 95 % of branches at the last measurement (the required minimum was 70 %).
+Coverage is measured with **JaCoCo**: 98 % of instructions and 95 % of branches at the last measurement (the required minimum was 70 %).
 
 ![Back-end test results](docs/screenshots/tests-backend.png)
 ![Back-end test coverage](docs/screenshots/cobertura-backend.png)
