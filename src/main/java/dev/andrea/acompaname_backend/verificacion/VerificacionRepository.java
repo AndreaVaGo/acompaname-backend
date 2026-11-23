@@ -15,4 +15,7 @@ public interface VerificacionRepository extends JpaRepository<VerificacionEntity
     List<VerificacionEntity> findByEstadoOrderBySolicitadaEnAsc(EstadoVerificacion estado);
 
     List<VerificacionEntity> findAllByOrderBySolicitadaEnAsc();
+
+    // Cuántas están esperando que el administrador las revise
+    long countByEstado(EstadoVerificacion estado);
 }
