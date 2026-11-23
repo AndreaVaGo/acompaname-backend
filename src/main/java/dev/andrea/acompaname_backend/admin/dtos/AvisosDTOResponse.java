@@ -4,6 +4,8 @@ package dev.andrea.acompaname_backend.admin.dtos;
 public record AvisosDTOResponse(
         long pendientesProximas48Horas,
         long pendientesVencidas,
-        long pagosSinCobrarMasDeUnaSemana) {
+        long pagosSinCobrarMasDeUnaSemana,
+        long verificacionesPendientes,
+        long sugerenciasUltimaSemana) {
 
 }
