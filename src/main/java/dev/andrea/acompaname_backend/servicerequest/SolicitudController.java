@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.andrea.acompaname_backend.generics.PaginaDTOResponse;
 import dev.andrea.acompaname_backend.servicerequest.dtos.CambiarEstadoDTO;
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
@@ -45,6 +46,14 @@ public class SolicitudController {
     @GetMapping("/mis-solicitudes")
     public List<SolicitudDTOResponse> getMisSolicitudes() {
         return service.getMisSolicitudes();
+    }
+
+    // Las solicitudes del usuario por páginas (page empieza en 0; size tiene un máximo en el servicio)
+    @GetMapping("/mis-solicitudes/pagina")
+    public PaginaDTOResponse<SolicitudDTOResponse> getMisSolicitudesPaginadas(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return service.getMisSolicitudesPaginadas(page, size);
     }
 
     // Público: solo devuelve ids de cuidadores ocupados, para filtrar la búsqueda por fechas y horas.
