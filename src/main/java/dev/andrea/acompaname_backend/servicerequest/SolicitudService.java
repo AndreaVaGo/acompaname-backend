@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import dev.andrea.acompaname_backend.generics.InterfaceGenericService;
+import dev.andrea.acompaname_backend.generics.PaginaDTOResponse;
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTORequest;
 import dev.andrea.acompaname_backend.servicerequest.dtos.SolicitudDTOResponse;
 
@@ -14,6 +15,9 @@ public interface SolicitudService
         SolicitudDTOResponse cambiarEstado(Long id, EstadoSolicitud nuevoEstado);
 
         List<SolicitudDTOResponse> getMisSolicitudes();
+
+        // Las solicitudes del usuario por páginas, las más recientes primero. pagina empieza en 0
+        PaginaDTOResponse<SolicitudDTOResponse> getMisSolicitudesPaginadas(int pagina, int tamano);
 
         // Ids de los cuidadores que ya tienen un servicio aceptado que se cruza con esas fechas y horas.
         // La fecha de fin y las horas son opcionales: sin ellas se busca el día completo
