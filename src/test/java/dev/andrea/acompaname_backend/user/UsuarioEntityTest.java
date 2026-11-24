@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -128,5 +129,36 @@ public class UsuarioEntityTest {
     void testElBuilderDejaElSegundoPasoDesactivadoPorDefecto() {
         assertThat(UsuarioEntity.builder().build().isDosPasos(), is(false));
         assertThat(UsuarioEntity.builder().dosPasos(true).build().isDosPasos(), is(true));
+    }
+
+    @Test
+    void testFechaAltaEmpiezaVaciaYSeRellenaAlGuardar() {
+        UsuarioEntity usuario = new UsuarioEntity();
+        assertThat(usuario.getFechaAlta(), is(nullValue()));
+
+        LocalDateTime antes = LocalDateTime.now().minusSeconds(1);
+        usuario.asignarFechaAlta();
+
+        assertThat(usuario.getFechaAlta().isAfter(antes), is(true));
+    }
+
+    @Test
+    void testAsignarFechaAltaNoPisaUnaFechaYaGuardada() {
+        LocalDateTime fecha = LocalDateTime.of(2026, 1, 15, 10, 30);
+        UsuarioEntity usuario = new UsuarioEntity();
+        usuario.setFechaAlta(fecha);
+
+        usuario.asignarFechaAlta();
+
+        assertThat(usuario.getFechaAlta(), is(equalTo(fecha)));
+    }
+
+    @Test
+    void testLosConstructoresAntiguosDejanLaFechaAltaVacia() {
+        assertThat(new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234", Set.of()).getFechaAlta(),
+                is(nullValue()));
+        assertThat(new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234", Set.of(), true, false)
+                .getFechaAlta(), is(nullValue()));
+        assertThat(UsuarioEntity.builder().build().getFechaAlta(), is(nullValue()));
     }
 }
