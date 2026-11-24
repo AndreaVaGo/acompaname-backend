@@ -33,7 +33,7 @@ import dev.andrea.acompaname_backend.user.UsuarioRepository;
 
 // La aplicación completa con MySQL de verdad: solo la persona cuidadora de la solicitud ficha,
 // la familia y la persona cuidadora ven los fichajes, y nadie más.
-@SpringBootTest(properties = { "rate-limit.max-requests=1000", "geocoding.enabled=false" })
+@SpringBootTest(properties = { "rate-limit.max-requests=1000", "geocoding.enabled=false", "fichaje.verificar-lugar=true" })
 @AutoConfigureMockMvc
 public class FichajeSecurityIntegrationTest extends ContenedorMySqlAplicacion {
 
@@ -203,6 +203,15 @@ public class FichajeSecurityIntegrationTest extends ContenedorMySqlAplicacion {
                 .andExpect(status().isForbidden());
         mockMvc.perform(get(ruta("")).header("Authorization", "Bearer " + token(lucia)))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void testLaConfiguracionLaVeCualquierPersonaConSesion() throws Exception {
+        mockMvc.perform(get("/api/v1/fichajes/configuracion").header("Authorization", "Bearer " + token(pepe)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.verificarLugar").value(true));
+
+        mockMvc.perform(get("/api/v1/fichajes/configuracion")).andExpect(status().isUnauthorized());
     }
 
     @Test
