@@ -89,7 +89,7 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
                 media = redondearMedia((Double) fila[1]);
                 numValoraciones = (Long) fila[2];
             }
-            resultado.add(PerfilCuidadorMapper.toDTO(perfil, media, numValoraciones));
+            resultado.add(PerfilCuidadorMapper.toDTOPublico(perfil, media, numValoraciones));
         }
         return resultado;
     }
@@ -97,7 +97,19 @@ public class PerfilCuidadorServiceImpl implements PerfilCuidadorService {
     @Override
     public PerfilCuidadorDTOResponse getById(Long id) {
         PerfilCuidadorEntity perfil = findEntityById(id);
-        return aDTO(perfil);
+        Double media = redondearMedia(valoracionRepository.mediaPorCuidador(perfil.getId()));
+        Long numValoraciones = valoracionRepository.countBySolicitudCuidadorId(perfil.getId());
+        // Perfil público: la foto va como dirección, no como imagen dentro de la respuesta
+        return PerfilCuidadorMapper.toDTOPublico(perfil, media, numValoraciones);
+    }
+
+    @Override
+    public FotoDescargable getFoto(Long id) {
+        PerfilCuidadorEntity perfil = findEntityById(id);
+        if (!FotoDescargable.esDescargable(perfil.getFoto())) {
+            throw new PerfilCuidadorExceptionNotFound("Este perfil no tiene foto. Id " + id + ".");
+        }
+        return FotoDescargable.de(perfil.getFoto());
     }
 
     @Transactional
