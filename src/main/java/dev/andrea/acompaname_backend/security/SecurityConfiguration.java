@@ -70,6 +70,9 @@ public class SecurityConfiguration {
                         // El calendario propio (bloques ocupados) es solo de las personas cuidadoras
                         .requestMatchers("/" + endpoint + "/bloques-ocupados/**").hasAuthority("CUIDADOR")
                         .requestMatchers("/" + endpoint + "/bloques-ocupados").hasAuthority("CUIDADOR")
+                        // Fichar el inicio y el fin de un servicio es solo de las personas cuidadoras
+                        // (ver los fichajes lo puede hacer también la familia: lo comprueba el servicio)
+                        .requestMatchers(HttpMethod.POST, "/" + endpoint + "/fichajes/**").hasAuthority("CUIDADOR")
                         // Todo lo que cuelga de /admin es solo para el administrador
                         .requestMatchers("/" + endpoint + "/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated())
