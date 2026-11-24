@@ -9,4 +9,8 @@ public interface PerfilCuidadorService
 
         PerfilCuidadorDTOResponse getMiPerfil();
 
+        // La foto del perfil como imagen (para pedirla aparte y que el navegador la guarde en caché).
+        // Si el perfil no existe o no tiene foto, lanza el error de "no encontrado"
+        FotoDescargable getFoto(Long id);
+
 }
