@@ -16,6 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
@@ -141,6 +144,66 @@ public class SolicitudRepositoryIntegrationTest extends ContenedorMySqlRepositor
 
         assertThat(solicitudes.size(), is(equalTo(1)));
         assertThat(solicitudes.get(0).getId(), is(equalTo(solicitud.getId())));
+    }
+
+    // Sort igual que el del servicio: las más recientes primero
+    private static final Sort RECIENTES_PRIMERO = Sort.by(Sort.Direction.DESC, "fechaCuidado")
+            .and(Sort.by(Sort.Direction.DESC, "id"));
+
+    @Test
+    void testLasSolicitudesSeDevuelvenPorPaginasConElTotal() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        for (int dia = 1; dia <= 5; dia++) {
+            crearSolicitud(ana, pepe, LocalDate.of(2026, 11, dia), null, EstadoSolicitud.PENDIENTE);
+        }
+
+        Page<SolicitudEntity> primera = repository.findByParticipante("ana@test.com",
+                PageRequest.of(0, 2, RECIENTES_PRIMERO));
+        Page<SolicitudEntity> ultima = repository.findByParticipante("ana@test.com",
+                PageRequest.of(2, 2, RECIENTES_PRIMERO));
+
+        assertThat(primera.getContent().size(), is(equalTo(2)));
+        assertThat(primera.getTotalElements(), is(equalTo(5L)));
+        assertThat(primera.getTotalPages(), is(equalTo(3)));
+        assertThat(ultima.getContent().size(), is(equalTo(1)));
+    }
+
+    @Test
+    void testLaPaginaVieneOrdenadaConLasMasRecientesPrimero() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        crearSolicitud(ana, pepe, LocalDate.of(2026, 11, 3), null, EstadoSolicitud.PENDIENTE);
+        crearSolicitud(ana, pepe, LocalDate.of(2026, 11, 20), null, EstadoSolicitud.PENDIENTE);
+        crearSolicitud(ana, pepe, LocalDate.of(2026, 11, 10), null, EstadoSolicitud.PENDIENTE);
+
+        List<SolicitudEntity> pagina = repository.findByParticipante("ana@test.com",
+                PageRequest.of(0, 10, RECIENTES_PRIMERO)).getContent();
+
+        assertThat(pagina.get(0).getFechaCuidado(), is(equalTo(LocalDate.of(2026, 11, 20))));
+        assertThat(pagina.get(1).getFechaCuidado(), is(equalTo(LocalDate.of(2026, 11, 10))));
+        assertThat(pagina.get(2).getFechaCuidado(), is(equalTo(LocalDate.of(2026, 11, 3))));
+    }
+
+    @Test
+    void testLaPaginaSoloTieneLasSolicitudesDeEseUsuario() {
+        UsuarioEntity ana = crearUsuario("Ana", "ana@test.com");
+        UsuarioEntity luis = crearUsuario("Luis", "luis@test.com");
+        PerfilCuidadorEntity pepe = crearCuidador(crearUsuario("Pepe", "pepe@test.com"));
+        crearSolicitud(ana, pepe);
+        crearSolicitud(luis, pepe);
+        crearUsuario("Intruso", "intruso@test.com");
+
+        Page<SolicitudEntity> deAna = repository.findByParticipante("ana@test.com",
+                PageRequest.of(0, 10, RECIENTES_PRIMERO));
+        Page<SolicitudEntity> dePepe = repository.findByParticipante("pepe@test.com",
+                PageRequest.of(0, 10, RECIENTES_PRIMERO));
+        Page<SolicitudEntity> deIntruso = repository.findByParticipante("intruso@test.com",
+                PageRequest.of(0, 10, RECIENTES_PRIMERO));
+
+        assertThat(deAna.getTotalElements(), is(equalTo(1L)));
+        assertThat(dePepe.getTotalElements(), is(equalTo(2L)));
+        assertThat(deIntruso.getTotalElements(), is(equalTo(0L)));
     }
 
     @Test
