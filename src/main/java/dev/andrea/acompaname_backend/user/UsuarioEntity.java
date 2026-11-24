@@ -1,5 +1,6 @@
 package dev.andrea.acompaname_backend.user;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import dev.andrea.acompaname_backend.role.RoleEntity;
@@ -12,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,6 +51,23 @@ public class UsuarioEntity {
     @Builder.Default
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean dosPasos = false;
+
+    // Cuándo se creó la cuenta. Se rellena sola al guardar un usuario nuevo.
+    // Los usuarios que ya existían antes de este campo la tienen vacía (no cuentan como nuevos)
+    private LocalDateTime fechaAlta;
+
+    @PrePersist
+    void asignarFechaAlta() {
+        if (fechaAlta == null) {
+            fechaAlta = LocalDateTime.now();
+        }
+    }
+
+    // Constructor sin fechaAlta (se rellena al guardar), para no romper el código que ya existía
+    public UsuarioEntity(Long id, String nombre, String email, String telefono, String password,
+            Set<RoleEntity> roles, boolean activo, boolean dosPasos) {
+        this(id, nombre, email, telefono, password, roles, activo, dosPasos, null);
+    }
 
     // Constructor sin dosPasos (queda desactivado), para no romper el código que ya existía
     public UsuarioEntity(Long id, String nombre, String email, String telefono, String password,
