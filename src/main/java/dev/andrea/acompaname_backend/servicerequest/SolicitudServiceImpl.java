@@ -9,11 +9,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.andrea.acompaname_backend.generics.PaginaDTOResponse;
 import dev.andrea.acompaname_backend.globals.GrupoEdad;
 import dev.andrea.acompaname_backend.globals.ListaDeTexto;
 import dev.andrea.acompaname_backend.payment.CalculoDeImporte;
@@ -39,6 +43,9 @@ import dev.andrea.acompaname_backend.user.exceptions.UsuarioExceptionNotFound;
 
 @Service
 public class SolicitudServiceImpl implements SolicitudService {
+
+    // Lo máximo que se devuelve en una página, pida lo que pida el cliente
+    static final int TAMANO_MAXIMO_PAGINA = 50;
 
     private final SolicitudRepository repository;
     private final UsuarioRepository usuarioRepository;
@@ -321,6 +328,18 @@ public class SolicitudServiceImpl implements SolicitudService {
         return repository.findByParticipante(emailLogueado()).stream()
                 .map(this::aDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PaginaDTOResponse<SolicitudDTOResponse> getMisSolicitudesPaginadas(int pagina, int tamano) {
+        // Nunca se devuelve todo de golpe: el tamaño tiene un máximo y una página negativa cuenta como la primera
+        int paginaSegura = Math.max(pagina, 0);
+        int tamanoSeguro = Math.min(Math.max(tamano, 1), TAMANO_MAXIMO_PAGINA);
+        // Las más recientes primero; con la misma fecha, las últimas creadas
+        Sort orden = Sort.by(Sort.Direction.DESC, "fechaCuidado").and(Sort.by(Sort.Direction.DESC, "id"));
+        Page<SolicitudEntity> resultado = repository.findByParticipante(emailLogueado(),
+                PageRequest.of(paginaSegura, tamanoSeguro, orden));
+        return PaginaDTOResponse.de(resultado, this::aDTO);
     }
 
     // Para la búsqueda de la familia: devuelve solo ids, sin datos de las solicitudes
