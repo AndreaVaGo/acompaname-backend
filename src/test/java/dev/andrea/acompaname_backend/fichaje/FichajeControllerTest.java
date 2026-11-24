@@ -23,6 +23,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import dev.andrea.acompaname_backend.fichaje.dtos.FichajeConfiguracionDTOResponse;
 import dev.andrea.acompaname_backend.fichaje.dtos.FichajeDTORequest;
 import dev.andrea.acompaname_backend.fichaje.dtos.FichajeDTOResponse;
 import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptionAccesoDenegado;
@@ -132,6 +133,17 @@ public class FichajeControllerTest {
 
         assertThat(response.getStatus(), is(equalTo(200)));
         assertThat(response.getContentAsString(), containsString("EN_EL_LUGAR"));
+    }
+
+    @Test
+    void testConfiguracionDiceSiHayQuePedirLaUbicacion() throws Exception {
+        when(service.configuracion()).thenReturn(new FichajeConfiguracionDTOResponse(true));
+
+        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/fichajes/configuracion")).andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(200)));
+        assertThat(response.getContentAsString(), containsString("\"verificarLugar\":true"));
     }
 
     @Test
