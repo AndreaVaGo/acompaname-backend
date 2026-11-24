@@ -3,6 +3,7 @@ package dev.andrea.acompaname_backend.caregiverprofile.mappers;
 import java.util.ArrayList;
 import java.util.List;
 
+import dev.andrea.acompaname_backend.caregiverprofile.FotoDescargable;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTORequest;
 import dev.andrea.acompaname_backend.caregiverprofile.dtos.PerfilCuidadorDTOResponse;
@@ -111,8 +112,35 @@ public class PerfilCuidadorMapper {
         return toDTO(entity, null, 0L);
     }
 
+    // Con la foto tal y como está guardada (para editar el propio perfil)
     public static PerfilCuidadorDTOResponse toDTO(PerfilCuidadorEntity entity, Double valoracionMedia,
             Long numValoraciones) {
+        return construir(entity, valoracionMedia, numValoraciones, entity.getFoto());
+    }
+
+    // Para las listas y los perfiles públicos: en vez de la imagen en Base64 (que puede pesar 300 KB por
+    // persona) lleva la dirección donde pedirla, y el navegador la guarda en caché (ACOM-158)
+    public static PerfilCuidadorDTOResponse toDTOPublico(PerfilCuidadorEntity entity, Double valoracionMedia,
+            Long numValoraciones) {
+        return construir(entity, valoracionMedia, numValoraciones, direccionDeLaFoto(entity));
+    }
+
+    // Dirección de la foto, relativa a la API: /cuidadores/5/foto?v=1a2b3c.
+    // La parte v cambia cuando cambia la foto, así el navegador no enseña una antigua desde su caché.
+    // Sin foto devuelve null; una foto que ya fuera una dirección externa se deja como estaba
+    public static String direccionDeLaFoto(PerfilCuidadorEntity entity) {
+        String foto = entity.getFoto();
+        if (foto == null || foto.isBlank()) {
+            return null;
+        }
+        if (!FotoDescargable.esDescargable(foto)) {
+            return foto;
+        }
+        return "/cuidadores/" + entity.getId() + "/foto?v=" + Integer.toHexString(foto.hashCode());
+    }
+
+    private static PerfilCuidadorDTOResponse construir(PerfilCuidadorEntity entity, Double valoracionMedia,
+            Long numValoraciones, String foto) {
         PerfilCuidadorDTOResponse dtoResponse = new PerfilCuidadorDTOResponse(
                 entity.getId(),
                 entity.getEspecialidad(),
@@ -123,7 +151,7 @@ public class PerfilCuidadorMapper {
                 entity.isDisponibleAhora(),
                 entity.getUsuario().getId(),
                 entity.getUsuario().getNombre(),
-                entity.getFoto(),
+                foto,
                 valoracionMedia,
                 numValoraciones,
                 tipoCuidadoOPorDefecto(entity.getTipoCuidado()),
