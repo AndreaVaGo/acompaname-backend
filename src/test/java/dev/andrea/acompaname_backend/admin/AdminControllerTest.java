@@ -65,7 +65,7 @@ public class AdminControllerTest {
 
     @Test
     void testAvisosDevuelveLosAvisosDelPanel() throws Exception {
-        AvisosDTOResponse avisos = new AvisosDTOResponse(3, 1, 2, 4, 5);
+        AvisosDTOResponse avisos = new AvisosDTOResponse(3, 1, 2, 4, 5, 6);
         when(service.avisos()).thenReturn(avisos);
         String json = mapper.writeValueAsString(avisos);
 
