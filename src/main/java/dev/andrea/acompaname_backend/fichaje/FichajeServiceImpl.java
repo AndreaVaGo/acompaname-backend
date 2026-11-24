@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.andrea.acompaname_backend.fichaje.dtos.FichajeConfiguracionDTOResponse;
 import dev.andrea.acompaname_backend.fichaje.dtos.FichajeDTORequest;
 import dev.andrea.acompaname_backend.fichaje.dtos.FichajeDTOResponse;
 import dev.andrea.acompaname_backend.geolocation.Coordenadas;
@@ -28,7 +29,9 @@ import dev.andrea.acompaname_backend.servicerequest.exceptions.SolicitudExceptio
 // Privacidad (RGPD, minimización de datos):
 // - La ubicación se pide UNA vez en cada fichaje, nunca de forma continua.
 // - Las coordenadas se usan solo para calcular la distancia y se descartan: no se guardan ni se muestran.
-// - Solo se consulta la dirección del servicio al geocodificador si hay ubicación que comparar.
+// - Solo se consulta la dirección del servicio al geocodificador (un servicio de internet de terceros)
+//   si hay ubicación que comparar Y la comprobación del lugar está activada (fichaje.verificar-lugar).
+//   Por defecto está APAGADA: la dirección, que puede ser un domicilio, no sale de la aplicación.
 @Service
 public class FichajeServiceImpl implements FichajeService {
 
@@ -39,13 +42,17 @@ public class FichajeServiceImpl implements FichajeService {
     private final Geocodificador geocodificador;
     // A cuántos metros de la dirección se considera que la persona cuidadora está "en el lugar"
     private final double radioMetros;
+    // Si está apagado, el fichaje solo guarda la hora: no se usa la ubicación ni se consulta la dirección
+    private final boolean verificarLugar;
 
     public FichajeServiceImpl(FichajeRepository repository, SolicitudRepository solicitudRepository,
-            Geocodificador geocodificador, @Value("${fichaje.radio-metros:300}") double radioMetros) {
+            Geocodificador geocodificador, @Value("${fichaje.radio-metros:300}") double radioMetros,
+            @Value("${fichaje.verificar-lugar:false}") boolean verificarLugar) {
         this.repository = repository;
         this.solicitudRepository = solicitudRepository;
         this.geocodificador = geocodificador;
         this.radioMetros = radioMetros;
+        this.verificarLugar = verificarLugar;
     }
 
     private String emailLogueado() {
@@ -113,6 +120,11 @@ public class FichajeServiceImpl implements FichajeService {
         return respuesta;
     }
 
+    @Override
+    public FichajeConfiguracionDTOResponse configuracion() {
+        return new FichajeConfiguracionDTOResponse(verificarLugar);
+    }
+
     private FichajeDTOResponse guardar(SolicitudEntity solicitud, TipoFichaje tipo, FichajeDTORequest ubicacion) {
         FichajeEntity fichaje = FichajeEntity.builder()
                 .solicitud(solicitud)
@@ -125,7 +137,8 @@ public class FichajeServiceImpl implements FichajeService {
 
     // Compara el punto que manda el navegador con la dirección del servicio. Las coordenadas no se guardan
     private ResultadoUbicacion comprobarUbicacion(SolicitudEntity solicitud, FichajeDTORequest ubicacion) {
-        if (ubicacion == null || !ubicacion.tieneUbicacion()) {
+        // Con la comprobación apagada se ignora la ubicación aunque llegue: ni se usa ni se consulta nada
+        if (!verificarLugar || ubicacion == null || !ubicacion.tieneUbicacion()) {
             return ResultadoUbicacion.SIN_UBICACION;
         }
         String direccion = solicitud.getDireccion();
