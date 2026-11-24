@@ -1,7 +1,10 @@
 package dev.andrea.acompaname_backend.caregiverprofile;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import org.springframework.http.CacheControl;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +37,17 @@ public class PerfilCuidadorController {
     @GetMapping("{id}")
     public PerfilCuidadorDTOResponse getById(@PathVariable Long id) {
         return service.getById(id);
+    }
+
+    // La foto como imagen. Es pública (como el perfil) y el navegador la guarda un día en caché;
+    // la dirección lleva un ?v= que cambia con la foto, así que al cambiarla se pide de nuevo
+    @GetMapping("{id}/foto")
+    public ResponseEntity<byte[]> getFoto(@PathVariable Long id) {
+        FotoDescargable foto = service.getFoto(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(foto.tipo()))
+                .cacheControl(CacheControl.maxAge(1, TimeUnit.DAYS).cachePublic())
+                .body(foto.bytes());
     }
 
     @PostMapping("")
