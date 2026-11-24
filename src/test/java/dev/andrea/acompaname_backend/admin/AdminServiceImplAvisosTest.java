@@ -79,6 +79,7 @@ public class AdminServiceImplAvisosTest {
         assertThat(resultado.pagosSinCobrarMasDeUnaSemana(), is(equalTo(0L)));
         assertThat(resultado.verificacionesPendientes(), is(equalTo(0L)));
         assertThat(resultado.sugerenciasUltimaSemana(), is(equalTo(0L)));
+        assertThat(resultado.usuariosNuevosUltimaSemana(), is(equalTo(0L)));
     }
 
     @Test
@@ -123,6 +124,26 @@ public class AdminServiceImplAvisosTest {
         service.avisos();
 
         verify(sugerenciaRepository).countByFechaAfter(desde.capture());
+        LocalDateTime esperado = LocalDateTime.now().minusDays(7);
+        assertThat(Duration.between(desde.getValue(), esperado).abs().toMinutes() < 1, is(true));
+    }
+
+    @Test
+    void testLosAvisosCuentanLosUsuariosNuevosDeLaUltimaSemana() {
+        when(usuarioRepository.countByFechaAltaAfter(any(LocalDateTime.class))).thenReturn(6L);
+
+        AvisosDTOResponse resultado = service.avisos();
+
+        assertThat(resultado.usuariosNuevosUltimaSemana(), is(equalTo(6L)));
+    }
+
+    @Test
+    void testLosUsuariosNuevosSeCuentanDesdeHaceSieteDias() {
+        ArgumentCaptor<LocalDateTime> desde = ArgumentCaptor.forClass(LocalDateTime.class);
+
+        service.avisos();
+
+        verify(usuarioRepository).countByFechaAltaAfter(desde.capture());
         LocalDateTime esperado = LocalDateTime.now().minusDays(7);
         assertThat(Duration.between(desde.getValue(), esperado).abs().toMinutes() < 1, is(true));
     }
