@@ -3,6 +3,8 @@ package dev.andrea.acompaname_backend.servicerequest;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +16,15 @@ public interface SolicitudRepository extends JpaRepository<SolicitudEntity, Long
             + "WHERE s.familia.email = :email "
             + "OR s.cuidador.usuario.email = :email")
     List<SolicitudEntity> findByParticipante(@Param("email") String email);
+
+    // Lo mismo, pero por páginas: la base de datos ordena y devuelve solo la página pedida (ACOM-234)
+    @Query(value = "SELECT s FROM SolicitudEntity s "
+            + "WHERE s.familia.email = :email "
+            + "OR s.cuidador.usuario.email = :email",
+            countQuery = "SELECT COUNT(s) FROM SolicitudEntity s "
+                    + "WHERE s.familia.email = :email "
+                    + "OR s.cuidador.usuario.email = :email")
+    Page<SolicitudEntity> findByParticipante(@Param("email") String email, Pageable pageable);
 
     // Solicitudes en ese estado cuyos días se cruzan con el periodo (de cualquier cuidador).
     // Si la solicitud no tiene fecha de fin, cuenta como un solo día (COALESCE).
