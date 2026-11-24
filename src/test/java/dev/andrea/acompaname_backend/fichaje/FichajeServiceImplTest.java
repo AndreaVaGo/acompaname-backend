@@ -60,7 +60,7 @@ public class FichajeServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        service = new FichajeServiceImpl(repository, solicitudRepository, geocodificador, 300);
+        service = new FichajeServiceImpl(repository, solicitudRepository, geocodificador, 300, true);
     }
 
     @AfterEach
@@ -137,7 +137,7 @@ public class FichajeServiceImplTest {
     @Test
     void testElRadioSePuedeConfigurar() {
         // Con un radio de 50 metros, un punto a unos 110 metros ya está fuera
-        service = new FichajeServiceImpl(repository, solicitudRepository, geocodificador, 50);
+        service = new FichajeServiceImpl(repository, solicitudRepository, geocodificador, 50, true);
         hayUnaSolicitudAceptadaDeHoy();
         elRepositorioGuardaLoQueRecibe();
         when(geocodificador.buscar("Calle Uría 1, Oviedo")).thenReturn(Optional.of(LUGAR));
@@ -157,6 +157,26 @@ public class FichajeServiceImplTest {
         assertThat(resultado.ubicacion(), is(equalTo(ResultadoUbicacion.SIN_UBICACION)));
         // La dirección privada solo sale al geocodificador si hay una ubicación que comparar
         verifyNoInteractions(geocodificador);
+    }
+
+    @Test
+    void testConLaComprobacionApagadaNoSeUsaLaUbicacionNiSeConsultaLaDireccion() {
+        service = new FichajeServiceImpl(repository, solicitudRepository, geocodificador, 300, false);
+        hayUnaSolicitudAceptadaDeHoy();
+        elRepositorioGuardaLoQueRecibe();
+
+        // Llega una ubicación cercana, pero se ignora: el fichaje solo guarda la hora
+        FichajeDTOResponse resultado = service.empezar(1L, CERCA);
+
+        assertThat(resultado.ubicacion(), is(equalTo(ResultadoUbicacion.SIN_UBICACION)));
+        verifyNoInteractions(geocodificador);
+    }
+
+    @Test
+    void testLaConfiguracionDiceSiSeComprueba() {
+        assertThat(service.configuracion().verificarLugar(), is(true));
+        assertThat(new FichajeServiceImpl(repository, solicitudRepository, geocodificador, 300, false)
+                .configuracion().verificarLugar(), is(false));
     }
 
     @Test
