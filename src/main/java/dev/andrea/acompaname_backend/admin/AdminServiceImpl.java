@@ -157,8 +157,11 @@ public class AdminServiceImpl implements AdminService {
         long verificaciones = verificacionRepository.countByEstado(EstadoVerificacion.PENDIENTE);
         // Sugerencias recibidas en los últimos 7 días
         long sugerencias = sugerenciaRepository.countByFechaAfter(LocalDateTime.now().minusDays(7));
+        // Cuentas creadas en los últimos 7 días
+        long usuariosNuevos = usuarioRepository.countByFechaAltaAfter(LocalDateTime.now().minusDays(7));
 
-        return new AvisosDTOResponse(proximas, vencidas, pagosSinCobrar, verificaciones, sugerencias);
+        return new AvisosDTOResponse(proximas, vencidas, pagosSinCobrar, verificaciones, sugerencias,
+                usuariosNuevos);
     }
 
     @Override
