@@ -6,6 +6,7 @@ public record AvisosDTOResponse(
         long pendientesVencidas,
         long pagosSinCobrarMasDeUnaSemana,
         long verificacionesPendientes,
-        long sugerenciasUltimaSemana) {
+        long sugerenciasUltimaSemana,
+        long usuariosNuevosUltimaSemana) {
 
 }
