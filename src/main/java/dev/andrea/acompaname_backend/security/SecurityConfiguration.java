@@ -55,6 +55,8 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores/mi-perfil").authenticated()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores").permitAll()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores/*").permitAll()
+                        // La foto del perfil como imagen, para las listas y los perfiles (público, como el perfil)
+                        .requestMatchers(HttpMethod.GET, "/" + endpoint + "/cuidadores/*/foto").permitAll()
                         // Las valoraciones de un cuidador se ven sin iniciar sesión (solo puntuación, comentario y fecha)
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/valoraciones/cuidador/*").permitAll()
                         // Para filtrar la búsqueda por fechas sin iniciar sesión: solo devuelve ids de cuidadores
