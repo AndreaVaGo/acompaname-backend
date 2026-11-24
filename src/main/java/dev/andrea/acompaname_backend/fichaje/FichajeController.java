@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.andrea.acompaname_backend.fichaje.dtos.FichajeConfiguracionDTOResponse;
 import dev.andrea.acompaname_backend.fichaje.dtos.FichajeDTORequest;
 import dev.andrea.acompaname_backend.fichaje.dtos.FichajeDTOResponse;
 import jakarta.validation.Valid;
@@ -35,6 +36,12 @@ public class FichajeController {
     public ResponseEntity<FichajeDTOResponse> fin(@PathVariable Long solicitudId,
             @Valid @RequestBody(required = false) FichajeDTORequest dto) {
         return ResponseEntity.status(201).body(service.terminar(solicitudId, ubicacionDe(dto)));
+    }
+
+    // Para que el navegador sepa si tiene que pedir la ubicación antes de fichar
+    @GetMapping("/configuracion")
+    public ResponseEntity<FichajeConfiguracionDTOResponse> configuracion() {
+        return ResponseEntity.ok(service.configuracion());
     }
 
     @GetMapping("/{solicitudId}")
