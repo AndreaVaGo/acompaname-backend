@@ -1,0 +1,104 @@
+# Despliegue de PRODUCCIÓN de Acompáñame: MySQL + back (Spring Boot) + Caddy (HTTPS).
+# Guía completa: docs/deployment.md
+#
+# Uso (en el servidor):
+#   cp .env.prod.example .env      # y rellenar TODOS los valores
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Solo Caddy (puertos 80 y 443) es accesible desde internet. MySQL y el back viven en una red
+# interna de Docker: el puerto 3306 NO se publica.
+name: acompaname-prod
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Define DB_ROOT_PASSWORD en .env}
+      MYSQL_DATABASE: ${DB_NAME:-acompaname_db}
+      MYSQL_USER: ${DB_USER:?Define DB_USER en .env}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en .env}
+      TZ: Europe/Madrid
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Solo la PRIMERA vez (con el volumen vacío), MySQL ejecuta este script y crea las tablas.
+      # Después no se vuelve a ejecutar. Los cambios de esquema se aplican a mano (docs/sql/)
+      - ./docs/sql/schema-completo.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      # 127.0.0.1 (por red) y no "localhost" (por socket): durante la inicialización MySQL solo
+      # escucha por socket, y así no se da por listo antes de haber creado las tablas
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    logging: &logs
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+    networks: [interna]
+
+  backend:
+    build: .
+    image: acompaname-backend:latest
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    # Sin límite, la JVM calcularía su memoria sobre TODA la del servidor y dejaría sin ella a MySQL
+    mem_limit: ${BACKEND_MEM_LIMIT:-768m}
+    environment:
+      # SPRING_PROFILES_ACTIVE=prod ya viene en la imagen. Sin JPA_DDL_AUTO: queda en "validate"
+      DB_HOST: mysql
+      DB_NAME: ${DB_NAME:-acompaname_db}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET en .env}
+      CORS_ORIGINS: ${CORS_ORIGINS:?Define CORS_ORIGINS en .env}
+      FRONTEND_URL: ${FRONTEND_URL:?Define FRONTEND_URL en .env}
+      MAIL_FROM: ${MAIL_FROM:?Define MAIL_FROM en .env}
+      MAIL_HOST: ${MAIL_HOST:?Define MAIL_HOST en .env}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USER: ${MAIL_USER:?Define MAIL_USER en .env}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:?Define MAIL_PASSWORD en .env}
+      CAPTCHA_ENABLED: ${CAPTCHA_ENABLED:-true}
+      CAPTCHA_SECRET: ${CAPTCHA_SECRET:-}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      # Verificar el lugar del fichaje manda la dirección del servicio a un tercero (Nominatim):
+      # apagado hasta que la política de privacidad lo explique y se decida activarlo
+      FICHAJE_VERIFICAR_LUGAR: ${FICHAJE_VERIFICAR_LUGAR:-false}
+    # Sin "ports": solo Caddy puede hablar con el back, por la red interna
+    expose:
+      - "8080"
+    logging: *logs
+    networks: [interna]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+      - "${HTTPS_PORT:-443}:443/udp"
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?Define API_DOMAIN en .env}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Aquí guarda Caddy los certificados HTTPS: si se pierde, tiene que pedirlos de nuevo
+      - caddy_data:/data
+      - caddy_config:/config
+    logging: *logs
+    networks: [interna]
+
+volumes:
+  mysql_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  interna:
