@@ -12,4 +12,7 @@ public interface SugerenciaRepository extends JpaRepository<SugerenciaEntity, Lo
 
     // Cuántas se han enviado después de esa fecha
     long countByFechaAfter(LocalDateTime fecha);
+
+    // Borra las sugerencias de una persona (se llama desde un método @Transactional)
+    void deleteByUsuarioId(Long usuarioId);
 }
