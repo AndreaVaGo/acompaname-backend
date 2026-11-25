@@ -18,4 +18,7 @@ public interface VerificacionRepository extends JpaRepository<VerificacionEntity
 
     // Cuántas están esperando que el administrador las revise
     long countByEstado(EstadoVerificacion estado);
+
+    // Borra todas las verificaciones de una persona cuidadora (se llama desde un método @Transactional)
+    void deleteByCuidadorId(Long cuidadorId);
 }
