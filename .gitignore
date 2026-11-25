@@ -37,3 +37,11 @@ build/
 
 ### Resultados de las pruebas de carga ###
 load-tests/resultados/
+
+### Producción ###
+# Variables de entorno de cualquier tipo (.env.prod, .env.prod-prueba...), menos los ejemplos
+.env.*
+!.env.example
+!.env.prod.example
+# Copias de seguridad de la base de datos (llevan datos personales)
+backups/
