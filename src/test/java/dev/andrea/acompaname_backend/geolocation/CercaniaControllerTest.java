@@ -4,6 +4,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -20,6 +24,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import dev.andrea.acompaname_backend.geolocation.dtos.CercaniaDTOResponse;
 import dev.andrea.acompaname_backend.geolocation.dtos.DistanciaCuidadorDTOResponse;
+import dev.andrea.acompaname_backend.security.DemasiadasPeticionesException;
+import dev.andrea.acompaname_backend.security.LimitadorDePeticiones;
 
 @WebMvcTest(controllers = CercaniaController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -29,6 +35,8 @@ public class CercaniaControllerTest {
     private MockMvc mockMvc;
     @MockitoBean
     private CercaniaService service;
+    @MockitoBean
+    private LimitadorDePeticiones limitador;
 
     @Test
     void testDevuelveLasDistanciasDelLugarBuscado() throws Exception {
@@ -64,5 +72,27 @@ public class CercaniaControllerTest {
 
         assertThat(response.getStatus(), is(equalTo(200)));
         verify(service).buscarCerca("");
+    }
+
+    @Test
+    void testCadaBusquedaCuentaParaElLimiteDeSuDireccionIp() throws Exception {
+        when(service.buscarCerca("Oviedo")).thenReturn(new CercaniaDTOResponse(false, List.of()));
+
+        mockMvc.perform(get("/api/v1/cuidadores/cerca?lugar=Oviedo")).andReturn();
+
+        // 127.0.0.1 es la dirección que MockMvc pone por defecto; 20 es el máximo por defecto
+        verify(limitador).comprobar("cerca:127.0.0.1", 20);
+    }
+
+    @Test
+    void testSiSeSuperaElLimiteDa429YNoSeBuscaNada() throws Exception {
+        doThrow(new DemasiadasPeticionesException("Demasiados intentos. Espera un minuto y vuelve a intentarlo."))
+                .when(limitador).comprobar(anyString(), anyInt());
+
+        MockHttpServletResponse response = mockMvc.perform(get("/api/v1/cuidadores/cerca?lugar=Oviedo"))
+                .andReturn().getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(429)));
+        verify(service, never()).buscarCerca(anyString());
     }
 }
