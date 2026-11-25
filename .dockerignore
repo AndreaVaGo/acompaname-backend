@@ -1,0 +1,20 @@
+# Lo que NO hace falta (ni conviene) mandar a Docker al construir la imagen
+target/
+.git/
+.github/
+.idea/
+.vscode/
+.mvn/wrapper/maven-wrapper.jar
+docs/
+load-tests/
+node_modules/
+package-lock.json
+HELP.md
+README.md
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Secretos: nunca dentro de una imagen
+.env
+.env.*
