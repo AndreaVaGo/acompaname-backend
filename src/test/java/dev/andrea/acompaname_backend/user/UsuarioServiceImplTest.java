@@ -43,10 +43,13 @@ public class UsuarioServiceImplTest {
     private PerfilCuidadorRepository perfilCuidadorRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private AnonimizadorDeCuenta anonimizador;
 
     @BeforeEach
     void setUp() {
-        service = new UsuarioServiceImpl(repository, roleRepository, perfilCuidadorRepository, passwordEncoder);
+        service = new UsuarioServiceImpl(repository, roleRepository, perfilCuidadorRepository, passwordEncoder,
+                anonimizador);
     }
 
     private RoleEntity crearRolMock() {
@@ -110,7 +113,9 @@ public class UsuarioServiceImplTest {
         when(repository.findById(1L)).thenReturn(Optional.of(usuarioMock));
 
         service.deleteById(1L);
-        Mockito.verify(repository).deleteById(1L);
+        // No se borra la fila: se anonimiza, para no romper el historial de la otra parte
+        Mockito.verify(anonimizador).anonimizar(usuarioMock);
+        Mockito.verify(repository, Mockito.never()).deleteById(Mockito.anyLong());
     }
 
     @Test
