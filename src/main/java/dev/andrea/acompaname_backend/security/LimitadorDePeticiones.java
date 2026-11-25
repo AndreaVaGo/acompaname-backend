@@ -29,9 +29,15 @@ public class LimitadorDePeticiones {
         this.segundosDeVentana = segundosDeVentana;
     }
 
-    // Si la clave ya ha llegado al máximo en el último tiempo, lanza el error.
+    // Si la clave ya ha llegado al máximo general en el último tiempo, lanza el error.
+    public void comprobar(String clave) {
+        comprobar(clave, maximoDePeticiones);
+    }
+
+    // Igual, pero con un máximo propio para rutas que necesitan uno distinto al general
+    // (por ejemplo, la búsqueda por cercanía). La ventana de tiempo es la misma.
     // synchronized: varias personas pueden llamar a la vez y la lista no se puede tocar a la vez
-    public synchronized void comprobar(String clave) {
+    public synchronized void comprobar(String clave, int maximo) {
         Instant ahora = Instant.now();
         Instant limite = ahora.minusSeconds(segundosDeVentana);
 
@@ -50,7 +56,7 @@ public class LimitadorDePeticiones {
             }
         }
 
-        if (recientes.size() >= maximoDePeticiones) {
+        if (recientes.size() >= maximo) {
             peticiones.put(clave, recientes);
             throw new DemasiadasPeticionesException(
                     "Demasiados intentos. Espera un minuto y vuelve a intentarlo.");
