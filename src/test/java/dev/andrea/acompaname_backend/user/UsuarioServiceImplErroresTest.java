@@ -49,6 +49,8 @@ public class UsuarioServiceImplErroresTest {
     private PerfilCuidadorRepository perfilCuidadorRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private AnonimizadorDeCuenta anonimizador;
 
     private UsuarioServiceImpl service;
     private SecurityContext contextoOriginal;
@@ -58,7 +60,8 @@ public class UsuarioServiceImplErroresTest {
         // Uso un contexto de seguridad vacío para no afectar a los otros tests
         contextoOriginal = SecurityContextHolder.getContext();
         SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
-        service = new UsuarioServiceImpl(repository, roleRepository, perfilCuidadorRepository, passwordEncoder);
+        service = new UsuarioServiceImpl(repository, roleRepository, perfilCuidadorRepository, passwordEncoder,
+                anonimizador);
     }
 
     @AfterEach
@@ -186,6 +189,7 @@ public class UsuarioServiceImplErroresTest {
 
         assertThrows(UsuarioExceptionAccesoDenegado.class, () -> service.deleteById(1L));
         verify(repository, never()).deleteById(Mockito.anyLong());
+        verify(anonimizador, never()).anonimizar(Mockito.any(UsuarioEntity.class));
     }
 
     @Test
