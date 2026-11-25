@@ -1,0 +1,18 @@
+# Caddy: pone HTTPS (certificado automático de Let's Encrypt) y reenvía la API al back.
+# {$API_DOMAIN} sale del .env:
+#   - un dominio (api.midominio.es): HTTPS automático. El dominio tiene que apuntar a la IP del servidor
+#   - ":80": sin HTTPS, solo para probar en local o por IP
+{$API_DOMAIN} {
+	encode zstd gzip
+
+	# Solo se publica la API. Lo demás, incluida la salud (/actuator), NO sale a internet
+	handle /api/* {
+		# Caddy pone la cabecera X-Forwarded-For con la IP real y descarta la que mande quien llama,
+		# así nadie puede falsear su IP para saltarse el límite de intentos del back
+		reverse_proxy backend:8080
+	}
+
+	handle {
+		respond "No encontrado" 404
+	}
+}
