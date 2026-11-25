@@ -32,13 +32,16 @@ public class UsuarioServiceImpl implements UsuarioService {
     private final RoleRepository roleRepository;
     private final PerfilCuidadorRepository perfilCuidadorRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AnonimizadorDeCuenta anonimizador;
 
     public UsuarioServiceImpl(UsuarioRepository repository, RoleRepository roleRepository,
-            PerfilCuidadorRepository perfilCuidadorRepository, PasswordEncoder passwordEncoder) {
+            PerfilCuidadorRepository perfilCuidadorRepository, PasswordEncoder passwordEncoder,
+            AnonimizadorDeCuenta anonimizador) {
         this.repository = repository;
         this.roleRepository = roleRepository;
         this.perfilCuidadorRepository = perfilCuidadorRepository;
         this.passwordEncoder = passwordEncoder;
+        this.anonimizador = anonimizador;
     }
 
     private UsuarioEntity findEntityById(Long id) {
@@ -116,7 +119,8 @@ public class UsuarioServiceImpl implements UsuarioService {
     public void deleteById(Long id) {
         UsuarioEntity usuario = findEntityById(id);
         verificarPropietario(usuario);
-        repository.deleteById(id);
+        // No se borra la fila: la otra parte de sus solicitudes y pagos conserva su historial
+        anonimizador.anonimizar(usuario);
     }
 
     @Transactional
