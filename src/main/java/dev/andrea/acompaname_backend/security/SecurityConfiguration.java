@@ -42,6 +42,9 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/usuarios").permitAll()
                         .requestMatchers(HttpMethod.GET, "/" + endpoint + "/roles").permitAll()
+                        // Comprobación de salud para el hosting y Docker: solo dice si la aplicación está viva (UP/DOWN),
+                        // sin detalles. Es lo único de actuator que se expone (ver management.* en application.properties)
+                        .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/**").permitAll()
                         // El login es público: aquí es donde la persona consigue su token
                         .requestMatchers(HttpMethod.POST, "/" + endpoint + "/login").permitAll()
                         // Segundo paso del login: aquí todavía no hay token, la persona llega con el código del correo
