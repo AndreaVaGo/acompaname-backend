@@ -16,4 +16,7 @@ public interface BloqueOcupadoRepository extends JpaRepository<BloqueOcupadoEnti
 
     // Los bloques de una persona cuidadora entre dos fechas (incluidas). Se usa al aceptar una solicitud
     List<BloqueOcupadoEntity> findByCuidadorIdAndFechaBetween(Long cuidadorId, LocalDate desde, LocalDate hasta);
+
+    // Borra todos los bloques de una persona cuidadora (se llama desde un método @Transactional)
+    void deleteByCuidadorId(Long cuidadorId);
 }
