@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -71,7 +72,10 @@ public class VerificadorTurnstile implements VerificadorCaptcha {
 
         RespuestaTurnstile respuesta;
         try {
-            respuesta = cliente.post().uri(url).body(datos).retrieve().body(RespuestaTurnstile.class);
+            // Formulario clásico (secret=...&response=...). Se indica a mano: sin esto, según la versión
+            // de Spring, el cuerpo se manda como multipart en vez de como formulario
+            respuesta = cliente.post().uri(url).contentType(MediaType.APPLICATION_FORM_URLENCODED).body(datos)
+                    .retrieve().body(RespuestaTurnstile.class);
         } catch (Exception e) {
             // Sin internet, Cloudflare caído...: no se deja pasar
             log.warn("No se pudo comprobar el CAPTCHA con Turnstile", e);
