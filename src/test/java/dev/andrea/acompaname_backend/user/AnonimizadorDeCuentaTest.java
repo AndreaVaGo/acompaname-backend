@@ -28,6 +28,7 @@ import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.passwordreset.PasswordResetTokenRepository;
 import dev.andrea.acompaname_backend.schedule.BloqueOcupadoRepository;
+import dev.andrea.acompaname_backend.schedule.SuscripcionCalendarioRepository;
 import dev.andrea.acompaname_backend.suggestion.SugerenciaRepository;
 import dev.andrea.acompaname_backend.verificacion.VerificacionRepository;
 
@@ -51,6 +52,8 @@ public class AnonimizadorDeCuentaTest {
     @Mock
     private BloqueOcupadoRepository bloqueOcupadoRepository;
     @Mock
+    private SuscripcionCalendarioRepository suscripcionCalendarioRepository;
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     private AnonimizadorDeCuenta anonimizador;
@@ -59,7 +62,7 @@ public class AnonimizadorDeCuentaTest {
     void setUp() {
         anonimizador = new AnonimizadorDeCuenta(usuarioRepository, perfilCuidadorRepository, codigoLoginRepository,
                 tokenRepository, sugerenciaRepository, verificacionRepository, bloqueOcupadoRepository,
-                passwordEncoder);
+                suscripcionCalendarioRepository, passwordEncoder);
     }
 
     private UsuarioEntity ana() {
@@ -171,6 +174,7 @@ public class AnonimizadorDeCuentaTest {
 
         verify(verificacionRepository).deleteByCuidadorId(3L);
         verify(bloqueOcupadoRepository).deleteByCuidadorId(3L);
+        verify(suscripcionCalendarioRepository).deleteByCuidadorId(3L);
     }
 
     @Test
