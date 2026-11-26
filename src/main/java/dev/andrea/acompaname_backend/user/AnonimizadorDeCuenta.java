@@ -11,6 +11,7 @@ import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorEntity;
 import dev.andrea.acompaname_backend.caregiverprofile.PerfilCuidadorRepository;
 import dev.andrea.acompaname_backend.passwordreset.PasswordResetTokenRepository;
 import dev.andrea.acompaname_backend.schedule.BloqueOcupadoRepository;
+import dev.andrea.acompaname_backend.schedule.SuscripcionCalendarioRepository;
 import dev.andrea.acompaname_backend.suggestion.SugerenciaRepository;
 import dev.andrea.acompaname_backend.verificacion.VerificacionRepository;
 
@@ -31,13 +32,14 @@ public class AnonimizadorDeCuenta {
     private final SugerenciaRepository sugerenciaRepository;
     private final VerificacionRepository verificacionRepository;
     private final BloqueOcupadoRepository bloqueOcupadoRepository;
+    private final SuscripcionCalendarioRepository suscripcionCalendarioRepository;
     private final PasswordEncoder passwordEncoder;
 
     public AnonimizadorDeCuenta(UsuarioRepository usuarioRepository,
             PerfilCuidadorRepository perfilCuidadorRepository, CodigoLoginRepository codigoLoginRepository,
             PasswordResetTokenRepository tokenRepository, SugerenciaRepository sugerenciaRepository,
             VerificacionRepository verificacionRepository, BloqueOcupadoRepository bloqueOcupadoRepository,
-            PasswordEncoder passwordEncoder) {
+            SuscripcionCalendarioRepository suscripcionCalendarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.perfilCuidadorRepository = perfilCuidadorRepository;
         this.codigoLoginRepository = codigoLoginRepository;
@@ -45,6 +47,7 @@ public class AnonimizadorDeCuenta {
         this.sugerenciaRepository = sugerenciaRepository;
         this.verificacionRepository = verificacionRepository;
         this.bloqueOcupadoRepository = bloqueOcupadoRepository;
+        this.suscripcionCalendarioRepository = suscripcionCalendarioRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -72,6 +75,8 @@ public class AnonimizadorDeCuenta {
     private void vaciarPerfil(PerfilCuidadorEntity perfil) {
         verificacionRepository.deleteByCuidadorId(perfil.getId());
         bloqueOcupadoRepository.deleteByCuidadorId(perfil.getId());
+        // La dirección secreta de su calendario externo también se borra
+        suscripcionCalendarioRepository.deleteByCuidadorId(perfil.getId());
 
         perfil.setFoto(null);
         perfil.setBio("");
