@@ -37,7 +37,9 @@ public class PerfilCuidadorEntity {
     private boolean tieneVehiculo;
     private boolean disponibleAhora;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    // Carga siempre el usuario (nombre, email...): casi todo el código lo necesita y, sin
+    // open-in-view, leerlo "más tarde" fuera de una transacción daría error
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "usuario_id", referencedColumnName = "id")
     private UsuarioEntity usuario;
 
