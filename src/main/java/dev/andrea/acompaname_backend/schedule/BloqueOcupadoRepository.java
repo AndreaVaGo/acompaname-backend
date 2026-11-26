@@ -19,4 +19,10 @@ public interface BloqueOcupadoRepository extends JpaRepository<BloqueOcupadoEnti
 
     // Borra todos los bloques de una persona cuidadora (se llama desde un método @Transactional)
     void deleteByCuidadorId(Long cuidadorId);
+
+    // Los bloques sincronizados de un calendario externo que todavía no han pasado (se vuelven a crear al sincronizar)
+    void deleteByCuidadorIdAndMotivoAndFechaGreaterThanEqual(Long cuidadorId, String motivo, LocalDate desde);
+
+    // Todos los bloques con ese motivo (al desvincular el calendario)
+    void deleteByCuidadorIdAndMotivo(Long cuidadorId, String motivo);
 }
