@@ -168,6 +168,17 @@ CREATE TABLE `sugerencias` (
   CONSTRAINT `FKjr3r2tpm7t2u1t1vdntjoqsjw` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE `suscripciones_calendario` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `cuidador_id` bigint NOT NULL,
+  `ultima_sincronizacion` datetime(6) DEFAULT NULL,
+  `ultimo_error` varchar(255) DEFAULT NULL,
+  `url` varchar(500) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_suscripciones_calendario_cuidador` (`cuidador_id`),
+  CONSTRAINT `FK_suscripciones_calendario_cuidador` FOREIGN KEY (`cuidador_id`) REFERENCES `perfilcuidadores` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE `tokens_recuperacion_password` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `expira_en` datetime(6) NOT NULL,
