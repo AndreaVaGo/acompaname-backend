@@ -183,12 +183,13 @@ CREATE TABLE `usuarios` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `activo` tinyint(1) NOT NULL DEFAULT '1',
   `dos_pasos` tinyint(1) NOT NULL DEFAULT '0',
-  `email` varchar(255) DEFAULT NULL,
+  `email` varchar(255) NOT NULL,
   `fecha_alta` datetime(6) DEFAULT NULL,
   `nombre` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
   `telefono` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_usuarios_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `valoraciones` (
