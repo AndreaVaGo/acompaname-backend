@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.client.ExpectedCount.never;
 import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
@@ -90,6 +91,7 @@ public class VerificadorTurnstileTest {
     @Test
     void testMandaLaClaveSecretaElTokenYLaIpPorPost() {
         servidor.expect(once(), method(HttpMethod.POST))
+                .andExpect(header("Content-Type", containsString("application/x-www-form-urlencoded")))
                 .andExpect(content().string(containsString("secret=clave-secreta")))
                 .andExpect(content().string(containsString("response=mi-token")))
                 .andExpect(content().string(containsString("remoteip=1.2.3.4")))
