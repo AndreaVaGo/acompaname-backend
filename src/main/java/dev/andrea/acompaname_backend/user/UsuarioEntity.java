@@ -33,6 +33,8 @@ public class UsuarioEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nombre;
+    // Único también en la base de datos: la comprobación del servicio no frena dos registros simultáneos
+    @Column(nullable = false, unique = true)
     private String email;
     private String telefono;
     private String password;
