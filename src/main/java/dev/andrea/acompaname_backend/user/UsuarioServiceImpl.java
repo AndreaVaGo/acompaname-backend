@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -94,7 +95,14 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
         UsuarioEntity usuarioToSave = UsuarioMapper.toEntity(dto, roles);
         usuarioToSave.setPassword(passwordEncoder.encode(dto.password()));
-        UsuarioEntity usuarioSaved = repository.save(usuarioToSave);
+        UsuarioEntity usuarioSaved;
+        try {
+            usuarioSaved = repository.save(usuarioToSave);
+        } catch (DataIntegrityViolationException e) {
+            // Dos registros a la vez con el mismo email: el segundo lo frena la base de datos
+            throw new UsuarioExceptionEmailDuplicado(
+                    "No ha sido posible completar el registro con los datos proporcionados.");
+        }
 
         boolean esCuidador = roles.stream()
                 .anyMatch(role -> role.getName().equals("CUIDADOR"));
@@ -138,7 +146,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuarioExistente.setNombre(dto.nombre());
         usuarioExistente.setEmail(dto.email());
         usuarioExistente.setTelefono(dto.telefono());
-        UsuarioEntity usuarioActualizado = repository.save(usuarioExistente);
+        UsuarioEntity usuarioActualizado = guardarYComprobarEmail(usuarioExistente);
         return UsuarioMapper.toDTO(usuarioActualizado);
     }
 
@@ -170,6 +178,18 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setNombre(dto.nombre());
         usuario.setEmail(dto.email());
         usuario.setTelefono(dto.telefono());
-        return UsuarioMapper.toDTO(repository.save(usuario));
+        return UsuarioMapper.toDTO(guardarYComprobarEmail(usuario));
+    }
+
+    // flush() fuerza el UPDATE ahora (y no al final de la transacción) para poder traducir el error
+    private UsuarioEntity guardarYComprobarEmail(UsuarioEntity usuario) {
+        try {
+            UsuarioEntity guardado = repository.save(usuario);
+            repository.flush();
+            return guardado;
+        } catch (DataIntegrityViolationException e) {
+            throw new UsuarioExceptionEmailDuplicado(
+                    "No ha sido posible completar la actualización con los datos proporcionados.");
+        }
     }
 }
