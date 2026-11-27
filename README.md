@@ -50,7 +50,7 @@ Final project of the Full Stack Web Development bootcamp (850 h) at **Factoría 
 **Caregivers** can:
 - 🧑‍⚕️ Create a professional profile (specialty, experience, hourly rate, extra-person surcharge, age groups they care for, availability and photo)
 - 📥 Receive requests and accept, reject or complete them
-- 🗓️ Keep a calendar of busy time slots (one by one, repeated, or imported from an `.ics` file) so families only see them when they are free
+- 🗓️ Keep a calendar of busy time slots (one by one, repeated, imported from an `.ics` file, or kept in sync with a Google, Outlook or iCloud calendar) so families only see them when they are free
 
 **Administrators** can:
 - 📊 See activity statistics (families, caregivers, requests, income, average rating), alerts and payment analytics
@@ -172,6 +172,8 @@ cp .env.example .env
 | `FRONTEND_URL` | `http://localhost:5173` | Used to build the link in the password-reset email |
 | `PASSWORD_RESET_MINUTES` | `60` | Validity of the password-reset link |
 | `PAGOS_RECARGO_PERSONA_EXTRA` | `0.25` | Default surcharge per extra person (25 %) |
+| `CALENDARIO_HOSTS_PERMITIDOS` | Google, Outlook, iCloud | Servers a synced calendar can be read from (and their subdomains, comma separated). It protects the server from downloading arbitrary addresses |
+| `CALENDARIO_SINCRONIZACION_CRON` | `0 10 * * * *` | When synced calendars are read again (by default, minute 10 of every hour) |
 | `GEOCODING_ENABLED` | `true` | `false` stops calls to Nominatim (distance search finds nothing) |
 | `FORWARD_HEADERS_STRATEGY` | `none` (`native` in prod) | Read the real client IP behind a reverse proxy |
 
@@ -242,7 +244,7 @@ Base prefix: `/api/v1`. The token goes in `Authorization: Bearer <token>`. 🔓 
 | 💳 Payments | `GET /pagos`, `GET /pagos/{id}`, `PATCH /pagos/{id}/pagar` | the family of the request pays |
 | ⭐ Ratings | `GET /valoraciones/cuidador/{id}` 🔓; `POST`, `PUT /{id}`, `DELETE /{id}` | author only |
 | 💬 Chat | `GET`/`POST /solicitudes/{id}/mensajes`, `GET /mensajes/no-leidos` | the family and the caregiver of the request |
-| 🗓️ Busy slots | `GET`, `POST`, `DELETE /bloques-ocupados/{id}`, `POST /bloques-ocupados/repetir`, `POST /bloques-ocupados/importar` | `CUIDADOR` |
+| 🗓️ Busy slots | `GET`, `POST`, `DELETE /bloques-ocupados/{id}`, `POST /bloques-ocupados/repetir`, `POST /bloques-ocupados/importar`; calendar sync: `GET`, `PUT`, `DELETE /bloques-ocupados/suscripcion`, `POST /bloques-ocupados/suscripcion/sincronizar` | `CUIDADOR` |
 | 💡 Suggestions | `POST /sugerencias` | `FAMILIA`, `CUIDADOR` |
 | 🛡️ Admin | `/admin/estadisticas`, `/admin/avisos`, `/admin/cuidadores/mejor-valorados`, `/admin/valoraciones/ultimas`, `DELETE /admin/valoraciones/{id}`, `/admin/usuarios`, `PATCH /admin/usuarios/{id}/activo`, `/admin/solicitudes?estado=`, `/admin/pagos`, `/admin/pagos/resumen`, `/admin/sugerencias` | `ADMIN` |
 
@@ -324,7 +326,7 @@ Results on a development laptop (up to 100 virtual users, 0 % errors):
 The request test fails above a p95 of 1.5 s. The login limit (5 per minute per IP) would cut the load on purpose, so raise `RATE_LIMIT_MAX_REQUESTS` only during the test and turn it back afterwards.
 
 > [!NOTE]
-> The lists (`mis-solicitudes`, caregivers) return every record, and photos travel as Base64 inside them. With one family accumulating more than 1,600 requests the response was hundreds of MB. Pagination and storing photos as files are on the [roadmap](#-roadmap).
+> At the time of the test, the lists (`mis-solicitudes`, caregivers) returned every record and photos travelled as Base64 inside them. With one family accumulating more than 1,600 requests the response was hundreds of MB. Since then the request list is paginated and photos are served as URLs; pagination of the remaining lists and storing photos as files are on the [roadmap](#-roadmap).
 
 ---
 
@@ -369,9 +371,8 @@ The design went from sketches to wireframes, mockups and a prototype, for mobile
 > Areas identified as pending, listed openly.
 
 - 💳 **Simulated payments:** there is no payment gateway. The payment is created when the caregiver completes the request and is marked as paid with `PATCH /pagos/{id}/pagar`.
-- 📃 **Lists are not paginated:** some endpoints return every record (see [Load tests](#-load-tests)).
+- 📃 **Only the request list is paginated** (`/solicitudes/mis-solicitudes/pagina`): the caregiver list and the admin lists still return every record (see [Load tests](#-load-tests)).
 - 🖼️ **Photos are stored as Base64 text** in the database, reduced to at most 300 KB, which makes caregiver lists heavy.
-- 🔐 **No two-factor authentication** yet.
 - 🛡️ **A single administrator**, created from environment variables; there is no screen to create more.
 - 🔒 **A blocked account is not told why:** it gets the same `401` as a wrong password. This is intentional for privacy.
 - 🗝️ **Development defaults** remain in `application.properties` and `docker-compose.yml`; the production profile has none.
@@ -384,10 +385,8 @@ The design went from sketches to wireframes, mockups and a prototype, for mobile
 > Phase 2 features, outside the delivered scope.
 
 - 💳 Real payment gateway (Stripe, test mode first) and a platform fee
-- 📃 Pagination of the lists
+- 📃 Pagination of the remaining lists (caregivers and admin)
 - 🖼️ Store profile photos as files in external storage
-- 🔐 Two-factor authentication
-- 📱 Installable web app (PWA)
 - 📄 PDF reports
 - ☁️ Deployment (Docker images and a cloud database)
 
