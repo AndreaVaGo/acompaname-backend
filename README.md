@@ -376,6 +376,7 @@ The design went from sketches to wireframes, mockups and a prototype, for mobile
 - 🖼️ **Photos are stored as Base64 text** in the database, reduced to at most 300 KB, which makes caregiver lists heavy.
 - 🛡️ **A single administrator**, created from environment variables; there is no screen to create more.
 - 🔒 **A blocked account is not told why:** it gets the same `401` as a wrong password. This is intentional for privacy.
+- 🔄 **Calendar sync is one-way** (external calendar → Acompáñame): the secret `.ics` address is read-only by design, so the app can read the caregiver's calendar but never write to it. Slots created in the app do not appear in Google, Outlook or iCloud, and a synced slot deleted in the app comes back on the next read while the event still exists there. This avoids asking for access to the person's account (OAuth), which would also need Google's app verification and a privacy policy. Google can also take hours to publish changes in its `.ics` feed.
 - 🗝️ **Development defaults** remain in `application.properties` and `docker-compose.yml`; the production profile has none.
 
 ---
@@ -388,6 +389,7 @@ The design went from sketches to wireframes, mockups and a prototype, for mobile
 - 💳 Real payment gateway (Stripe, test mode first) and a platform fee
 - 📃 Pagination of the remaining lists (caregivers and admin)
 - 🖼️ Store profile photos as files in external storage
+- 🔄 Calendar sync in the other direction (an outgoing `.ics` feed with the accepted services, or a two-way sync through the providers' APIs)
 - 📄 PDF reports
 - ☁️ Deployment (Docker images and a cloud database)
 
