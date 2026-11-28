@@ -1,6 +1,8 @@
 package dev.andrea.acompaname_backend.user;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Set;
 
 import dev.andrea.acompaname_backend.role.RoleEntity;
@@ -58,6 +60,16 @@ public class UsuarioEntity {
     // Los usuarios que ya existían antes de este campo la tienen vacía (no cuentan como nuevos)
     private LocalDateTime fechaAlta;
 
+    // Los tokens emitidos ANTES de este momento ya no valen (ACOM-260). Se rellena al cambiar o restablecer
+    // la contraseña, para que una sesión robada no siga abierta. Vacío: ningún token se ha invalidado
+    private Instant sesionesValidasDesde;
+
+    // Cierra todas las sesiones abiertas: los tokens emitidos hasta este momento dejan de valer.
+    // Los tokens llevan la hora en segundos, así que se compara también en segundos
+    public void cerrarSesiones() {
+        this.sesionesValidasDesde = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+    }
+
     @PrePersist
     void asignarFechaAlta() {
         if (fechaAlta == null) {
@@ -68,7 +80,7 @@ public class UsuarioEntity {
     // Constructor sin fechaAlta (se rellena al guardar), para no romper el código que ya existía
     public UsuarioEntity(Long id, String nombre, String email, String telefono, String password,
             Set<RoleEntity> roles, boolean activo, boolean dosPasos) {
-        this(id, nombre, email, telefono, password, roles, activo, dosPasos, null);
+        this(id, nombre, email, telefono, password, roles, activo, dosPasos, null, null);
     }
 
     // Constructor sin dosPasos (queda desactivado), para no romper el código que ya existía
