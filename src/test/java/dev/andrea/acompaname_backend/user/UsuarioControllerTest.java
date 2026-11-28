@@ -271,6 +271,17 @@ public class UsuarioControllerTest {
         Mockito.verifyNoInteractions(service);
     }
 
+    // ACOM-265
+    @Test
+    void testCerrarSesionesDevuelve204() throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(post("/api/v1/usuarios/1/cerrar-sesiones"))
+                .andReturn()
+                .getResponse();
+
+        assertThat(response.getStatus(), is(equalTo(204)));
+        Mockito.verify(service).cerrarSesiones(1L);
+    }
+
     @Test
     void testActualizarContactoDevuelve200() throws Exception {
         ActualizarContactoDTO dto = new ActualizarContactoDTO("Juan Nuevo", "nuevo@test.com", "699000111");
