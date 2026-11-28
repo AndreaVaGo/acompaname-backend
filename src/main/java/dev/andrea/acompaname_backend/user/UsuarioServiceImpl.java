@@ -169,6 +169,16 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Transactional
     @Override
+    public void cerrarSesiones(Long id) {
+        UsuarioEntity usuario = findEntityById(id);
+        verificarPropietario(usuario);
+        // Todos los tokens emitidos hasta ahora (en cualquier dispositivo) dejan de valer
+        usuario.cerrarSesiones();
+        repository.save(usuario);
+    }
+
+    @Transactional
+    @Override
     public UsuarioDTOResponse actualizarContacto(Long id, ActualizarContactoDTO dto) {
         UsuarioEntity usuario = findEntityById(id);
         verificarPropietario(usuario);
