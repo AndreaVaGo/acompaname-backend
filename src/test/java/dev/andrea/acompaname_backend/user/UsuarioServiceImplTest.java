@@ -194,6 +194,23 @@ public class UsuarioServiceImplTest {
         assertThat(usuarioMock.getSesionesValidasDesde(), is(org.hamcrest.Matchers.notNullValue()));
     }
 
+    // ACOM-265: cerrar sesión en todos los dispositivos
+    @Test
+    void testCerrarSesionesInvalidaLosTokensAnterioresYGuarda() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        RoleEntity rol = crearRolMock();
+        UsuarioEntity usuarioMock = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "cifrada",
+                Set.of(rol));
+        when(repository.findById(1L)).thenReturn(Optional.of(usuarioMock));
+
+        service.cerrarSesiones(1L);
+
+        assertThat(usuarioMock.getSesionesValidasDesde(), is(org.hamcrest.Matchers.notNullValue()));
+        verify(repository).save(usuarioMock);
+    }
+
     @Test
     void testActualizarContactoCambiaNombreEmailYTelefono() {
         Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
