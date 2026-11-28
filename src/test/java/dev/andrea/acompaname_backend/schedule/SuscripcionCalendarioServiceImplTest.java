@@ -3,6 +3,7 @@ package dev.andrea.acompaname_backend.schedule;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -46,12 +47,15 @@ public class SuscripcionCalendarioServiceImplTest {
     @Mock
     private GuardadoDeSincronizacion guardado;
 
+    private final CifradorDeUrl cifrador = new CifradorDeUrl("frase-de-prueba", new String[] { "http://localhost" });
+
     private SuscripcionCalendarioServiceImpl service;
     private PerfilCuidadorEntity pepe;
 
     @BeforeEach
     void setup() {
-        service = new SuscripcionCalendarioServiceImpl(repository, perfilRepository, descargador, guardado);
+        service = new SuscripcionCalendarioServiceImpl(repository, perfilRepository, descargador, guardado,
+                cifrador);
         SecurityContextHolder.getContext()
                 .setAuthentication(new UsernamePasswordAuthenticationToken("pepe@test.com", null));
         UsuarioEntity usuario = new UsuarioEntity();
@@ -124,7 +128,9 @@ public class SuscripcionCalendarioServiceImplTest {
         ArgumentCaptor<SuscripcionCalendarioEntity> captor = ArgumentCaptor.forClass(SuscripcionCalendarioEntity.class);
         ArgumentCaptor<LecturaDeCalendario> lectura = ArgumentCaptor.forClass(LecturaDeCalendario.class);
         verify(guardado).aplicar(captor.capture(), lectura.capture());
-        assertThat(captor.getValue().getUrl(), is(equalTo(URL)));
+        // En la base de datos va cifrada, nunca en claro
+        assertThat(captor.getValue().getUrl(), is(not(equalTo(URL))));
+        assertThat(cifrador.descifrar(captor.getValue().getUrl()), is(equalTo(URL)));
         assertThat(captor.getValue().getCuidador(), is(equalTo(pepe)));
         assertThat(lectura.getValue().tramos().size(), is(1));
         assertThat(respuesta.vinculado(), is(true));
@@ -142,7 +148,8 @@ public class SuscripcionCalendarioServiceImplTest {
         service.vincular(nueva);
 
         verify(guardado).aplicar(any(SuscripcionCalendarioEntity.class), any(LecturaDeCalendario.class));
-        assertThat(existente.getUrl(), is(equalTo(nueva)));
+        assertThat(cifrador.estaCifrado(existente.getUrl()), is(true));
+        assertThat(cifrador.descifrar(existente.getUrl()), is(equalTo(nueva)));
     }
 
     @Test
@@ -261,5 +268,60 @@ public class SuscripcionCalendarioServiceImplTest {
         service.sincronizarTodas();
 
         verify(guardado).registrarError(primera, "fallo raro");
+    }
+
+    @Test
+    void testUnaDireccionCifradaSeDescifraParaDescargar() {
+        darPerfil();
+        SuscripcionCalendarioEntity suscripcion = suscripcionDePepe();
+        suscripcion.setUrl(cifrador.cifrar(URL));
+        when(repository.findByCuidadorId(4L)).thenReturn(Optional.of(suscripcion));
+        when(descargador.descargar(URL)).thenReturn(calendarioDeUnEvento());
+
+        service.sincronizarAhora();
+
+        verify(descargador).descargar(URL);
+        verify(guardado).aplicar(any(SuscripcionCalendarioEntity.class), any(LecturaDeCalendario.class));
+        assertThat(cifrador.descifrar(suscripcion.getUrl()), is(equalTo(URL)));
+    }
+
+    @Test
+    void testUnaDireccionAntiguaEnClaroSeCifraTrasLeerseBien() {
+        darPerfil();
+        SuscripcionCalendarioEntity suscripcion = suscripcionDePepe();
+        suscripcion.setUrl(URL);
+        when(repository.findByCuidadorId(4L)).thenReturn(Optional.of(suscripcion));
+        when(descargador.descargar(URL)).thenReturn(calendarioDeUnEvento());
+
+        service.sincronizarAhora();
+
+        assertThat(cifrador.estaCifrado(suscripcion.getUrl()), is(true));
+        assertThat(cifrador.descifrar(suscripcion.getUrl()), is(equalTo(URL)));
+    }
+
+    @Test
+    void testUnaDireccionAntiguaSeQuedaEnClaroSiLaLecturaFalla() {
+        darPerfil();
+        SuscripcionCalendarioEntity suscripcion = suscripcionDePepe();
+        suscripcion.setUrl(URL);
+        when(repository.findByCuidadorId(4L)).thenReturn(Optional.of(suscripcion));
+        when(descargador.descargar(URL)).thenThrow(new BloqueOcupadoExceptionFechaInvalida("No se pudo descargar"));
+
+        service.sincronizarAhora();
+
+        verify(guardado).registrarError(suscripcion, "No se pudo descargar");
+    }
+
+    @Test
+    void testSiLaClaveHaCambiadoSeApuntaElErrorSinTocarInternet() {
+        darPerfil();
+        SuscripcionCalendarioEntity suscripcion = suscripcionDePepe();
+        suscripcion.setUrl(new CifradorDeUrl("otra-frase", new String[] { "http://localhost" }).cifrar(URL));
+        when(repository.findByCuidadorId(4L)).thenReturn(Optional.of(suscripcion));
+
+        service.sincronizarAhora();
+
+        verify(descargador, never()).descargar(anyString());
+        verify(guardado).registrarError(any(SuscripcionCalendarioEntity.class), anyString());
     }
 }
