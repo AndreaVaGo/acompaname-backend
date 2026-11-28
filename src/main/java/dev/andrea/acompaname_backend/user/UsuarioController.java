@@ -70,6 +70,12 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("{id}/cerrar-sesiones")
+    public ResponseEntity<Void> cerrarSesiones(@PathVariable Long id) {
+        service.cerrarSesiones(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("{id}/contacto")
     public ResponseEntity<UsuarioDTOResponse> actualizarContacto(@PathVariable Long id,
             @Valid @RequestBody ActualizarContactoDTO dto) {
