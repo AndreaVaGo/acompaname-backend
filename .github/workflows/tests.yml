@@ -1,0 +1,38 @@
+# Pasa todos los tests del back en cada push a dev o main y en cada pull request.
+# Los tests de integración usan Testcontainers (MySQL en Docker): los servidores de GitHub ya traen Docker.
+name: Tests
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+
+# Solo lectura del código: este flujo no necesita más permisos
+permissions:
+  contents: read
+
+# Si llega otro push a la misma rama, se cancela la ejecución anterior
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      # Java 21, el mismo que usa el pom.xml y el Dockerfile
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      # En Windows el archivo mvnw puede no tener permiso de ejecución
+      - name: Dar permiso de ejecución a mvnw
+        run: chmod +x mvnw
+
+      - name: Pasar los tests
+        run: ./mvnw -B test
