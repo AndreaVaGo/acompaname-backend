@@ -173,7 +173,7 @@ cp .env.example .env
 | `PASSWORD_RESET_MINUTES` | `60` | Validity of the password-reset link |
 | `PAGOS_RECARGO_PERSONA_EXTRA` | `0.25` | Default surcharge per extra person (25 %) |
 | `CALENDARIO_HOSTS_PERMITIDOS` | Google, Outlook, iCloud | Servers a synced calendar can be read from (and their subdomains, comma separated). It protects the server from downloading arbitrary addresses |
-| `CALENDARIO_SINCRONIZACION_CRON` | `0 10 * * * *` | When synced calendars are read again (by default, minute 10 of every hour) |
+| `CALENDARIO_SINCRONIZACION_CRON` | `0 */15 * * * *` | When synced calendars are read again (by default, every 15 minutes) |
 | `CALENDARIO_CLAVE` | development key | Passphrase that encrypts the secret address of linked calendars in the database (AES-GCM). Required in production; the app refuses to start with the development key on a real server. If it changes, calendars must be linked again |
 | `GEOCODING_ENABLED` | `true` | `false` stops calls to Nominatim (distance search finds nothing) |
 | `FORWARD_HEADERS_STRATEGY` | `none` (`native` in prod) | Read the real client IP behind a reverse proxy |
