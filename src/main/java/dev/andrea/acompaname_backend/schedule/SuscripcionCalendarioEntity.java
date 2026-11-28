@@ -19,7 +19,7 @@ import lombok.Setter;
 
 // El calendario externo (Google, Outlook, iCloud...) que una persona cuidadora ha vinculado.
 // Solo puede tener uno. La dirección es secreta (cualquiera que la tenga puede leer ese calendario),
-// así que NUNCA se devuelve por la API: solo se guarda para volver a leerlo.
+// así que NUNCA se devuelve por la API y en la base de datos se guarda CIFRADA (ver CifradorDeUrl).
 @Entity
 @Table(name = "suscripciones_calendario")
 @Getter
@@ -37,7 +37,7 @@ public class SuscripcionCalendarioEntity {
     @JoinColumn(name = "cuidador_id", nullable = false, unique = true)
     private PerfilCuidadorEntity cuidador;
 
-    @Column(nullable = false, length = 500)
+    @Column(nullable = false, length = 1000)
     private String url;
 
     // Cuándo se leyó bien por última vez (null si todavía no)

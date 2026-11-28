@@ -26,15 +26,17 @@ public class SuscripcionCalendarioServiceImpl implements SuscripcionCalendarioSe
     private final PerfilCuidadorRepository perfilRepository;
     private final DescargadorDeCalendario descargador;
     private final GuardadoDeSincronizacion guardado;
+    private final CifradorDeUrl cifrador;
     private final LectorDeCalendario lector = new LectorDeCalendario();
 
     public SuscripcionCalendarioServiceImpl(SuscripcionCalendarioRepository repository,
             PerfilCuidadorRepository perfilRepository, DescargadorDeCalendario descargador,
-            GuardadoDeSincronizacion guardado) {
+            GuardadoDeSincronizacion guardado, CifradorDeUrl cifrador) {
         this.repository = repository;
         this.perfilRepository = perfilRepository;
         this.descargador = descargador;
         this.guardado = guardado;
+        this.cifrador = cifrador;
     }
 
     private PerfilCuidadorEntity perfilLogueado() {
@@ -64,7 +66,8 @@ public class SuscripcionCalendarioServiceImpl implements SuscripcionCalendarioSe
 
         SuscripcionCalendarioEntity suscripcion = repository.findByCuidadorId(perfil.getId())
                 .orElseGet(() -> SuscripcionCalendarioEntity.builder().cuidador(perfil).build());
-        suscripcion.setUrl(direccion);
+        // En la base de datos la dirección va cifrada (ACOM-261)
+        suscripcion.setUrl(cifrador.cifrar(direccion));
         guardado.aplicar(suscripcion, lectura);
         return aDTO(suscripcion);
     }
@@ -98,7 +101,12 @@ public class SuscripcionCalendarioServiceImpl implements SuscripcionCalendarioSe
     // Lee una suscripción. Si falla no lanza el error: lo apunta para enseñarlo en la pantalla
     private void sincronizar(SuscripcionCalendarioEntity suscripcion) {
         try {
-            LecturaDeCalendario lectura = lector.leer(descargador.descargar(suscripcion.getUrl()));
+            String direccion = cifrador.descifrar(suscripcion.getUrl());
+            LecturaDeCalendario lectura = lector.leer(descargador.descargar(direccion));
+            if (!cifrador.estaCifrado(suscripcion.getUrl())) {
+                // Dirección antigua guardada en claro: se cifra ahora que se ha leído bien
+                suscripcion.setUrl(cifrador.cifrar(direccion));
+            }
             guardado.aplicar(suscripcion, lectura);
         } catch (RuntimeException e) {
             guardado.registrarError(suscripcion, e.getMessage());
