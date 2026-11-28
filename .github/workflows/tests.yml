@@ -20,6 +20,27 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+
+    # Siete clases de tests (Security...Test y AcompanameBackendApplicationTests) arrancan la aplicación con
+    # @SpringBootTest y se conectan a la base de datos de application.properties (localhost:3306).
+    # En local es tu MySQL; aquí se levanta uno con los mismos datos que usa por defecto la aplicación
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: acompaname_db
+          MYSQL_USER: acompaname_user
+          MYSQL_PASSWORD: acompaname_pass
+        ports:
+          - 3306:3306
+        # No se empieza hasta que MySQL responde
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
     steps:
       - uses: actions/checkout@v4
 
