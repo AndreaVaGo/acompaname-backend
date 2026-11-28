@@ -79,6 +79,45 @@ public class JwtUsuarioConverterTest {
         assertThrows(BadCredentialsException.class, () -> converter.convert(tokenDelUsuario7()));
     }
 
+    // ACOM-260: un token emitido antes de cambiar la contraseña ya no vale
+    @Test
+    void testUnTokenEmitidoAntesDeCerrarLasSesionesSeRechaza() {
+        UsuarioEntity ana = ana("FAMILIA");
+        ana.setSesionesValidasDesde(Instant.now().plusSeconds(60));
+        Mockito.when(repository.findById(7L)).thenReturn(Optional.of(ana));
+
+        assertThrows(BadCredentialsException.class, () -> converter.convert(tokenDelUsuario7()));
+    }
+
+    @Test
+    void testUnTokenEmitidoDespuesDeCerrarLasSesionesSeAcepta() {
+        UsuarioEntity ana = ana("FAMILIA");
+        ana.setSesionesValidasDesde(Instant.now().minusSeconds(60));
+        Mockito.when(repository.findById(7L)).thenReturn(Optional.of(ana));
+
+        Authentication auth = converter.convert(tokenDelUsuario7());
+
+        assertThat(auth.getName(), is(equalTo("ana@test.com")));
+    }
+
+    @Test
+    void testUnTokenEmitidoJustoEnElMomentoDeCerrarLasSesionesSeAcepta() {
+        Instant momento = Instant.now().minusSeconds(5);
+        Jwt token = Jwt.withTokenValue("token")
+                .header("alg", "HS256")
+                .subject("7")
+                .issuedAt(momento)
+                .expiresAt(momento.plusSeconds(3600))
+                .build();
+        UsuarioEntity ana = ana("FAMILIA");
+        ana.setSesionesValidasDesde(momento);
+        Mockito.when(repository.findById(7L)).thenReturn(Optional.of(ana));
+
+        Authentication auth = converter.convert(token);
+
+        assertThat(auth.isAuthenticated(), is(equalTo(true)));
+    }
+
     @Test
     void testSiLaPersonaEstaBloqueadaElTokenSeRechaza() {
         UsuarioEntity bloqueada = ana("FAMILIA");

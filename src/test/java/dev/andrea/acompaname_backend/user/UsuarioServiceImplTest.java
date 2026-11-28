@@ -175,6 +175,25 @@ public class UsuarioServiceImplTest {
         verify(repository).save(usuarioMock);
     }
 
+    // ACOM-260: al cambiar la contraseña se cierran las sesiones abiertas
+    @Test
+    void testCambiarPasswordCierraLasSesionesAbiertas() {
+        Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        RoleEntity rol = crearRolMock();
+        UsuarioEntity usuarioMock = new UsuarioEntity(1L, "Juan", "juan@test.com", "600111222", "cifradaVieja",
+                Set.of(rol));
+        when(repository.findById(1L)).thenReturn(Optional.of(usuarioMock));
+        when(passwordEncoder.matches("actual1234", "cifradaVieja")).thenReturn(true);
+        when(passwordEncoder.matches("nueva12345", "cifradaVieja")).thenReturn(false);
+        when(passwordEncoder.encode("nueva12345")).thenReturn("cifradaNueva");
+
+        service.cambiarPassword(1L, new CambiarPasswordDTO("actual1234", "nueva12345"));
+
+        assertThat(usuarioMock.getSesionesValidasDesde(), is(org.hamcrest.Matchers.notNullValue()));
+    }
+
     @Test
     void testActualizarContactoCambiaNombreEmailYTelefono() {
         Authentication auth = new UsernamePasswordAuthenticationToken("juan@test.com", null);

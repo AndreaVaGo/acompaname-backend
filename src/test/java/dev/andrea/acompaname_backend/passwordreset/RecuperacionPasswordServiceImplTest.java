@@ -200,6 +200,21 @@ public class RecuperacionPasswordServiceImplTest {
         assertThat(guardado.getValue().getPassword(), is(equalTo("nueva-cifrada")));
     }
 
+    // ACOM-260: al restablecer la contraseña se cierran las sesiones abiertas
+    @Test
+    void testRestablecerCierraLasSesionesAbiertas() {
+        when(tokenRepository.findByTokenHash(CodificadorDeTokens.hash("token-bueno")))
+                .thenReturn(Optional.of(tokenValidoDe("token-bueno", ana)));
+        when(passwordEncoder.matches("Nueva1234!", "cifrada")).thenReturn(false);
+        when(passwordEncoder.encode("Nueva1234!")).thenReturn("nueva-cifrada");
+
+        service.restablecer("token-bueno", "Nueva1234!");
+
+        ArgumentCaptor<UsuarioEntity> guardado = ArgumentCaptor.forClass(UsuarioEntity.class);
+        verify(usuarioRepository).save(guardado.capture());
+        assertThat(guardado.getValue().getSesionesValidasDesde(), is(org.hamcrest.Matchers.notNullValue()));
+    }
+
     @Test
     void testRestablecerBorraLosTokensParaQueNoSePuedaUsarDosVeces() {
         when(tokenRepository.findByTokenHash(CodificadorDeTokens.hash("token-bueno")))

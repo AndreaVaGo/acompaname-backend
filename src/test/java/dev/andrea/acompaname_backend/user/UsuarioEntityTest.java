@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -160,5 +161,27 @@ public class UsuarioEntityTest {
         assertThat(new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234", Set.of(), true, false)
                 .getFechaAlta(), is(nullValue()));
         assertThat(UsuarioEntity.builder().build().getFechaAlta(), is(nullValue()));
+    }
+
+    // ACOM-260
+    @Test
+    void testUnUsuarioNuevoNoTieneSesionesInvalidadas() {
+        assertThat(new UsuarioEntity().getSesionesValidasDesde(), is(nullValue()));
+        assertThat(UsuarioEntity.builder().build().getSesionesValidasDesde(), is(nullValue()));
+        assertThat(new UsuarioEntity(1L, "Ana", "ana@test.com", "600111222", "1234", Set.of(), true, false)
+                .getSesionesValidasDesde(), is(nullValue()));
+    }
+
+    @Test
+    void testCerrarSesionesApuntaElMomentoActualEnSegundos() {
+        UsuarioEntity usuario = new UsuarioEntity();
+        Instant antes = Instant.now().minusSeconds(1);
+
+        usuario.cerrarSesiones();
+
+        Instant momento = usuario.getSesionesValidasDesde();
+        assertThat(momento.isAfter(antes), is(true));
+        assertThat(momento.getNano(), is(0));
+        assertThat(momento.isAfter(Instant.now()), is(false));
     }
 }
