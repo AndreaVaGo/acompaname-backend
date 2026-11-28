@@ -14,7 +14,7 @@ public class SincronizadorDeCalendarios {
         this.service = service;
     }
 
-    // Por defecto, al minuto 10 de cada hora. Se puede cambiar con la variable CALENDARIO_SINCRONIZACION_CRON
+    // Por defecto, cada 15 minutos. Se puede cambiar con la variable CALENDARIO_SINCRONIZACION_CRON
     @Scheduled(cron = "${calendario.sincronizacion-cron}")
     public void sincronizarCadaHora() {
         service.sincronizarTodas();
