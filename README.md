@@ -174,6 +174,7 @@ cp .env.example .env
 | `PAGOS_RECARGO_PERSONA_EXTRA` | `0.25` | Default surcharge per extra person (25 %) |
 | `CALENDARIO_HOSTS_PERMITIDOS` | Google, Outlook, iCloud | Servers a synced calendar can be read from (and their subdomains, comma separated). It protects the server from downloading arbitrary addresses |
 | `CALENDARIO_SINCRONIZACION_CRON` | `0 10 * * * *` | When synced calendars are read again (by default, minute 10 of every hour) |
+| `CALENDARIO_CLAVE` | development key | Passphrase that encrypts the secret address of linked calendars in the database (AES-GCM). Required in production; the app refuses to start with the development key on a real server. If it changes, calendars must be linked again |
 | `GEOCODING_ENABLED` | `true` | `false` stops calls to Nominatim (distance search finds nothing) |
 | `FORWARD_HEADERS_STRATEGY` | `none` (`native` in prod) | Read the real client IP behind a reverse proxy |
 
@@ -332,7 +333,7 @@ The request test fails above a p95 of 1.5 s. The login limit (5 per minute per I
 
 ## 🚀 Production profile
 
-Activated with `SPRING_PROFILES_ACTIVE=prod`. It has **no default values** for secrets: if `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`, `CAPTCHA_SECRET`, `MAIL_*` or `FRONTEND_URL` is missing, the application does not start, so development keys are never used by mistake. It also:
+Activated with `SPRING_PROFILES_ACTIVE=prod`. It has **no default values** for secrets: if `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`, `CALENDARIO_CLAVE`, `CAPTCHA_SECRET`, `MAIL_*` or `FRONTEND_URL` is missing, the application does not start, so development keys are never used by mistake. It also:
 
 - sets `ddl-auto=validate` (Hibernate only checks the tables; the **first** time, with an empty database, start once with `JPA_DDL_AUTO=update` and remove it afterwards),
 - hides error messages, stack traces and SQL, and logs at `INFO`,

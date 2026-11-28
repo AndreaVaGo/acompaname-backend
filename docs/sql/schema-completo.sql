@@ -173,7 +173,7 @@ CREATE TABLE `suscripciones_calendario` (
   `cuidador_id` bigint NOT NULL,
   `ultima_sincronizacion` datetime(6) DEFAULT NULL,
   `ultimo_error` varchar(255) DEFAULT NULL,
-  `url` varchar(500) NOT NULL,
+  `url` varchar(1000) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UK_suscripciones_calendario_cuidador` (`cuidador_id`),
   CONSTRAINT `FK_suscripciones_calendario_cuidador` FOREIGN KEY (`cuidador_id`) REFERENCES `perfilcuidadores` (`id`)
@@ -198,6 +198,7 @@ CREATE TABLE `usuarios` (
   `fecha_alta` datetime(6) DEFAULT NULL,
   `nombre` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
+  `sesiones_validas_desde` datetime(6) DEFAULT NULL,
   `telefono` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_usuarios_email` (`email`)
