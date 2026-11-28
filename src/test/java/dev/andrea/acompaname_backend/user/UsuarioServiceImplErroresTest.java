@@ -233,6 +233,16 @@ public class UsuarioServiceImplErroresTest {
         verify(repository, never()).save(Mockito.any(UsuarioEntity.class));
     }
 
+    // ACOM-265
+    @Test
+    void testCerrarSesionesDeOtroUsuarioDaAccesoDenegadoYNoGuarda() {
+        loguearComo("intruso@test.com");
+        when(repository.findById(1L)).thenReturn(Optional.of(juan()));
+
+        assertThrows(UsuarioExceptionAccesoDenegado.class, () -> service.cerrarSesiones(1L));
+        verify(repository, never()).save(Mockito.any(UsuarioEntity.class));
+    }
+
     @Test
     void testActualizarContactoConEmailDeOtroUsuarioDaConflictoYNoGuarda() {
         loguearComo("juan@test.com");
