@@ -1,5 +1,7 @@
 package dev.andrea.acompaname_backend.security;
 
+import java.time.Instant;
+
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -35,6 +37,12 @@ public class JwtUsuarioConverter implements Converter<Jwt, AbstractAuthenticatio
         // Si el administrador la ha bloqueado, el token deja de valer al momento
         if (!securityUser.isEnabled()) {
             throw new DisabledException("Usuario bloqueado");
+        }
+
+        // Si la persona cambió o restableció su contraseña después de emitirse este token, ya no vale (ACOM-260)
+        Instant sesionesDesde = usuario.getSesionesValidasDesde();
+        if (sesionesDesde != null && jwt.getIssuedAt() != null && jwt.getIssuedAt().isBefore(sesionesDesde)) {
+            throw new BadCredentialsException("Sesión cerrada");
         }
 
         return new UsernamePasswordAuthenticationToken(securityUser, null, securityUser.getAuthorities());
