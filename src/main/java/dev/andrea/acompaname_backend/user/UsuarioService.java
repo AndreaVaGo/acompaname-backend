@@ -12,4 +12,6 @@ public interface UsuarioService extends InterfaceGenericService<UsuarioEntity, U
 
     UsuarioDTOResponse actualizarContacto(Long id, ActualizarContactoDTO dto);
 
+    void cerrarSesiones(Long id);
+
 }
