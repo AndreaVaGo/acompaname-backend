@@ -95,6 +95,8 @@ public class RecuperacionPasswordServiceImpl implements RecuperacionPasswordServ
         }
 
         usuario.setPassword(passwordEncoder.encode(passwordNueva));
+        // Las sesiones abiertas dejan de valer: quien restablece la contraseña suele hacerlo porque no se fía
+        usuario.cerrarSesiones();
         usuarioRepository.save(usuario);
 
         // El enlace solo se puede usar una vez: se borran todos los de esa persona

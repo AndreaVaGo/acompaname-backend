@@ -162,6 +162,8 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new UsuarioExceptionPasswordInvalida("La nueva contraseña debe ser distinta de la actual");
         }
         usuario.setPassword(passwordEncoder.encode(dto.passwordNueva()));
+        // Las sesiones abiertas (por ejemplo, la de alguien que robó el token) dejan de valer
+        usuario.cerrarSesiones();
         repository.save(usuario);
     }
 
